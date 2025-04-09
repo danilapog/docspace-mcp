@@ -2,6 +2,7 @@ import * as z from "zod"
 import type {Result} from "../../../ext/result.ts"
 import {error, ok, safeNew} from "../../../ext/result.ts"
 import type {Response} from "../response.ts"
+import type {Filters} from "../schemas.ts"
 import {
 	ArchiveRoomRequestSchema,
 	BatchRequestDtoSchema,
@@ -12,6 +13,7 @@ import {
 	DownloadRequestDtoSchema,
 	FileDtoSchema,
 	FileOperationDtoSchema,
+	FiltersSchema,
 	RoomInvitationRequestSchema,
 	SessionRequestSchema,
 	UpdateFileSchema,
@@ -236,8 +238,19 @@ export class FilesService extends Service {
 	/**
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FoldersController.cs/#L161 | DocSpace Reference}
 	 */
-	async getFolder(s: AbortSignal, id: number): Promise<Result<[unknown, Response], Error>> {
-		let u = this.c.createUrl(`api/2.0/files/folder/${id}`)
+	async getFolder(s: AbortSignal, id: number, filters?: Filters): Promise<Result<[unknown, Response], Error>> {
+		let q: object | undefined
+
+		if (filters) {
+			let f = FiltersSchema.safeParse(filters)
+			if (!f.success) {
+				return error(new Error("Parsing filters.", {cause: f.error}))
+			}
+
+			q = f.data
+		}
+
+		let u = this.c.createUrl(`api/2.0/files/folder/${id}`, q)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
