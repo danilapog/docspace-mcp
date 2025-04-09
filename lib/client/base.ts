@@ -13,7 +13,7 @@ export class Base {
 		this.baseFetch = fetch
 	}
 
-	createUrl(path: string): Result<string, Error> {
+	createUrl(path: string, query?: object): Result<string, Error> {
 		if (!this.baseUrl.endsWith("/")) {
 			return error(new Error(`Base URL must end with a trailing slash, but ${this.baseUrl} does not.`))
 		}
@@ -25,6 +25,21 @@ export class Base {
 		let u = safeNew(URL, path, this.baseUrl)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
+		}
+
+		if (query) {
+			let q = new URLSearchParams()
+
+			for (let [k, v] of Object.entries(query)) {
+				if (v !== undefined) {
+					q.append(k, v.toString())
+				}
+			}
+
+			let s = q.toString()
+			if (s) {
+				u.v.search = s
+			}
 		}
 
 		return ok(u.v.toString())
