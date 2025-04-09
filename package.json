@@ -1,0 +1,27 @@
+{
+	"name": "@onlyoffice/docspace-mcp",
+	"version": "0.1.0",
+	"type": "module",
+	"scripts": {
+		"build": "tsc --project tsconfig.build.json",
+		"lint": "eslint .",
+		"serve": "node scripts/serve.ts"
+	},
+	"devDependencies": {
+		"@modelcontextprotocol/inspector": "0.7.0",
+		"@modelcontextprotocol/sdk": "1.8.0",
+		"@types/node": "22.13.16",
+		"@types/web": "0.0.216",
+		"@vanyauhalin/eslint-config": "0.0.5",
+		"eslint": "9.23.0",
+		"typescript": "5.8.2",
+		"undici": "7.7.0",
+		"zod": "3.24.2",
+		"zod-to-json-schema": "3.24.5"
+	},
+	"peerDependencies": {
+		"@modelcontextprotocol/sdk": "^1.0.0",
+		"zod": "^3.0.0",
+		"zod-to-json-schema": "^3.0.0"
+	}
+}
