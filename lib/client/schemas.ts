@@ -1,5 +1,7 @@
 import * as z from "zod"
 
+export type Filters = z.infer<typeof FiltersSchema>
+
 /**
  * {@link https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/reference-types/#the-object-type | .NET Reference}
  */
@@ -16,6 +18,38 @@ export const TypeObjectSchema = z.union([
  * {@link https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonelement/?view=net-9.0 | .NET Reference}
  */
 export const JsonElementSchema = z.union([z.string(), z.number()])
+
+/**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/common/ASC.Api.Core/Core/ApiContext.cs/#L94 | DocSpace Reference}
+ */
+export const SortOderSchema = z.union([
+	z.literal("ascending"),
+	z.literal("descending"),
+])
+
+/**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/common/ASC.Api.Core/Core/ApiContext.cs/#L83 | DocSpace Reference}
+ */
+export const FilterOpSchema = z.union([
+	z.literal("contains"),
+	z.literal("equals"),
+	z.literal("startsWith"),
+	z.literal("present"),
+])
+
+/**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/common/ASC.Api.Core/Core/ApiContext.cs/#L32 | DocSpace Reference}
+ */
+export const FiltersSchema = z.object({
+	count: z.number().optional(),
+	startIndex: z.number().optional(),
+	sortBy: z.string().optional(),
+	sortOrder: SortOderSchema.optional(),
+	filterBy: z.string().optional(),
+	filterOp: FilterOpSchema.optional(),
+	filterValue: z.string().optional(),
+	updatedSince: z.string().optional(),
+})
 
 /**
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/common/ASC.Api.Core/Middleware/CommonApiResponse.cs/#L31 | DocSpace Reference}
