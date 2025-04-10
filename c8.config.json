@@ -1,0 +1,11 @@
+{
+	"all": true,
+	"branches": 80,
+	"check-coverage": true,
+	"functions": 80,
+	"lines": 80,
+	"per-file": true,
+	"reporter": ["html", "text"],
+	"src": ["node"],
+	"statements": 80
+}
