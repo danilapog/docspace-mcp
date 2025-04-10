@@ -1,7 +1,7 @@
 import * as z from "zod"
 import type {Result} from "../../../ext/result.ts"
 import {error, ok, safeAsync, safeSync} from "../../../ext/result.ts"
-import type {BulkDownloadOptions, CreateUploadSessionOptions} from "../../../lib/client.ts"
+import type {BulkDownloadOptions, CreateUploadSessionOptions, Response} from "../../../lib/client.ts"
 import {Toolset} from "../toolset.ts"
 
 export const DownloadAsTextInputSchema = z.object({
@@ -15,7 +15,7 @@ export const UploadFileInputSchema = z.object({
 })
 
 export class OthersToolset extends Toolset {
-	async downloadAsText(signal: AbortSignal, p: unknown): Promise<Result<unknown, Error>> {
+	async downloadAsText(signal: AbortSignal, p: unknown): Promise<Result<string, Error>> {
 		let pr = DownloadAsTextInputSchema.safeParse(p)
 		if (!pr.success) {
 			return error(new Error("Parsing input.", {cause: pr.error}))
@@ -104,7 +104,7 @@ export class OthersToolset extends Toolset {
 		return ok(tt.v)
 	}
 
-	async uploadFile(signal: AbortSignal, p: unknown): Promise<Result<unknown, Error>> {
+	async uploadFile(signal: AbortSignal, p: unknown): Promise<Result<Response, Error>> {
 		let pr = UploadFileInputSchema.safeParse(p)
 		if (!pr.success) {
 			return error(new Error("Parsing input.", {cause: pr.error}))
@@ -132,8 +132,8 @@ export class OthersToolset extends Toolset {
 			return error(new Error("Uploading file.", {cause: ur.err}))
 		}
 
-		let [ud] = ur.v
+		let [, res] = ur.v
 
-		return ok(ud)
+		return ok(res)
 	}
 }

@@ -4,7 +4,7 @@ import {CallToolRequestSchema, ListToolsRequestSchema} from "@modelcontextprotoc
 import * as z from "zod"
 import {zodToJsonSchema} from "zod-to-json-schema"
 import type {Result} from "../ext/result.ts"
-import {error, safeSync} from "../ext/result.ts"
+import {error, ok, safeAsync, safeSync} from "../ext/result.ts"
 import type {Config} from "./server/base.ts"
 import {Base} from "./server/base.ts"
 import {
@@ -27,6 +27,7 @@ import {
 	UpdateRoomInputSchema,
 	UploadFileInputSchema,
 } from "./server/toolsets.ts"
+import type {Response} from "../lib/client.ts"
 
 export type {Config} from "./server/base.ts"
 
@@ -150,112 +151,127 @@ export class Server {
 	}
 
 	async callTools(req: CallToolRequest, extra: RequestHandlerExtra): Promise<CallToolResult> {
-		let r: Result<unknown, Error>
+		let cr: Result<string | Response, Error>
 
 		try {
 			switch (req.params.name) {
 			case "files.delete_file":
-				r = await this.files.deleteFile(extra.signal, req.params.arguments)
+				cr = await this.files.deleteFile(extra.signal, req.params.arguments)
 				break
 			case "files.get_file_info":
-				r = await this.files.getFileInfo(extra.signal, req.params.arguments)
+				cr = await this.files.getFileInfo(extra.signal, req.params.arguments)
 				break
 			case "files.update_file":
-				r = await this.files.updateFile(extra.signal, req.params.arguments)
+				cr = await this.files.updateFile(extra.signal, req.params.arguments)
 				break
 			case "files.create_folder":
-				r = await this.files.createFolder(extra.signal, req.params.arguments)
+				cr = await this.files.createFolder(extra.signal, req.params.arguments)
 				break
 			case "files.delete_folder":
-				r = await this.files.deleteFolder(extra.signal, req.params.arguments)
+				cr = await this.files.deleteFolder(extra.signal, req.params.arguments)
 				break
 			case "files.get_folder":
-				r = await this.files.getFolder(extra.signal, req.params.arguments)
+				cr = await this.files.getFolder(extra.signal, req.params.arguments)
 				break
 			case "files.get_folders":
-				r = await this.files.getFolders(extra.signal, req.params.arguments)
+				cr = await this.files.getFolders(extra.signal, req.params.arguments)
 				break
 			case "files.rename_folder":
-				r = await this.files.renameFolder(extra.signal, req.params.arguments)
+				cr = await this.files.renameFolder(extra.signal, req.params.arguments)
 				break
 			case "files.get_my_folder":
-				r = await this.files.getMyFolder(extra.signal)
+				cr = await this.files.getMyFolder(extra.signal)
 				break
 			case "files.copy_batch_items":
-				r = await this.files.copyBatchItems(extra.signal, req.params.arguments)
+				cr = await this.files.copyBatchItems(extra.signal, req.params.arguments)
 				break
 			case "files.get_operation_statuses":
-				r = await this.files.getOperationStatuses(extra.signal)
+				cr = await this.files.getOperationStatuses(extra.signal)
 				break
 			case "files.move_batch_items":
-				r = await this.files.moveBatchItems(extra.signal, req.params.arguments)
+				cr = await this.files.moveBatchItems(extra.signal, req.params.arguments)
 				break
 			case "files.create_room":
-				r = await this.files.createRoom(extra.signal, req.params.arguments)
+				cr = await this.files.createRoom(extra.signal, req.params.arguments)
 				break
 			case "files.get_room_info":
-				r = await this.files.getRoomInfo(extra.signal, req.params.arguments)
+				cr = await this.files.getRoomInfo(extra.signal, req.params.arguments)
 				break
 			case "files.update_room":
-				r = await this.files.updateRoom(extra.signal, req.params.arguments)
+				cr = await this.files.updateRoom(extra.signal, req.params.arguments)
 				break
 			case "files.archive_room":
-				r = await this.files.archiveRoom(extra.signal, req.params.arguments)
+				cr = await this.files.archiveRoom(extra.signal, req.params.arguments)
 				break
 			case "files.get_rooms_folder":
-				r = await this.files.getRoomsFolder(extra.signal)
+				cr = await this.files.getRoomsFolder(extra.signal)
 				break
 
 			case "others.download_as_text":
-				r = await this.others.downloadAsText(extra.signal, req.params.arguments)
+				cr = await this.others.downloadAsText(extra.signal, req.params.arguments)
 				break
 			case "others.upload_file":
-				r = await this.others.uploadFile(extra.signal, req.params.arguments)
+				cr = await this.others.uploadFile(extra.signal, req.params.arguments)
 				break
 
 			default:
-				r = error(new Error(`Tool ${req.params.name} not found.`))
+				cr = error(new Error(`Tool ${req.params.name} not found.`))
 				break
 			}
 		} catch (err) {
 			if (err instanceof Error) {
-				r = error(err)
+				cr = error(err)
 			} else {
-				r = error(new Error("Unknown error.", {cause: err}))
+				cr = error(new Error("Unknown error.", {cause: err}))
 			}
 		}
 
-		if (r.err) {
+		let pr = await (async(): Promise<Result<string, Error>> => {
+			if (cr.err) {
+				return error(cr.err)
+			}
+
+			if (typeof cr.v === "string") {
+				return ok(cr.v)
+			}
+
+			let h = cr.v.response.headers.get("Content-Type")
+			if (h === null) {
+				return error(new Error("Content-Type header is missing"))
+			}
+
+			if (h.startsWith("application/json")) {
+				let p = await safeAsync(cr.v.response.json.bind(cr.v.response))
+				if (p.err) {
+					return error(new Error("Parsing json response", {cause: p.err}))
+				}
+
+				let s = safeSync(JSON.stringify, p.v, undefined, 2)
+				if (s.err) {
+					return error(new Error("Stringifying json value", {cause: s.err}))
+				}
+
+				return ok(s.v)
+			}
+
+			if (h.startsWith("text/")) {
+				let t = await safeAsync(cr.v.response.text.bind(cr.v.response))
+				if (t.err) {
+					return error(new Error("Parsing text response", {cause: t.err}))
+				}
+
+				return ok(t.v)
+			}
+
+			return error(new Error(`Content-Type ${h} is not supported`))
+		})()
+
+		if (pr.err) {
 			return {
 				content: [
 					{
 						type: "text",
-						text: this.base.format(r.err),
-					},
-				],
-				isError: true,
-			}
-		}
-
-		if (typeof r.v === "string") {
-			return {
-				content: [
-					{
-						type: "text",
-						text: r.v,
-					},
-				],
-			}
-		}
-
-		let j = safeSync(JSON.stringify, r.v, undefined, 2)
-		if (j.err) {
-			let err = new Error("Stringifying json value", {cause: j.err})
-			return {
-				content: [
-					{
-						type: "text",
-						text: this.base.format(err),
+						text: this.base.format(pr.err),
 					},
 				],
 				isError: true,
@@ -266,7 +282,7 @@ export class Server {
 			content: [
 				{
 					type: "text",
-					text: j.v,
+					text: pr.v,
 				},
 			],
 		}

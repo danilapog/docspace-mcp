@@ -8,11 +8,10 @@ import type {
 	DeleteFileOptions,
 	DeleteFolderOptions,
 	FilesService, // eslint-disable-line typescript/no-unused-vars
-	GetFileInfoResponse,
 	MoveBatchItemsOptions,
 	RenameFolderOptions,
+	Response,
 	UpdateFileOptions,
-	UpdateFileResponse,
 } from "../../../lib/client.ts"
 import {Toolset} from "../toolset.ts"
 
@@ -131,7 +130,7 @@ export class FilesToolset extends Toolset {
 	/**
 	 * {@link FilesService.getFileInfo}
 	 */
-	async getFileInfo(signal: AbortSignal, p: unknown): Promise<Result<GetFileInfoResponse, Error>> {
+	async getFileInfo(signal: AbortSignal, p: unknown): Promise<Result<Response, Error>> {
 		let pr = GetFileInfoInputSchema.safeParse(p)
 		if (!pr.success) {
 			return error(new Error("Parsing input.", {cause: pr.error}))
@@ -142,15 +141,15 @@ export class FilesToolset extends Toolset {
 			return error(new Error("Getting file info.", {cause: gr.err}))
 		}
 
-		let [gd] = gr.v
+		let [, res] = gr.v
 
-		return ok(gd)
+		return ok(res)
 	}
 
 	/**
 	 * {@link FilesService.updateFile}
 	 */
-	async updateFile(signal: AbortSignal, p: unknown): Promise<Result<UpdateFileResponse, Error>> {
+	async updateFile(signal: AbortSignal, p: unknown): Promise<Result<Response, Error>> {
 		let pr = UpdateFileInputSchema.safeParse(p)
 		if (!pr.success) {
 			return error(new Error("Parsing input.", {cause: pr.error}))
@@ -165,15 +164,15 @@ export class FilesToolset extends Toolset {
 			return error(new Error("Updating file.", {cause: ur.err}))
 		}
 
-		let [ud] = ur.v
+		let [, res] = ur.v
 
-		return ok(ud)
+		return ok(res)
 	}
 
 	/**
 	 * {@link FilesService.createFolder}
 	 */
-	async createFolder(signal: AbortSignal, p: unknown): Promise<Result<unknown, Error>> {
+	async createFolder(signal: AbortSignal, p: unknown): Promise<Result<Response, Error>> {
 		let pr = CreateFolderInputSchema.safeParse(p)
 		if (!pr.success) {
 			return error(new Error("Parsing input.", {cause: pr.error}))
@@ -188,9 +187,9 @@ export class FilesToolset extends Toolset {
 			return error(new Error("Creating folder.", {cause: cr.err}))
 		}
 
-		let [cd] = cr.v
+		let [, res] = cr.v
 
-		return ok(cd)
+		return ok(res)
 	}
 
 	/**
@@ -225,7 +224,7 @@ export class FilesToolset extends Toolset {
 	/**
 	 * {@link FilesService.getFolder}
 	 */
-	async getFolder(signal: AbortSignal, p: unknown): Promise<Result<unknown, Error>> {
+	async getFolder(signal: AbortSignal, p: unknown): Promise<Result<Response, Error>> {
 		let pr = GetFolderInputSchema.safeParse(p)
 		if (!pr.success) {
 			return error(new Error("Parsing input.", {cause: pr.error}))
@@ -236,15 +235,15 @@ export class FilesToolset extends Toolset {
 			return error(new Error("Getting folder info.", {cause: gr.err}))
 		}
 
-		let [gd] = gr.v
+		let [, res] = gr.v
 
-		return ok(gd)
+		return ok(res)
 	}
 
 	/**
 	 * {@link FilesService.getFolders}
 	 */
-	async getFolders(signal: AbortSignal, p: unknown): Promise<Result<unknown, Error>> {
+	async getFolders(signal: AbortSignal, p: unknown): Promise<Result<Response, Error>> {
 		let pr = GetFoldersInputSchema.safeParse(p)
 		if (!pr.success) {
 			return error(new Error("Parsing input.", {cause: pr.error}))
@@ -255,15 +254,15 @@ export class FilesToolset extends Toolset {
 			return error(new Error("Getting folders.", {cause: gr.err}))
 		}
 
-		let [gd] = gr.v
+		let [, res] = gr.v
 
-		return ok(gd)
+		return ok(res)
 	}
 
 	/**
 	 * {@link FilesService.renameFolder}
 	 */
-	async renameFolder(signal: AbortSignal, p: unknown): Promise<Result<unknown, Error>> {
+	async renameFolder(signal: AbortSignal, p: unknown): Promise<Result<Response, Error>> {
 		let pr = RenameFolderInputSchema.safeParse(p)
 		if (!pr.success) {
 			return error(new Error("Parsing input.", {cause: pr.error}))
@@ -278,29 +277,29 @@ export class FilesToolset extends Toolset {
 			return error(new Error("Renaming folder.", {cause: rr.err}))
 		}
 
-		let [rd] = rr.v
+		let [, res] = rr.v
 
-		return ok(rd)
+		return ok(res)
 	}
 
 	/**
 	 * {@link FilesService.getMyFolder}
 	 */
-	async getMyFolder(signal: AbortSignal): Promise<Result<unknown, Error>> {
+	async getMyFolder(signal: AbortSignal): Promise<Result<Response, Error>> {
 		let gr = await this.s.client.files.getMyFolder(signal)
 		if (gr.err) {
 			return error(new Error("Getting my folder.", {cause: gr.err}))
 		}
 
-		let [gd] = gr.v
+		let [, res] = gr.v
 
-		return ok(gd)
+		return ok(res)
 	}
 
 	/**
 	 * {@link FilesService.copyBatchItems}
 	 */
-	async copyBatchItems(signal: AbortSignal, p: unknown): Promise<Result<unknown, Error>> {
+	async copyBatchItems(signal: AbortSignal, p: unknown): Promise<Result<string, Error>> {
 		let pr = CopyBatchItemsInputSchema.safeParse(p)
 		if (!pr.success) {
 			return error(new Error("Parsing input.", {cause: pr.error}))
@@ -331,21 +330,21 @@ export class FilesToolset extends Toolset {
 	/**
 	 * {@link FilesService.getOperationStatuses}
 	 */
-	async getOperationStatuses(signal: AbortSignal): Promise<Result<unknown, Error>> {
+	async getOperationStatuses(signal: AbortSignal): Promise<Result<Response, Error>> {
 		let gr = await this.s.client.files.getOperationStatuses(signal)
 		if (gr.err) {
 			return error(new Error("Getting operation statuses.", {cause: gr.err}))
 		}
 
-		let [gd] = gr.v
+		let [, res] = gr.v
 
-		return ok(gd)
+		return ok(res)
 	}
 
 	/**
 	 * {@link FilesService.moveBatchItems}
 	 */
-	async moveBatchItems(signal: AbortSignal, p: unknown): Promise<Result<unknown, Error>> {
+	async moveBatchItems(signal: AbortSignal, p: unknown): Promise<Result<string, Error>> {
 		let pr = MoveBatchItemsInputSchema.safeParse(p)
 		if (!pr.success) {
 			return error(new Error("Parsing input.", {cause: pr.error}))
@@ -376,7 +375,7 @@ export class FilesToolset extends Toolset {
 	/**
 	 * {@link FilesService.createRoom}
 	 */
-	async createRoom(signal: AbortSignal, p: unknown): Promise<Result<unknown, Error>> {
+	async createRoom(signal: AbortSignal, p: unknown): Promise<Result<Response, Error>> {
 		let pr = CreateRoomInputSchema.safeParse(p)
 		if (!pr.success) {
 			return error(new Error("Parsing input.", {cause: pr.error}))
@@ -392,15 +391,15 @@ export class FilesToolset extends Toolset {
 			return error(new Error("Creating room.", {cause: cr.err}))
 		}
 
-		let [cd] = cr.v
+		let [, res] = cr.v
 
-		return ok(cd)
+		return ok(res)
 	}
 
 	/**
 	 * {@link FilesService.getRoomInfo}
 	 */
-	async getRoomInfo(signal: AbortSignal, p: unknown): Promise<Result<unknown, Error>> {
+	async getRoomInfo(signal: AbortSignal, p: unknown): Promise<Result<Response, Error>> {
 		let pr = GetRoomInfoInputSchema.safeParse(p)
 		if (!pr.success) {
 			return error(new Error("Parsing input.", {cause: pr.error}))
@@ -411,15 +410,15 @@ export class FilesToolset extends Toolset {
 			return error(new Error("Getting room info.", {cause: gr.err}))
 		}
 
-		let [gd] = gr.v
+		let [, res] = gr.v
 
-		return ok(gd)
+		return ok(res)
 	}
 
 	/**
 	 * {@link FilesService.updateRoom}
 	 */
-	async updateRoom(signal: AbortSignal, p: unknown): Promise<Result<unknown, Error>> {
+	async updateRoom(signal: AbortSignal, p: unknown): Promise<Result<Response, Error>> {
 		let pr = UpdateRoomInputSchema.safeParse(p)
 		if (!pr.success) {
 			return error(new Error("Parsing input.", {cause: pr.error}))
@@ -430,15 +429,15 @@ export class FilesToolset extends Toolset {
 			return error(new Error("Updating room.", {cause: ur.err}))
 		}
 
-		let [ud] = ur.v
+		let [, res] = ur.v
 
-		return ok(ud)
+		return ok(res)
 	}
 
 	/**
 	 * {@link FilesService.archiveRoom}
 	 */
-	async archiveRoom(signal: AbortSignal, p: unknown): Promise<Result<unknown, Error>> {
+	async archiveRoom(signal: AbortSignal, p: unknown): Promise<Result<string, Error>> {
 		let pr = ArchiveRoomInputSchema.safeParse(p)
 		if (!pr.success) {
 			return error(new Error("Parsing input.", {cause: pr.error}))
@@ -462,14 +461,14 @@ export class FilesToolset extends Toolset {
 	/**
 	 * {@link FilesService.getRoomsFolder}
 	 */
-	async getRoomsFolder(signal: AbortSignal): Promise<Result<unknown, Error>> {
+	async getRoomsFolder(signal: AbortSignal): Promise<Result<Response, Error>> {
 		let gr = await this.s.client.files.getRoomsFolder(signal)
 		if (gr.err) {
 			return error(new Error("Getting rooms folder.", {cause: gr.err}))
 		}
 
-		let [gd] = gr.v
+		let [, res] = gr.v
 
-		return ok(gd)
+		return ok(res)
 	}
 }
