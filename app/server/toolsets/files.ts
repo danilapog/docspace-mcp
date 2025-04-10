@@ -11,6 +11,7 @@ import type {
 	MoveBatchItemsOptions,
 	RenameFolderOptions,
 	Response,
+	SetRoomSecurityOptions,
 	UpdateFileOptions,
 } from "../../../lib/client.ts"
 import {FiltersSchema} from "../schemas.ts"
@@ -118,6 +119,20 @@ export const UpdateRoomInputSchema = z.object({
 
 export const ArchiveRoomInputSchema = z.object({
 	roomId: z.number().describe("The ID of the room to archive."),
+})
+
+export const SetRoomSecurityInputSchema = z.object({
+	roomId: z.number().describe("The ID of the room to set security for."),
+	invitations: z.array(
+		z.union([
+			z.object({
+				id: z.string().describe("The ID of the user to invite."),
+			}),
+			z.object({
+				email: z.string().describe("The email of the user to invite."),
+			}),
+		]),
+	),
 })
 
 export class FilesToolset extends Toolset {
@@ -498,6 +513,29 @@ export class FilesToolset extends Toolset {
 		}
 
 		return ok("Room archived.")
+	}
+
+	/**
+	 * {@link FilesService.setRoomSecurity}
+	 */
+	async setRoomSecurity(signal: AbortSignal, p: unknown): Promise<Result<Response, Error>> {
+		let pr = SetRoomSecurityInputSchema.safeParse(p)
+		if (!pr.success) {
+			return error(new Error("Parsing input.", {cause: pr.error}))
+		}
+
+		let so: SetRoomSecurityOptions = {
+			invitations: pr.data.invitations,
+		}
+
+		let sr = await this.s.client.files.setRoomSecurity(signal, pr.data.roomId, so)
+		if (sr.err) {
+			return error(new Error("Setting room security.", {cause: sr.err}))
+		}
+
+		let [, res] = sr.v
+
+		return ok(res)
 	}
 
 	/**

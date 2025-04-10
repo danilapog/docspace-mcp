@@ -25,6 +25,7 @@ import {
 	OthersToolset,
 	PeopleToolset,
 	RenameFolderInputSchema,
+	SetRoomSecurityInputSchema,
 	UpdateFileInputSchema,
 	UpdateRoomInputSchema,
 	UploadFileInputSchema,
@@ -140,6 +141,11 @@ export class Server {
 					inputSchema: toInputSchema(ArchiveRoomInputSchema),
 				},
 				{
+					name: "files.set_room_security",
+					description: "",
+					inputSchema: toInputSchema(SetRoomSecurityInputSchema),
+				},
+				{
 					name: "files.get_rooms_folder",
 					description: "",
 					inputSchema: toInputSchema(z.object({})),
@@ -220,6 +226,9 @@ export class Server {
 				break
 			case "files.archive_room":
 				cr = await this.files.archiveRoom(extra.signal, req.params.arguments)
+				break
+			case "files.set_room_security":
+				cr = await this.files.setRoomSecurity(extra.signal, req.params.arguments)
 				break
 			case "files.get_rooms_folder":
 				cr = await this.files.getRoomsFolder(extra.signal)
