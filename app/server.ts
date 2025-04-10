@@ -22,6 +22,7 @@ import {
 	GetRoomInfoInputSchema,
 	MoveBatchItemsInputSchema,
 	OthersToolset,
+	PeopleToolset,
 	RenameFolderInputSchema,
 	UpdateFileInputSchema,
 	UpdateRoomInputSchema,
@@ -36,12 +37,14 @@ export class Server {
 
 	files: FilesToolset
 	others: OthersToolset
+	people: PeopleToolset
 
 	constructor(config: Config) {
 		this.base = new Base(config)
 
 		this.files = new FilesToolset(this.base)
 		this.others = new OthersToolset(this.base)
+		this.people = new PeopleToolset(this.base)
 
 		this.base.server.setRequestHandler(ListToolsRequestSchema, this.listTools.bind(this))
 		this.base.server.setRequestHandler(CallToolRequestSchema, this.callTools.bind(this))
@@ -146,6 +149,12 @@ export class Server {
 					description: "",
 					inputSchema: toInputSchema(UploadFileInputSchema),
 				},
+
+				{
+					name: "people.get_all",
+					description: "",
+					inputSchema: toInputSchema(z.object({})),
+				},
 			],
 		}
 	}
@@ -212,6 +221,10 @@ export class Server {
 				break
 			case "others.upload_file":
 				cr = await this.others.uploadFile(extra.signal, req.params.arguments)
+				break
+
+			case "people.get_all":
+				cr = await this.people.getAll(extra.signal)
 				break
 
 			default:
