@@ -20,6 +20,25 @@ export const TypeObjectSchema = z.union([
 export const JsonElementSchema = z.union([z.string(), z.number()])
 
 /**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Core/Core/Entries/OrderBy.cs/#L30 | DocSpace Reference}
+ */
+export const SortedByTypeSchema = z.union([
+	z.literal("DateAndTime"),
+	z.literal("AZ"),
+	z.literal("Size"),
+	z.literal("Author"),
+	z.literal("Type"),
+	z.literal("New"),
+	z.literal("DateAndTimeCreation"),
+	z.literal("RoomType"),
+	z.literal("Tags"),
+	z.literal("Room"),
+	z.literal("CustomOrder"),
+	z.literal("LastOpened"),
+	z.literal("UsedSpace"),
+])
+
+/**
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/common/ASC.Api.Core/Core/ApiContext.cs/#L94 | DocSpace Reference}
  */
 export const SortOderSchema = z.union([
@@ -43,7 +62,7 @@ export const FilterOpSchema = z.union([
 export const FiltersSchema = z.object({
 	count: z.number().optional(),
 	startIndex: z.number().optional(),
-	sortBy: z.string().optional(),
+	sortBy: z.union([SortedByTypeSchema, z.string()]).optional(),
 	sortOrder: SortOderSchema.optional(),
 	filterBy: z.string().optional(),
 	filterOp: FilterOpSchema.optional(),
