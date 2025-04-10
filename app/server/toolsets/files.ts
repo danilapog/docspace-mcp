@@ -13,6 +13,7 @@ import type {
 	Response,
 	UpdateFileOptions,
 } from "../../../lib/client.ts"
+import {FiltersSchema} from "../schemas.ts"
 import {Toolset} from "../toolset.ts"
 
 export const DeleteFileInputSchema = z.object({
@@ -39,6 +40,7 @@ export const DeleteFolderInputSchema = z.object({
 
 export const GetFolderInputSchema = z.object({
 	folderId: z.number().describe("The ID of the folder to get."),
+	filters: FiltersSchema.optional().describe("The filters to apply to the folder."),
 })
 
 export const GetFolderInfoInputSchema = z.object({
@@ -251,7 +253,7 @@ export class FilesToolset extends Toolset {
 			return error(new Error("Parsing input.", {cause: pr.error}))
 		}
 
-		let gr = await this.s.client.files.getFolder(signal, pr.data.folderId)
+		let gr = await this.s.client.files.getFolder(signal, pr.data.folderId, pr.data.filters)
 		if (gr.err) {
 			return error(new Error("Getting folder.", {cause: gr.err}))
 		}
