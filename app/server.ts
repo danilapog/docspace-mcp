@@ -18,6 +18,7 @@ import {
 	FilesToolset,
 	GetFileInfoInputSchema,
 	GetFolderInputSchema,
+	GetFolderInfoInputSchema,
 	GetFoldersInputSchema,
 	GetRoomInfoInputSchema,
 	MoveBatchItemsInputSchema,
@@ -82,6 +83,11 @@ export class Server {
 					name: "files.get_folder",
 					description: "",
 					inputSchema: toInputSchema(GetFolderInputSchema),
+				},
+				{
+					name: "files.get_folder_info",
+					description: "",
+					inputSchema: toInputSchema(GetFolderInfoInputSchema),
 				},
 				{
 					name: "files.get_folders",
@@ -181,6 +187,9 @@ export class Server {
 				break
 			case "files.get_folder":
 				cr = await this.files.getFolder(extra.signal, req.params.arguments)
+				break
+			case "files.get_folder_info":
+				cr = await this.files.getFolderInfo(extra.signal, req.params.arguments)
 				break
 			case "files.get_folders":
 				cr = await this.files.getFolders(extra.signal, req.params.arguments)

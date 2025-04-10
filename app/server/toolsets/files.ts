@@ -38,6 +38,10 @@ export const DeleteFolderInputSchema = z.object({
 })
 
 export const GetFolderInputSchema = z.object({
+	folderId: z.number().describe("The ID of the folder to get."),
+})
+
+export const GetFolderInfoInputSchema = z.object({
 	folderId: z.number().describe("The ID of the folder to get info for."),
 })
 
@@ -248,6 +252,25 @@ export class FilesToolset extends Toolset {
 		}
 
 		let gr = await this.s.client.files.getFolder(signal, pr.data.folderId)
+		if (gr.err) {
+			return error(new Error("Getting folder.", {cause: gr.err}))
+		}
+
+		let [, res] = gr.v
+
+		return ok(res)
+	}
+
+	/**
+	 * {@link FilesService.getFolderInfo}
+	 */
+	async getFolderInfo(signal: AbortSignal, p: unknown): Promise<Result<Response, Error>> {
+		let pr = GetFolderInfoInputSchema.safeParse(p)
+		if (!pr.success) {
+			return error(new Error("Parsing input.", {cause: pr.error}))
+		}
+
+		let gr = await this.s.client.files.getFolderInfo(signal, pr.data.folderId)
 		if (gr.err) {
 			return error(new Error("Getting folder info.", {cause: gr.err}))
 		}

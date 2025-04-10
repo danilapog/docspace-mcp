@@ -250,7 +250,29 @@ export class FilesService extends Service {
 			q = f.data
 		}
 
-		let u = this.c.createUrl(`api/2.0/files/folder/${id}`, q)
+		let u = this.c.createUrl(`api/2.0/files/${id}`, q)
+		if (u.err) {
+			return error(new Error("Creating URL.", {cause: u.err}))
+		}
+
+		let req = this.c.createRequest(s, "GET", u.v)
+		if (req.err) {
+			return error(new Error("Creating request.", {cause: req.err}))
+		}
+
+		let f = await this.c.fetch(req.v)
+		if (f.err) {
+			return error(new Error("Fetching request.", {cause: f.err}))
+		}
+
+		return ok(f.v)
+	}
+
+	/**
+	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FoldersController.cs/#L180 | DocSpace Reference}
+	 */
+	async getFolderInfo(s: AbortSignal, id: number): Promise<Result<[unknown, Response], Error>> {
+		let u = this.c.createUrl(`api/2.0/files/folder/${id}`)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
