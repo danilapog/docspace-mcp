@@ -17,6 +17,10 @@ for (let c of config) {
 		c.rules["tsdoc/syntax"] = "off"
 	}
 
+	if ("typescript/ban-ts-comment" in c.rules) {
+		c.rules["typescript/ban-ts-comment"] = "off"
+	}
+
 	if ("typescript/prefer-nullish-coalescing" in c.rules) {
 		c.rules["typescript/prefer-nullish-coalescing"] = "off"
 	}

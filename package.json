@@ -4,6 +4,7 @@
 	"type": "module",
 	"scripts": {
 		"build": "tsc --project tsconfig.build.json",
+		"generate": "node scripts/generate.ts",
 		"lint": "eslint .",
 		"serve": "node scripts/serve.ts",
 		"test": "c8 --config c8.config.json node --test"
