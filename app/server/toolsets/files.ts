@@ -135,6 +135,10 @@ export const SetRoomSecurityInputSchema = z.object({
 	),
 })
 
+export const GetRoomSecurityInfoInputSchema = z.object({
+	roomId: z.number().describe("The ID of the room to get security info for."),
+})
+
 export class FilesToolset extends Toolset {
 	/**
 	 * {@link FilesService.deleteFile}
@@ -534,6 +538,25 @@ export class FilesToolset extends Toolset {
 		}
 
 		let [, res] = sr.v
+
+		return ok(res)
+	}
+
+	/**
+	 * {@link FilesService.getRoomSecurityInfo}
+	 */
+	async getRoomSecurityInfo(signal: AbortSignal, p: unknown): Promise<Result<Response, Error>> {
+		let pr = GetRoomSecurityInfoInputSchema.safeParse(p)
+		if (!pr.success) {
+			return error(new Error("Parsing input.", {cause: pr.error}))
+		}
+
+		let gr = await this.s.client.files.getRoomSecurityInfo(signal, pr.data.roomId)
+		if (gr.err) {
+			return error(new Error("Getting room security info.", {cause: gr.err}))
+		}
+
+		let [, res] = gr.v
 
 		return ok(res)
 	}

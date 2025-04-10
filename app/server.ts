@@ -21,6 +21,7 @@ import {
 	GetFolderInputSchema,
 	GetFoldersInputSchema,
 	GetRoomInfoInputSchema,
+	GetRoomSecurityInfoInputSchema,
 	MoveBatchItemsInputSchema,
 	OthersToolset,
 	PeopleToolset,
@@ -146,6 +147,11 @@ export class Server {
 					inputSchema: toInputSchema(SetRoomSecurityInputSchema),
 				},
 				{
+					name: "files.get_room_security_info",
+					description: "",
+					inputSchema: toInputSchema(GetRoomSecurityInfoInputSchema),
+				},
+				{
 					name: "files.get_rooms_folder",
 					description: "",
 					inputSchema: toInputSchema(z.object({})),
@@ -229,6 +235,9 @@ export class Server {
 				break
 			case "files.set_room_security":
 				cr = await this.files.setRoomSecurity(extra.signal, req.params.arguments)
+				break
+			case "files.get_room_security_info":
+				cr = await this.files.getRoomSecurityInfo(extra.signal, req.params.arguments)
 				break
 			case "files.get_rooms_folder":
 				cr = await this.files.getRoomsFolder(extra.signal)
