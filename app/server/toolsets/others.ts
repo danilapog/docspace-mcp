@@ -1,46 +1,11 @@
 import * as z from "zod"
 import type {Result} from "../../../ext/result.ts"
 import {error, ok, safeAsync, safeSync} from "../../../ext/result.ts"
-import type {
-	BulkDownloadOptions,
-	CopyBatchItemsOptions,
-	CreateUploadSessionOptions,
-	MoveBatchItemsOptions,
-} from "../../../lib/client.ts"
+import type {BulkDownloadOptions, CreateUploadSessionOptions} from "../../../lib/client.ts"
 import {Toolset} from "../toolset.ts"
-
-export const CopyBatchItemsInputSchema = z.object({
-	folderIds: z.
-		array(z.union([z.number(), z.string()])).
-		optional().
-		describe("The IDs of the folders to copy."),
-	fileIds: z.
-		array(z.union([z.number(), z.string()])).
-		optional().
-		describe("The IDs of the files to copy."),
-	destFolderId: z.
-		union([z.number(), z.string()]).
-		optional().
-		describe("The ID of the destination folder."),
-})
 
 export const DownloadAsTextInputSchema = z.object({
 	fileId: z.number().describe("The ID of the file to download as text."),
-})
-
-export const MoveBatchItemsInputSchema = z.object({
-	folderIds: z.
-		array(z.union([z.number(), z.string()])).
-		optional().
-		describe("The IDs of the folders to move items to."),
-	fileIds: z.
-		array(z.union([z.number(), z.string()])).
-		optional().
-		describe("The IDs of the files to move."),
-	destFolderId: z.
-		union([z.number(), z.string()]).
-		optional().
-		describe("The ID of the destination folder."),
 })
 
 export const UploadFileInputSchema = z.object({
@@ -49,35 +14,7 @@ export const UploadFileInputSchema = z.object({
 	content: z.string().describe("The content of the file to upload."),
 })
 
-export class OperationsToolset extends Toolset {
-	async copyBatchItems(signal: AbortSignal, p: unknown): Promise<Result<unknown, Error>> {
-		let pr = CopyBatchItemsInputSchema.safeParse(p)
-		if (!pr.success) {
-			return error(new Error("Parsing input.", {cause: pr.error}))
-		}
-
-		let co: CopyBatchItemsOptions = {
-			folderIds: pr.data.folderIds,
-			fileIds: pr.data.fileIds,
-			destFolderId: pr.data.destFolderId,
-			deleteAfter: false,
-		}
-
-		let cr = await this.s.client.files.copyBatchItems(signal, co)
-		if (cr.err) {
-			return error(new Error("Copying batch items.", {cause: cr.err}))
-		}
-
-		let [cd] = cr.v
-
-		let rr = await this.s.resolver.resolve(signal, ...cd)
-		if (rr.err) {
-			return error(new Error("Resolving copy batch items operations.", {cause: rr.err}))
-		}
-
-		return ok("Batch items copied.")
-	}
-
+export class OthersToolset extends Toolset {
 	async downloadAsText(signal: AbortSignal, p: unknown): Promise<Result<unknown, Error>> {
 		let pr = DownloadAsTextInputSchema.safeParse(p)
 		if (!pr.success) {
@@ -165,45 +102,6 @@ export class OperationsToolset extends Toolset {
 		}
 
 		return ok(tt.v)
-	}
-
-	async getOperationStatuses(signal: AbortSignal): Promise<Result<unknown, Error>> {
-		let gr = await this.s.client.files.getOperationStatuses(signal)
-		if (gr.err) {
-			return error(new Error("Getting operation statuses.", {cause: gr.err}))
-		}
-
-		let [gd] = gr.v
-
-		return ok(gd)
-	}
-
-	async moveBatchItems(signal: AbortSignal, p: unknown): Promise<Result<unknown, Error>> {
-		let pr = MoveBatchItemsInputSchema.safeParse(p)
-		if (!pr.success) {
-			return error(new Error("Parsing input.", {cause: pr.error}))
-		}
-
-		let mo: MoveBatchItemsOptions = {
-			folderIds: pr.data.folderIds,
-			fileIds: pr.data.fileIds,
-			destFolderId: pr.data.destFolderId,
-			deleteAfter: false,
-		}
-
-		let mr = await this.s.client.files.moveBatchItems(signal, mo)
-		if (mr.err) {
-			return error(new Error("Moving batch items.", {cause: mr.err}))
-		}
-
-		let [md] = mr.v
-
-		let rr = await this.s.resolver.resolve(signal, ...md)
-		if (rr.err) {
-			return error(new Error("Resolving move batch items operations.", {cause: rr.err}))
-		}
-
-		return ok("Batch items moved.")
 	}
 
 	async uploadFile(signal: AbortSignal, p: unknown): Promise<Result<unknown, Error>> {

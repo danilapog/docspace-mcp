@@ -16,15 +16,13 @@ import {
 	DeleteFolderInputSchema,
 	DownloadAsTextInputSchema,
 	FilesToolset,
-	FoldersToolset,
 	GetFileInfoInputSchema,
-	GetFolderInfoInputSchema,
+	GetFolderInputSchema,
 	GetFoldersInputSchema,
 	GetRoomInfoInputSchema,
 	MoveBatchItemsInputSchema,
-	OperationsToolset,
+	OthersToolset,
 	RenameFolderInputSchema,
-	RoomsToolset,
 	UpdateFileInputSchema,
 	UpdateRoomInputSchema,
 	UploadFileInputSchema,
@@ -36,17 +34,13 @@ export class Server {
 	private base: Base
 
 	files: FilesToolset
-	folders: FoldersToolset
-	operations: OperationsToolset
-	rooms: RoomsToolset
+	others: OthersToolset
 
 	constructor(config: Config) {
 		this.base = new Base(config)
 
 		this.files = new FilesToolset(this.base)
-		this.folders = new FoldersToolset(this.base)
-		this.operations = new OperationsToolset(this.base)
-		this.rooms = new RoomsToolset(this.base)
+		this.others = new OthersToolset(this.base)
 
 		this.base.server.setRequestHandler(ListToolsRequestSchema, this.listTools.bind(this))
 		this.base.server.setRequestHandler(CallToolRequestSchema, this.callTools.bind(this))
@@ -55,107 +49,101 @@ export class Server {
 	listTools(): ListToolsResult {
 		return {
 			tools: [
-				// Files
 				{
-					name: "delete_file",
+					name: "files.delete_file",
 					description: "",
 					inputSchema: toInputSchema(DeleteFileInputSchema),
 				},
 				{
-					name: "get_file_info",
+					name: "files.get_file_info",
 					description: "",
 					inputSchema: toInputSchema(GetFileInfoInputSchema),
 				},
 				{
-					name: "update_file",
+					name: "files.update_file",
 					description: "",
 					inputSchema: toInputSchema(UpdateFileInputSchema),
 				},
-
-				// Folders
 				{
-					name: "create_folder",
+					name: "files.create_folder",
 					description: "",
 					inputSchema: toInputSchema(CreateFolderInputSchema),
 				},
 				{
-					name: "delete_folder",
+					name: "files.delete_folder",
 					description: "",
 					inputSchema: toInputSchema(DeleteFolderInputSchema),
 				},
 				{
-					name: "get_folder_info",
+					name: "files.get_folder",
 					description: "",
-					inputSchema: toInputSchema(GetFolderInfoInputSchema),
+					inputSchema: toInputSchema(GetFolderInputSchema),
 				},
 				{
-					name: "get_folders",
+					name: "files.get_folders",
 					description: "",
 					inputSchema: toInputSchema(GetFoldersInputSchema),
 				},
 				{
-					name: "rename_folder",
+					name: "files.rename_folder",
 					description: "",
 					inputSchema: toInputSchema(RenameFolderInputSchema),
 				},
 				{
-					name: "get_my_folder",
+					name: "files.get_my_folder",
 					description: "",
 					inputSchema: toInputSchema(z.object({})),
 				},
-
-				// Operations
 				{
-					name: "copy_batch_items",
+					name: "files.copy_batch_items",
 					description: "",
 					inputSchema: toInputSchema(CopyBatchItemsInputSchema),
 				},
 				{
-					name: "download_as_text",
-					description: "",
-					inputSchema: toInputSchema(DownloadAsTextInputSchema),
-				},
-				{
-					name: "get_operation_statuses",
+					name: "files.get_operation_statuses",
 					description: "",
 					inputSchema: toInputSchema(z.object({})),
 				},
 				{
-					name: "move_batch_items",
+					name: "files.move_batch_items",
 					description: "",
 					inputSchema: toInputSchema(MoveBatchItemsInputSchema),
 				},
 				{
-					name: "upload_file",
-					description: "",
-					inputSchema: toInputSchema(UploadFileInputSchema),
-				},
-
-				// Rooms
-				{
-					name: "create_room",
+					name: "files.create_room",
 					description: "",
 					inputSchema: toInputSchema(CreateRoomInputSchema),
 				},
 				{
-					name: "get_room_info",
+					name: "files.get_room_info",
 					description: "",
 					inputSchema: toInputSchema(GetRoomInfoInputSchema),
 				},
 				{
-					name: "update_room",
+					name: "files.update_room",
 					description: "",
 					inputSchema: toInputSchema(UpdateRoomInputSchema),
 				},
 				{
-					name: "archive_room",
+					name: "files.archive_room",
 					description: "",
 					inputSchema: toInputSchema(ArchiveRoomInputSchema),
 				},
 				{
-					name: "get_rooms_folder",
+					name: "files.get_rooms_folder",
 					description: "",
 					inputSchema: toInputSchema(z.object({})),
+				},
+
+				{
+					name: "others.download_as_text",
+					description: "",
+					inputSchema: toInputSchema(DownloadAsTextInputSchema),
+				},
+				{
+					name: "others.upload_file",
+					description: "",
+					inputSchema: toInputSchema(UploadFileInputSchema),
 				},
 			],
 		}
@@ -166,69 +154,63 @@ export class Server {
 
 		try {
 			switch (req.params.name) {
-			// Files
-			case "delete_file":
+			case "files.delete_file":
 				r = await this.files.deleteFile(extra.signal, req.params.arguments)
 				break
-			case "get_file_info":
+			case "files.get_file_info":
 				r = await this.files.getFileInfo(extra.signal, req.params.arguments)
 				break
-			case "update_file":
+			case "files.update_file":
 				r = await this.files.updateFile(extra.signal, req.params.arguments)
 				break
+			case "files.create_folder":
+				r = await this.files.createFolder(extra.signal, req.params.arguments)
+				break
+			case "files.delete_folder":
+				r = await this.files.deleteFolder(extra.signal, req.params.arguments)
+				break
+			case "files.get_folder":
+				r = await this.files.getFolder(extra.signal, req.params.arguments)
+				break
+			case "files.get_folders":
+				r = await this.files.getFolders(extra.signal, req.params.arguments)
+				break
+			case "files.rename_folder":
+				r = await this.files.renameFolder(extra.signal, req.params.arguments)
+				break
+			case "files.get_my_folder":
+				r = await this.files.getMyFolder(extra.signal)
+				break
+			case "files.copy_batch_items":
+				r = await this.files.copyBatchItems(extra.signal, req.params.arguments)
+				break
+			case "files.get_operation_statuses":
+				r = await this.files.getOperationStatuses(extra.signal)
+				break
+			case "files.move_batch_items":
+				r = await this.files.moveBatchItems(extra.signal, req.params.arguments)
+				break
+			case "files.create_room":
+				r = await this.files.createRoom(extra.signal, req.params.arguments)
+				break
+			case "files.get_room_info":
+				r = await this.files.getRoomInfo(extra.signal, req.params.arguments)
+				break
+			case "files.update_room":
+				r = await this.files.updateRoom(extra.signal, req.params.arguments)
+				break
+			case "files.archive_room":
+				r = await this.files.archiveRoom(extra.signal, req.params.arguments)
+				break
+			case "files.get_rooms_folder":
+				r = await this.files.getRoomsFolder(extra.signal)
+				break
 
-			// Folders
-			case "create_folder":
-				r = await this.folders.createFolder(extra.signal, req.params.arguments)
+			case "others.download_as_text":
+				r = await this.others.downloadAsText(extra.signal, req.params.arguments)
 				break
-			case "delete_folder":
-				r = await this.folders.deleteFolder(extra.signal, req.params.arguments)
-				break
-			case "get_folder_info":
-				r = await this.folders.getFolderInfo(extra.signal, req.params.arguments)
-				break
-			case "get_folders":
-				r = await this.folders.getFolders(extra.signal, req.params.arguments)
-				break
-			case "rename_folder":
-				r = await this.folders.renameFolder(extra.signal, req.params.arguments)
-				break
-			case "get_my_folder":
-				r = await this.folders.getMyFolder(extra.signal)
-				break
-
-			// Operations
-			case "copy_batch_items":
-				r = await this.operations.copyBatchItems(extra.signal, req.params.arguments)
-				break
-			case "download_as_text":
-				r = await this.operations.downloadAsText(extra.signal, req.params.arguments)
-				break
-			case "get_operation_statuses":
-				r = await this.operations.getOperationStatuses(extra.signal)
-				break
-			case "move_batch_items":
-				r = await this.operations.moveBatchItems(extra.signal, req.params.arguments)
-				break
-			case "upload_file":
-				r = await this.operations.uploadFile(extra.signal, req.params.arguments)
-				break
-
-			// Rooms
-			case "create_room":
-				r = await this.rooms.createRoom(extra.signal, req.params.arguments)
-				break
-			case "get_room_info":
-				r = await this.rooms.getRoomInfo(extra.signal, req.params.arguments)
-				break
-			case "update_room":
-				r = await this.rooms.updateRoom(extra.signal, req.params.arguments)
-				break
-			case "archive_room":
-				r = await this.rooms.archiveRoom(extra.signal, req.params.arguments)
-				break
-			case "get_rooms_folder":
-				r = await this.rooms.getRoomsFolder(extra.signal)
+			case "others.upload_file":
+				r = await this.others.uploadFile(extra.signal, req.params.arguments)
 				break
 
 			default:
