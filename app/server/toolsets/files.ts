@@ -81,8 +81,25 @@ export const MoveBatchItemsInputSchema = z.object({
 })
 
 export const CreateRoomInputSchema = z.object({
-	title: z.string().describe("The title of the room."),
-	// roomType: z.string().optional().default("PublicRoom").describe("The type of the room."),
+	title: z.
+		string().
+		describe("The title of the room to create."),
+	roomType: z.
+		union([
+			z.literal(1).describe("The number representation of the Filling Forms Room type."),
+			z.literal(2).describe("The number representation of the Editing Room type."),
+			z.literal(5).describe("The number representation of the Custom Room type."),
+			z.literal(6).describe("The number representation of the Public Room type."),
+			z.literal(8).describe("The number representation of the Virtual Data Room type."),
+			z.literal("FillingFormsRoom").describe("The string representation of the Filling Forms Room type."),
+			z.literal("EditingRoom").describe("The string representation of the Editing Room type."),
+			z.literal("CustomRoom").describe("The string representation of the Custom Room type."),
+			z.literal("PublicRoom").describe("The string representation of the Public Room type."),
+			z.literal("VirtualDataRoom").describe("The string representation of the Virtual Data Room type."),
+		]).
+		optional().
+		default("PublicRoom").
+		describe("The type of the room to create."),
 })
 
 export const GetRoomInfoInputSchema = z.object({
@@ -383,7 +400,7 @@ export class FilesToolset extends Toolset {
 
 		let co: CreateRoomOptions = {
 			title: pr.data.title,
-			roomType: "PublicRoom",
+			roomType: pr.data.roomType,
 		}
 
 		let cr = await this.s.client.files.createRoom(signal, co)
