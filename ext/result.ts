@@ -149,6 +149,16 @@ export async function safeAsync<
 
 /**
  * Calls the constructor and wraps its return value in a Result.
+ *
+ * @param fn
+ *   The constructor to call.
+ *
+ * @param args
+ *   The arguments to pass to the constructor.
+ *
+ * @returns
+ *   A Result object containing the result of the constructor call or an error
+ *   if the constructor call failed.
  */
 export function safeNew<
 	A extends unknown[],
@@ -164,6 +174,6 @@ export function safeNew<
 		if (err instanceof Error) {
 			return error(err)
 		}
-		return error(new Error("Unknown error", {cause: err}))
+		return error(new Error("Unknown error.", {cause: err}))
 	}
 }

@@ -109,7 +109,7 @@ await test("safeNew(): calls a constructor and wraps its return value in a Resul
 
 		let r = safeNew(Foo)
 		eq(r.err, undefined)
-		eq(r.v, "ok")
+		eq(r.v instanceof Foo, true)
 	})
 
 	await t.test("returns an Error result when the constructor throws", () => {
