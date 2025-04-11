@@ -4,5 +4,6 @@
 		"noEmit": false,
 		"outDir": "dist"
 	},
-	"include": ["app", "ext", "lib"]
+	"include": ["app", "ext", "lib"],
+	"exclude": ["**/*.test.ts"]
 }
