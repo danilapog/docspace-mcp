@@ -1,0 +1,54 @@
+name: Release
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup mise
+      uses: jdx/mise-action@v2
+
+    - name: Install Dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Build Package
+      run: pnpm build
+
+    - name: Configure Registry
+      run: |
+        pnpm config set //registry.npmjs.org/:_authToken "\${NODE_AUTH_TOKEN}"
+        pnpm config set registry https://registry.npmjs.org
+
+    - name: Publish Package
+      env:
+        NODE_AUTH_TOKEN: ${{secrets.NPM_PUBLISH_TOKEN}}
+      run: pnpm publish --access public --no-git-checks
+
+    - name: Create Tarball
+      run: pnpm pack
+
+    - name: Store Package Version
+      run: echo "PACKAGE_VERSION=$(jq -r ".version" package.json)" >> "$GITHUB_ENV"
+
+    - name: Create Release
+      env:
+        GH_TOKEN: ${{github.token}}
+      run: |
+        gh release create "v${{env.PACKAGE_VERSION}}" \
+          --title "v${{env.PACKAGE_VERSION}}" \
+          --notes "See ${{github.server_url}}/${{github.repository}}/blob/main/CHANGELOG.md/"
+
+    - name: Upload Tarball
+      env:
+        GH_TOKEN: ${{github.token}}
+      run: gh release upload "v${{env.PACKAGE_VERSION}}" *.tgz
