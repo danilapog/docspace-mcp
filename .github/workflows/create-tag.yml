@@ -1,0 +1,29 @@
+name: Create Tag
+
+on:
+  push:
+    branches:
+    - main
+    paths-ignore:
+    - .github/**
+    - CHANGELOG.md
+    - LICENSE
+    - README.md
+
+jobs:
+  create-tag:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup GitHub Actions Bot
+      uses: vanyauhalin/action-gh-bot@v0
+
+    - name: Store Package Version
+      run: echo "PACKAGE_VERSION=$(jq -r ".version" package.json)" >> "$GITHUB_ENV"
+
+    - name: Create Tag
+      run: |
+        git tag "v${{env.PACKAGE_VERSION}}"
+        git push origin "v${{env.PACKAGE_VERSION}}"
