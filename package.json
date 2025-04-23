@@ -24,6 +24,9 @@
 	},
 	"type": "module",
 	"main": "dist/app/main.js",
+	"bin": {
+		"onlyoffice-docspace-mcp": "dist/app/main.js"
+	},
 	"files": [
 		"dist",
 		"LICENSE",
