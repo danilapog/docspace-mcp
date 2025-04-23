@@ -4,7 +4,9 @@ This document records all notable changes to the project, following the [Keep a 
 
 ## [Unreleased]
 
-<!-- There are no noticeable changes in version [unreleased]. -->
+There are no noticeable changes in version [unreleased].
+
+## [0.1.0] - 2025-04-23
 
 ### Added
 
@@ -16,4 +18,5 @@ This document records all notable changes to the project, following the [Keep a 
 [Keep a Changelog]: https://keepachangelog.com/en/1.1.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
-[Unreleased]: https://github.com/onlyoffice/docspace-mcp/compare/HEAD/
+[Unreleased]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...HEAD/
+[0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
