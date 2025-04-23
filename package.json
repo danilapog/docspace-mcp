@@ -1,6 +1,6 @@
 {
 	"name": "@onlyoffice/docspace-mcp",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "ONLYOFFICE DocSpace Model Context Protocol Server",
 	"keywords": [
 		"onlyoffice",
@@ -24,6 +24,9 @@
 	},
 	"type": "module",
 	"main": "dist/app/main.js",
+	"bin": {
+		"onlyoffice-docspace-mcp": "dist/app/main.js"
+	},
 	"files": [
 		"dist",
 		"LICENSE",
