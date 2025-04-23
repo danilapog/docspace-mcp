@@ -31,6 +31,10 @@ for (let c of config) {
 		c.rules["jsdoc/tag-lines"] = "off"
 	}
 
+	if ("n/hashbang" in c.rules) {
+		c.rules["n/hashbang"] = "off"
+	}
+
 	if ("tsdoc/syntax" in c.rules) {
 		c.rules["tsdoc/syntax"] = "off"
 	}
