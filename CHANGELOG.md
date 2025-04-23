@@ -6,6 +6,12 @@ This document records all notable changes to the project, following the [Keep a 
 
 There are no noticeable changes in version [unreleased].
 
+## [0.1.2] - 2025-04-23
+
+### Fixed
+
+- Fix the hashbang for the bin file ([90745be]).
+
 ## [0.1.1] - 2025-04-23
 
 ### Fixed
@@ -24,8 +30,10 @@ There are no noticeable changes in version [unreleased].
 [Keep a Changelog]: https://keepachangelog.com/en/1.1.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
-[Unreleased]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.1...HEAD/
+[Unreleased]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.2...HEAD/
+[0.1.2]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.1...v0.1.2/
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[90745be]: https://github.com/onlyoffice/docspace-mcp/commit/90745beb9a5827bd8a7a57fc72fe84468403e26b/
 [e3e04c7]: https://github.com/onlyoffice/docspace-mcp/commit/e3e04c7435b753a0bfa0b56f3c2b00ffa77e13d3/

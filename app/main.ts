@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * (c) Copyright Ascensio System SIA 2025
  *
