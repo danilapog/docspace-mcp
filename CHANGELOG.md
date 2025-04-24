@@ -6,6 +6,12 @@ This document records all notable changes to the project, following the [Keep a 
 
 There are no noticeable changes in version [unreleased].
 
+## [0.1.3] - 2025-04-24
+
+### Fixed
+
+- Fix compatibility with Windsurf Editor ([c637742], [3ae9500]).
+
 ## [0.1.2] - 2025-04-23
 
 ### Fixed
@@ -30,10 +36,13 @@ There are no noticeable changes in version [unreleased].
 [Keep a Changelog]: https://keepachangelog.com/en/1.1.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
-[Unreleased]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.2...HEAD/
+[Unreleased]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.3...HEAD/
+[0.1.3]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.2...v0.1.3/
 [0.1.2]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.1...v0.1.2/
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[3ae9500]: https://github.com/onlyoffice/docspace-mcp/commit/3ae95005e7c0b1a5f40e0401cd6d41ab6939b675/
+[c637742]: https://github.com/onlyoffice/docspace-mcp/commit/c63774232644f9479d54768b527f81390959b513/
 [90745be]: https://github.com/onlyoffice/docspace-mcp/commit/90745beb9a5827bd8a7a57fc72fe84468403e26b/
 [e3e04c7]: https://github.com/onlyoffice/docspace-mcp/commit/e3e04c7435b753a0bfa0b56f3c2b00ffa77e13d3/
