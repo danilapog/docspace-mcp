@@ -77,30 +77,42 @@ export const RenameFolderInputSchema = z.object({
 
 export const CopyBatchItemsInputSchema = z.object({
 	folderIds: z.
-		array(z.union([z.number(), z.string()])).
+		// The Windsurf Editor is experiencing an issue parsing the following type.
+		// array(z.union([z.number(), z.string()])).
+		array(z.unknown()).
 		optional().
 		describe("The IDs of the folders to copy."),
 	fileIds: z.
-		array(z.union([z.number(), z.string()])).
+		// The Windsurf Editor is experiencing an issue parsing the following type.
+		// array(z.union([z.number(), z.string()])).
+		array(z.unknown()).
 		optional().
 		describe("The IDs of the files to copy."),
 	destFolderId: z.
-		union([z.number(), z.string()]).
+		// The Windsurf Editor is experiencing an issue parsing the following type.
+		// union([z.number(), z.string()]).
+		unknown().
 		optional().
 		describe("The ID of the destination folder."),
 })
 
 export const MoveBatchItemsInputSchema = z.object({
 	folderIds: z.
-		array(z.union([z.number(), z.string()])).
+		// The Windsurf Editor is experiencing an issue parsing the following type.
+		// array(z.union([z.number(), z.string()])).
+		array(z.unknown()).
 		optional().
 		describe("The IDs of the folders to move items to."),
 	fileIds: z.
-		array(z.union([z.number(), z.string()])).
+		// The Windsurf Editor is experiencing an issue parsing the following type.
+		// array(z.union([z.number(), z.string()])).
+		array(z.unknown()).
 		optional().
 		describe("The IDs of the files to move."),
 	destFolderId: z.
-		union([z.number(), z.string()]).
+		// The Windsurf Editor is experiencing an issue parsing the following type.
+		// union([z.number(), z.string()]).
+		unknown().
 		optional().
 		describe("The ID of the destination folder."),
 })
@@ -385,8 +397,11 @@ export class FilesToolset extends Toolset {
 		}
 
 		let co: CopyBatchItemsOptions = {
+			// @ts-ignore See the type above for the reason.
 			folderIds: pr.data.folderIds,
+			// @ts-ignore See the type above for the reason.
 			fileIds: pr.data.fileIds,
+			// @ts-ignore See the type above for the reason.
 			destFolderId: pr.data.destFolderId,
 			deleteAfter: false,
 		}
@@ -430,8 +445,11 @@ export class FilesToolset extends Toolset {
 		}
 
 		let mo: MoveBatchItemsOptions = {
+			// @ts-ignore See the type above for the reason.
 			folderIds: pr.data.folderIds,
+			// @ts-ignore See the type above for the reason.
 			fileIds: pr.data.fileIds,
+			// @ts-ignore See the type above for the reason.
 			destFolderId: pr.data.destFolderId,
 			deleteAfter: false,
 		}
