@@ -17,11 +17,11 @@
  */
 
 import * as z from "zod"
-import type {Result} from "../../../ext/result.ts"
-import {error, ok} from "../../../ext/result.ts"
-import type {Response} from "../response.ts"
-import {AuthRequestsDtoSchema, AuthenticationTokenDtoSchema} from "../schemas.ts"
-import {Service} from "../service.ts"
+import type {Result} from "../../ext/result.ts"
+import {error, ok} from "../../ext/result.ts"
+import type {Client} from "../client.ts"
+import type {Response} from "./internal/response.ts"
+import {AuthRequestsDtoSchema, AuthenticationTokenDtoSchema} from "./internal/schemas.ts"
 
 export type AuthenticateMeOptions = z.input<typeof AuthRequestsDtoSchema>
 
@@ -30,7 +30,13 @@ export type AuthenticateMeResponse = z.output<typeof AuthenticationTokenDtoSchem
 /**
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/web/ASC.Web.Api/Api/AuthenticationController.cs/ | DocSpace Reference}
  */
-export class AuthService extends Service {
+export class AuthService {
+	private c: Client
+
+	constructor(s: Client) {
+		this.c = s
+	}
+
 	/**
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/web/ASC.Web.Api/Api/AuthenticationController.cs/#L88 | DocSpace Reference}
 	 */

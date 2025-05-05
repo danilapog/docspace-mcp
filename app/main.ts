@@ -20,6 +20,7 @@
 
 import {Server as ProtocolServer} from "@modelcontextprotocol/sdk/server/index.js"
 import {StdioServerTransport} from "@modelcontextprotocol/sdk/server/stdio.js"
+import type {Config as ClientConfig} from "../lib/client.ts"
 import {Client} from "../lib/client.ts"
 import {Resolver} from "../lib/resolver.ts"
 import {Uploader} from "../lib/uploader.ts"
@@ -70,16 +71,17 @@ async function main(): Promise<void> {
 }
 
 function createClient(config: AppConfig): Client {
-	let f = fetch
+	let f: ClientConfig = {
+		baseUrl: config.baseUrl,
+		userAgent: config.userAgent,
+		fetch,
+	}
 
 	if (config.origin) {
-		f = withOrigin(f, config.origin)
+		f.fetch = withOrigin(f.fetch, config.origin)
 	}
 
 	let c = new Client(f)
-
-	c.baseUrl = config.baseUrl
-	c.userAgent = config.userAgent
 
 	if (config.apiKey) {
 		c = c.withApiKey(config.apiKey)

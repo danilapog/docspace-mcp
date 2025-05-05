@@ -20,7 +20,7 @@ import {setTimeout} from "node:timers/promises"
 import type * as z from "zod"
 import type {Result} from "../ext/result.ts"
 import {error, ok, safeAsync} from "../ext/result.ts"
-import type {FileOperationDtoSchema} from "./client/schemas.ts"
+import type {FileOperationDtoSchema} from "./client/internal/schemas.ts"
 import type {Response as ClientResponse} from "./client.ts"
 
 export type Operation = z.output<typeof FileOperationDtoSchema>
