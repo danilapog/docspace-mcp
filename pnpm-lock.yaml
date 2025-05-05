@@ -7,13 +7,20 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: 1.8.0
+        version: 1.8.0
+      zod:
+        specifier: 3.24.2
+        version: 3.24.2
+      zod-to-json-schema:
+        specifier: 3.24.5
+        version: 3.24.5(zod@3.24.2)
     devDependencies:
       '@modelcontextprotocol/inspector':
         specifier: 0.7.0
         version: 0.7.0(@types/node@22.13.16)(typescript@5.8.2)
-      '@modelcontextprotocol/sdk':
-        specifier: 1.8.0
-        version: 1.8.0
       '@types/node':
         specifier: 22.13.16
         version: 22.13.16
@@ -35,12 +42,6 @@ importers:
       undici:
         specifier: 7.7.0
         version: 7.7.0
-      zod:
-        specifier: 3.24.2
-        version: 3.24.2
-      zod-to-json-schema:
-        specifier: 3.24.5
-        version: 3.24.5(zod@3.24.2)
 
 packages:
 
