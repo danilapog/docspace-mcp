@@ -26,8 +26,8 @@ import {Uploader} from "../lib/uploader.ts"
 import pack from "../package.json" with {type: "json"}
 import type {Config as AppConfig} from "./config.ts"
 import {ConfigSchema} from "./config.ts"
-import type {Config as ServerConfig} from "./server/base.ts"
 import {format} from "./format.ts"
+import type {Config as ServerConfig} from "./server/base.ts"
 import {Server} from "./server.ts"
 
 async function main(): Promise<void> {
