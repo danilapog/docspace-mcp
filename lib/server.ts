@@ -16,16 +16,16 @@
  * @license
  */
 
+import type {Server as McpServer} from "@modelcontextprotocol/sdk/server/index.js"
 import type {RequestHandlerExtra} from "@modelcontextprotocol/sdk/shared/protocol.js"
 import type {CallToolResult, ListToolsResult} from "@modelcontextprotocol/sdk/types.js"
 import {CallToolRequestSchema, ListToolsRequestSchema} from "@modelcontextprotocol/sdk/types.js"
 import * as z from "zod"
-import {zodToJsonSchema} from "zod-to-json-schema"
-import type {Result} from "../ext/result.ts"
-import {error, ok, safeAsync, safeSync} from "../ext/result.ts"
-import type {Response} from "../lib/client.ts"
-import type {Config} from "./server/base.ts"
-import {Base} from "./server/base.ts"
+import {format} from "../util/format.ts"
+import type {Result} from "../util/result.ts"
+import {error, ok, safeAsync, safeSync} from "../util/result.ts"
+import type {Client, Response} from "./client.ts"
+import type {Resolver} from "./resolver.ts"
 import {
 	ArchiveRoomInputSchema,
 	CopyBatchItemsInputSchema,
@@ -33,7 +33,6 @@ import {
 	CreateRoomInputSchema,
 	DeleteFileInputSchema,
 	DeleteFolderInputSchema,
-	DownloadAsTextInputSchema,
 	FilesToolset,
 	GetFileInfoInputSchema,
 	GetFolderInfoInputSchema,
@@ -42,33 +41,46 @@ import {
 	GetRoomInfoInputSchema,
 	GetRoomSecurityInfoInputSchema,
 	MoveBatchItemsInputSchema,
-	OthersToolset,
-	PeopleToolset,
 	RenameFolderInputSchema,
 	SetRoomSecurityInputSchema,
 	UpdateFileInputSchema,
 	UpdateRoomInputSchema,
-	UploadFileInputSchema,
-} from "./server/toolsets.ts"
+} from "./server/files.ts"
+import type {CallToolRequest} from "./server/internal/protocol.ts"
+import {toInputSchema} from "./server/internal/protocol.ts"
+import {DownloadAsTextInputSchema, OthersToolset, UploadFileInputSchema} from "./server/others.ts"
+import {PeopleToolset} from "./server/people.ts"
+import type {Uploader} from "./uploader.ts"
 
-export type {Config} from "./server/base.ts"
+export interface Config {
+	server: McpServer
+	client: Client
+	resolver: Resolver
+	uploader: Uploader
+}
 
 export class Server {
-	private base: Base
+	server: McpServer
+	client: Client
+	resolver: Resolver
+	uploader: Uploader
 
 	files: FilesToolset
 	others: OthersToolset
 	people: PeopleToolset
 
 	constructor(config: Config) {
-		this.base = new Base(config)
+		this.server = config.server
+		this.client = config.client
+		this.resolver = config.resolver
+		this.uploader = config.uploader
 
-		this.files = new FilesToolset(this.base)
-		this.others = new OthersToolset(this.base)
-		this.people = new PeopleToolset(this.base)
+		this.files = new FilesToolset(this)
+		this.others = new OthersToolset(this)
+		this.people = new PeopleToolset(this)
 
-		this.base.server.setRequestHandler(ListToolsRequestSchema, this.listTools.bind(this))
-		this.base.server.setRequestHandler(CallToolRequestSchema, this.callTools.bind(this))
+		this.server.setRequestHandler(ListToolsRequestSchema, this.listTools.bind(this))
+		this.server.setRequestHandler(CallToolRequestSchema, this.callTools.bind(this))
 	}
 
 	listTools(): ListToolsResult {
@@ -329,7 +341,7 @@ export class Server {
 				content: [
 					{
 						type: "text",
-						text: this.base.format(pr.err),
+						text: format(pr.err),
 					},
 				],
 				isError: true,
@@ -345,13 +357,4 @@ export class Server {
 			],
 		}
 	}
-}
-
-type CallToolRequest = z.infer<typeof CallToolRequestSchema>
-
-type ToolInputSchema = ListToolsResult["tools"][0]["inputSchema"]
-
-// eslint-disable-next-line typescript/no-empty-object-type
-function toInputSchema<T extends z.ZodObject<{}, "strip", z.ZodTypeAny, {}, {}>>(o: T): ToolInputSchema {
-	return zodToJsonSchema(o) as ToolInputSchema
 }

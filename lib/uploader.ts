@@ -16,8 +16,8 @@
  * @license
  */
 
-import type {Result} from "../ext/result.ts"
-import {error, ok} from "../ext/result.ts"
+import type {Result} from "../util/result.ts"
+import {error, ok} from "../util/result.ts"
 import type {Response} from "./client.ts"
 
 const maxChunkSize = 1024 * 1024 * 10 // 10mb

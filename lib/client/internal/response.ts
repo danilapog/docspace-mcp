@@ -17,8 +17,8 @@
  */
 
 import * as z from "zod"
-import type {Result} from "../../ext/result.ts"
-import {error, ok, safeAsync, safeSync} from "../../ext/result.ts"
+import type {Result} from "../../../util/result.ts"
+import {error, ok, safeAsync, safeSync} from "../../../util/result.ts"
 import {
 	ErrorApiResponseSchema,
 	SuccessApiResponseSchema,

@@ -31,7 +31,7 @@
 	"scripts": {
 		"build": "tsc --project tsconfig.build.json",
 		"generate": "node scripts/generate.ts",
-		"lint": "eslint .github app ext lib scripts c8.config.json CHANGELOG.md eslint.config.js mise.toml package.json README.md tsconfig.build.json tsconfig.json",
+		"lint": "eslint .github app lib scripts util c8.config.json CHANGELOG.md eslint.config.js mise.toml package.json README.md tsconfig.build.json tsconfig.json",
 		"serve": "node scripts/serve.ts",
 		"test": "c8 --config c8.config.json node --test"
 	},

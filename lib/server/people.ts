@@ -16,16 +16,22 @@
  * @license
  */
 
-import type {Result} from "../../../ext/result.ts"
-import {error, ok} from "../../../ext/result.ts"
+import type {Result} from "../../util/result.ts"
+import {error, ok} from "../../util/result.ts"
 // eslint-disable-next-line import-newlines/enforce
 import type {
 	PeopleService, // eslint-disable-line typescript/no-unused-vars
 	Response,
-} from "../../../lib/client.ts"
-import {Toolset} from "../toolset.ts"
+} from "../client.ts"
+import type {Server} from "../server.ts"
 
-export class PeopleToolset extends Toolset {
+export class PeopleToolset {
+	private s: Server
+
+	constructor(s: Server) {
+		this.s = s
+	}
+
 	/**
 	 * {@link PeopleService.getAll}
 	 */

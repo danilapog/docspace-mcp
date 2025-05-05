@@ -16,56 +16,54 @@
  * @license
  */
 
-import {safeNew, safeSync} from "../ext/result.ts"
-import {Base} from "./client/base.ts"
-import type {AuthenticateMeOptions} from "./client/services.ts"
-import {AuthService, FilesService, PeopleService} from "./client/services.ts"
+import type {Result} from "../util/result.ts"
+import {error, ok, safeAsync, safeNew, safeSync} from "../util/result.ts"
+import type {AuthenticateMeOptions} from "./client/auth.ts"
+import {AuthService} from "./client/auth.ts"
+import {FilesService} from "./client/files.ts"
+import type {BasicAuthState} from "./client/internal/auth.ts"
+import {checkBasicAuth, injectAuthKey, injectAuthToken} from "./client/internal/auth.ts"
+import type {Response} from "./client/internal/response.ts"
+import {checkResponse, parseResponse} from "./client/internal/response.ts"
+import {PeopleService} from "./client/people.ts"
 
-export * from "./client/response.ts"
-export * from "./client/services.ts"
+export {ErrorResponse, Response} from "./client/internal/response.ts"
 
-const headerApiKey = "Authorization"
-const headerAuthToken = "Authorization"
-const schemaApiKey = "Bearer"
-const cookieAuthToken = "asc_auth_key"
-const thresholdBasicAuth = 1000 * 60 * 5 // 5min
+export * from "./client/auth.ts"
+export * from "./client/files.ts"
+export * from "./client/people.ts"
+
+export interface Config {
+	baseUrl: string
+	userAgent: string
+	fetch: typeof globalThis.fetch
+}
 
 export class Client {
-	private base: Base
-
-	get baseUrl(): string {
-		return this.base.baseUrl
-	}
-
-	set baseUrl(v: string) {
-		this.base.baseUrl = v
-	}
-
-	get userAgent(): string {
-		return this.base.userAgent
-	}
-
-	set userAgent(v: string) {
-		this.base.userAgent = v
-	}
+	baseUrl: string
+	userAgent: string
+	baseFetch: typeof globalThis.fetch
 
 	auth: AuthService
 	files: FilesService
 	people: PeopleService
 
-	constructor(fetch: typeof globalThis.fetch) {
-		this.base = new Base(fetch)
-		this.auth = new AuthService(this.base)
-		this.files = new FilesService(this.base)
-		this.people = new PeopleService(this.base)
+	constructor(config: Config) {
+		this.baseUrl = config.baseUrl
+		this.userAgent = config.userAgent
+		this.baseFetch = config.fetch
+
+		this.auth = new AuthService(this)
+		this.files = new FilesService(this)
+		this.people = new PeopleService(this)
 	}
 
 	withApiKey(k: string): Client {
 		let c = this.copy()
 
-		let f = c.base.baseFetch
+		let f = c.baseFetch
 
-		c.base.baseFetch = async function baseFetch(input, init) {
+		c.baseFetch = async function baseFetch(input, init) {
 			if (!(input instanceof Request)) {
 				throw new Error("Unsupported input type.")
 			}
@@ -86,9 +84,9 @@ export class Client {
 	withAuthToken(t: string): Client {
 		let c = this.copy()
 
-		let f = c.base.baseFetch
+		let f = c.baseFetch
 
-		c.base.baseFetch = async function baseFetch(input, init) {
+		c.baseFetch = async function baseFetch(input, init) {
 			if (!(input instanceof Request)) {
 				throw new Error("Unsupported input type.")
 			}
@@ -112,7 +110,7 @@ export class Client {
 
 		let c = this.copy()
 
-		let f = c.base.baseFetch
+		let f = c.baseFetch
 
 		let s: BasicAuthState = {
 			token: "",
@@ -124,7 +122,7 @@ export class Client {
 			password: p,
 		}
 
-		c.base.baseFetch = async function baseFetch(input, init) {
+		c.baseFetch = async function baseFetch(input, init) {
 			if (!(input instanceof Request)) {
 				throw new Error("Unsupported input type.")
 			}
@@ -147,103 +145,141 @@ export class Client {
 		return c
 	}
 
-	private copy(): Client {
-		let c = new Client(this.base.baseFetch)
-		c.baseUrl = this.baseUrl
-		c.userAgent = this.userAgent
-		return c
+	copy(): Client {
+		let config: Config = {
+			baseUrl: this.baseUrl,
+			userAgent: this.userAgent,
+			fetch: this.baseFetch,
+		}
+		return new Client(config)
 	}
 
-	createUrl(...args: Parameters<Base["createUrl"]>): ReturnType<Base["createUrl"]> {
-		return this.base.createUrl(...args)
+	createUrl(path: string, query?: object): Result<string, Error> {
+		if (!this.baseUrl.endsWith("/")) {
+			return error(new Error(`Base URL must end with a trailing slash, but ${this.baseUrl} does not.`))
+		}
+
+		if (path.startsWith("/")) {
+			return error(new Error(`Path must not start with a leading slash, but ${path} does.`))
+		}
+
+		let u = safeNew(URL, path, this.baseUrl)
+		if (u.err) {
+			return error(new Error("Creating URL.", {cause: u.err}))
+		}
+
+		if (query) {
+			let q = new URLSearchParams()
+
+			for (let [k, v] of Object.entries(query)) {
+				if (v !== undefined) {
+					q.append(k, v.toString())
+				}
+			}
+
+			let s = q.toString()
+			if (s) {
+				u.v.search = s
+			}
+		}
+
+		return ok(u.v.toString())
 	}
 
-	createRequest(...args: Parameters<Base["createRequest"]>): ReturnType<Base["createRequest"]> {
-		return this.base.createRequest(...args)
+	createRequest(signal: AbortSignal, method: string, url: string, body?: unknown): Result<Request, Error> {
+		let c: RequestInit = {
+			method,
+			signal,
+		}
+
+		if (body !== undefined) {
+			let b = safeSync(JSON.stringify, body)
+			if (b.err) {
+				return error(new Error("Stringifying body.", {cause: b.err}))
+			}
+
+			c.body = b.v
+		}
+
+		let r = safeNew(Request, url, c)
+		if (r.err) {
+			return error(new Error("Creating request.", {cause: r.err}))
+		}
+
+		let h = safeSync(r.v.headers.set.bind(r.v.headers), "Accept", "application/json")
+		if (h.err) {
+			return error(new Error("Setting header.", {cause: h.err}))
+		}
+
+		if (body !== undefined) {
+			let h = safeSync(r.v.headers.set.bind(r.v.headers), "Content-Type", "application/json")
+			if (h.err) {
+				return error(new Error("Setting header.", {cause: h.err}))
+			}
+		}
+
+		if (this.userAgent) {
+			let h = safeSync(r.v.headers.set.bind(r.v.headers), "User-Agent", this.userAgent)
+			if (h.err) {
+				return error(new Error("Setting header.", {cause: h.err}))
+			}
+		}
+
+		return ok(r.v)
 	}
 
-	async fetch(...args: Parameters<Base["fetch"]>): ReturnType<Base["fetch"]> {
-		return await this.base.fetch(...args)
+	createFormRequest(signal: AbortSignal, url: string, body: FormData): Result<Request, Error> {
+		let c: RequestInit = {
+			body,
+			method: "POST",
+			signal,
+		}
+
+		let r = safeNew(Request, url, c)
+		if (r.err) {
+			return error(new Error("Creating request.", {cause: r.err}))
+		}
+
+		let h = safeSync(r.v.headers.set.bind(r.v.headers), "Accept", "application/json")
+		if (h.err) {
+			return error(new Error("Setting header.", {cause: h.err}))
+		}
+
+		if (this.userAgent) {
+			let h = safeSync(r.v.headers.set.bind(r.v.headers), "User-Agent", this.userAgent)
+			if (h.err) {
+				return error(new Error("Setting header.", {cause: h.err}))
+			}
+		}
+
+		return ok(r.v)
 	}
 
-	async bareFetch(...args: Parameters<Base["bareFetch"]>): ReturnType<Base["bareFetch"]> {
-		return await this.base.bareFetch(...args)
-	}
-}
+	async fetch(req: Request): Promise<Result<[unknown, Response], Error>> {
+		let f = await this.bareFetch(req)
+		if (f.err) {
+			return error(new Error("Making bare fetch.", {cause: f.err}))
+		}
 
-interface BasicAuthState {
-	token: string
-	expires: number
-}
+		let p = await parseResponse(req, f.v)
+		if (p.err) {
+			return error(new Error("Parsing response.", {cause: p.err}))
+		}
 
-async function checkBasicAuth(c: Client, s: BasicAuthState, o: AuthenticateMeOptions, input: Request): Promise<Error | undefined> {
-	if (s.expires > Date.now()) {
-		return
-	}
-
-	let a = await c.auth.authenticateMe(input.signal, o)
-	if (a.err) {
-		return new Error("Making authentication.", {cause: a.err})
+		return ok(p.v)
 	}
 
-	let [d] = a.v
+	async bareFetch(req: Request): Promise<Result<globalThis.Response, Error>> {
+		let f = await safeAsync(this.baseFetch, req.clone())
+		if (f.err) {
+			return error(new Error("Fetching request.", {cause: f.err}))
+		}
 
-	let errors: Error[] = []
+		let c = await checkResponse(req, f.v)
+		if (c) {
+			return error(new Error("Checking response.", {cause: c}))
+		}
 
-	let t = ""
-
-	if (d.token === undefined) {
-		errors.push(new Error("Token is not defined."))
-	} else {
-		t = d.token
-	}
-
-	let e = ""
-
-	if (d.expires === undefined) {
-		errors.push(new Error("Expiration date is not defined."))
-	} else {
-		e = d.expires
-	}
-
-	if (errors.length !== 0) {
-		return new Error("Checking authentication data.", {cause: errors})
-	}
-
-	let p = safeNew(Date, e)
-	if (p.err) {
-		return new Error("Parsing expiration date.", {cause: p.err})
-	}
-
-	s.token = t
-	s.expires = p.v.getTime() - thresholdBasicAuth
-}
-
-function injectAuthKey(input: Request, k: string): Error | undefined {
-	let h = safeSync(input.headers.set.bind(input.headers), headerApiKey, `${schemaApiKey} ${k}`)
-	if (h.err) {
-		return new Error("Setting header.", {cause: h.err})
-	}
-}
-
-function injectAuthToken(input: Request, t: string): Error | undefined {
-	let h = safeSync(input.headers.set.bind(input.headers), headerAuthToken, t)
-	if (h.err) {
-		return new Error("Setting header.", {cause: h.err})
-	}
-
-	let p = `${cookieAuthToken}=${t}`
-
-	let c = input.headers.get("Cookie")
-
-	if (c === null) {
-		c = p
-	} else {
-		c = `${c}; ${p}`
-	}
-
-	h = safeSync(input.headers.set.bind(input.headers), "Cookie", c)
-	if (h.err) {
-		return new Error("Setting header.", {cause: h.err})
+		return ok(f.v)
 	}
 }
