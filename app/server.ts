@@ -23,6 +23,7 @@ import * as z from "zod"
 import {zodToJsonSchema} from "zod-to-json-schema"
 import type {Result} from "../ext/result.ts"
 import {error, ok, safeAsync, safeSync} from "../ext/result.ts"
+import type {Response} from "../lib/client.ts"
 import type {Config} from "./server/base.ts"
 import {Base} from "./server/base.ts"
 import {
@@ -49,7 +50,6 @@ import {
 	UpdateRoomInputSchema,
 	UploadFileInputSchema,
 } from "./server/toolsets.ts"
-import type {Response} from "../lib/client.ts"
 
 export type {Config} from "./server/base.ts"
 

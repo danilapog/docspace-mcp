@@ -17,11 +17,11 @@
  */
 
 import {existsSync} from "node:fs"
+import {readFile, writeFile} from "node:fs/promises"
+import type {ListToolsResult} from "@modelcontextprotocol/sdk/types.js"
 import {RawConfigSchema} from "../app/config.ts"
 import type {Config as ServerConfig} from "../app/server.ts"
 import {Server} from "../app/server.ts"
-import type {ListToolsResult} from "@modelcontextprotocol/sdk/types.js"
-import {readFile, writeFile} from "node:fs/promises"
 
 async function main(): Promise<void> {
 	if (!existsSync("README.md")) {

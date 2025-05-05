@@ -27,12 +27,7 @@
 	"bin": {
 		"onlyoffice-docspace-mcp": "dist/app/main.js"
 	},
-	"files": [
-		"dist",
-		"LICENSE",
-		"package.json",
-		"README.md"
-	],
+	"files": ["dist"],
 	"scripts": {
 		"build": "tsc --project tsconfig.build.json",
 		"generate": "node scripts/generate.ts",
