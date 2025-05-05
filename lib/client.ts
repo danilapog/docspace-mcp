@@ -159,10 +159,6 @@ export class Client {
 			return error(new Error(`Base URL must end with a trailing slash, but ${this.baseUrl} does not.`))
 		}
 
-		if (path.startsWith("/")) {
-			return error(new Error(`Path must not start with a leading slash, but ${path} does.`))
-		}
-
 		let u = safeNew(URL, path, this.baseUrl)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
