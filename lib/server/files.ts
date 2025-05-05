@@ -17,8 +17,8 @@
  */
 
 import * as z from "zod"
-import type {Result} from "../../../ext/result.ts"
-import {error, ok} from "../../../ext/result.ts"
+import type {Result} from "../../ext/result.ts"
+import {error, ok} from "../../ext/result.ts"
 import type {
 	CopyBatchItemsOptions,
 	CreateFolderOptions,
@@ -31,9 +31,9 @@ import type {
 	Response,
 	SetRoomSecurityOptions,
 	UpdateFileOptions,
-} from "../../../lib/client.ts"
-import {FiltersSchema} from "../schemas.ts"
-import {Toolset} from "../toolset.ts"
+} from "../client.ts"
+import type {Server} from "../server.ts"
+import {FiltersSchema} from "./internal/schemas.ts"
 
 export const DeleteFileInputSchema = z.object({
 	fileId: z.number().describe("The ID of the file to delete."),
@@ -169,7 +169,13 @@ export const GetRoomSecurityInfoInputSchema = z.object({
 	roomId: z.number().describe("The ID of the room to get security info for."),
 })
 
-export class FilesToolset extends Toolset {
+export class FilesToolset {
+	private s: Server
+
+	constructor(s: Server) {
+		this.s = s
+	}
+
 	/**
 	 * {@link FilesService.deleteFile}
 	 */

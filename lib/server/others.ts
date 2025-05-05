@@ -17,10 +17,10 @@
  */
 
 import * as z from "zod"
-import type {Result} from "../../../ext/result.ts"
-import {error, ok, safeAsync, safeSync} from "../../../ext/result.ts"
-import type {BulkDownloadOptions, CreateUploadSessionOptions, Response} from "../../../lib/client.ts"
-import {Toolset} from "../toolset.ts"
+import type {Result} from "../../ext/result.ts"
+import {error, ok, safeAsync, safeSync} from "../../ext/result.ts"
+import type {BulkDownloadOptions, CreateUploadSessionOptions, Response} from "../client.ts"
+import type {Server} from "../server.ts"
 
 export const DownloadAsTextInputSchema = z.object({
 	fileId: z.number().describe("The ID of the file to download as text."),
@@ -32,7 +32,13 @@ export const UploadFileInputSchema = z.object({
 	content: z.string().describe("The content of the file to upload."),
 })
 
-export class OthersToolset extends Toolset {
+export class OthersToolset {
+	private s: Server
+
+	constructor(s: Server) {
+		this.s = s
+	}
+
 	async downloadAsText(signal: AbortSignal, p: unknown): Promise<Result<string, Error>> {
 		let pr = DownloadAsTextInputSchema.safeParse(p)
 		if (!pr.success) {

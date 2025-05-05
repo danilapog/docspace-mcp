@@ -23,13 +23,12 @@ import {StdioServerTransport} from "@modelcontextprotocol/sdk/server/stdio.js"
 import type {Config as ClientConfig} from "../lib/client.ts"
 import {Client} from "../lib/client.ts"
 import {Resolver} from "../lib/resolver.ts"
+import type {Config as ServerConfig} from "../lib/server.ts"
+import {Server} from "../lib/server.ts"
 import {Uploader} from "../lib/uploader.ts"
 import pack from "../package.json" with {type: "json"}
 import type {Config as AppConfig} from "./config.ts"
 import {ConfigSchema} from "./config.ts"
-import {format} from "./format.ts"
-import type {Config as ServerConfig} from "./server/base.ts"
-import {Server} from "./server.ts"
 
 async function main(): Promise<void> {
 	let ac = ConfigSchema.safeParse(process.env)
@@ -60,7 +59,6 @@ async function main(): Promise<void> {
 		client: lc,
 		resolver: lr,
 		uploader: lu,
-		format,
 	}
 
 	let _ = new Server(sc)
