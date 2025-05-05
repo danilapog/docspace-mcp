@@ -16,8 +16,8 @@
  * @license
  */
 
-import type {Result} from "../../ext/result.ts"
-import {error, ok} from "../../ext/result.ts"
+import type {Result} from "../../util/result.ts"
+import {error, ok} from "../../util/result.ts"
 // eslint-disable-next-line import-newlines/enforce
 import type {
 	PeopleService, // eslint-disable-line typescript/no-unused-vars

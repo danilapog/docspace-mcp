@@ -60,7 +60,7 @@ if (process.env.DOCSPACE_PASSWORD !== undefined) {
 args.push("--", "node")
 
 if (process.env.HTTP_PROXY !== undefined) {
-	args.push("--require", "./ext/proxy.ts")
+	args.push("--require", "./util/proxy.ts")
 }
 
 args.push("app/main.ts")

@@ -16,8 +16,8 @@
  * @license
  */
 
-import type {Result} from "../ext/result.ts"
-import {error, ok, safeAsync, safeNew, safeSync} from "../ext/result.ts"
+import type {Result} from "../util/result.ts"
+import {error, ok, safeAsync, safeNew, safeSync} from "../util/result.ts"
 import type {AuthenticateMeOptions} from "./client/auth.ts"
 import {AuthService} from "./client/auth.ts"
 import {FilesService} from "./client/files.ts"

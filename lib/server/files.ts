@@ -17,8 +17,8 @@
  */
 
 import * as z from "zod"
-import type {Result} from "../../ext/result.ts"
-import {error, ok} from "../../ext/result.ts"
+import type {Result} from "../../util/result.ts"
+import {error, ok} from "../../util/result.ts"
 import type {
 	CopyBatchItemsOptions,
 	CreateFolderOptions,

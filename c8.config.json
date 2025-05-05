@@ -6,6 +6,6 @@
 	"lines": 80,
 	"per-file": true,
 	"reporter": ["html", "text"],
-	"src": ["app", "ext", "lib"],
+	"src": ["app", "lib", "util"],
 	"statements": 80
 }

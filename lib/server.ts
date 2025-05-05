@@ -21,9 +21,9 @@ import type {RequestHandlerExtra} from "@modelcontextprotocol/sdk/shared/protoco
 import type {CallToolResult, ListToolsResult} from "@modelcontextprotocol/sdk/types.js"
 import {CallToolRequestSchema, ListToolsRequestSchema} from "@modelcontextprotocol/sdk/types.js"
 import * as z from "zod"
-import {format} from "../app/format.ts"
-import type {Result} from "../ext/result.ts"
-import {error, ok, safeAsync, safeSync} from "../ext/result.ts"
+import {format} from "../util/format.ts"
+import type {Result} from "../util/result.ts"
+import {error, ok, safeAsync, safeSync} from "../util/result.ts"
 import type {Client, Response} from "./client.ts"
 import type {Resolver} from "./resolver.ts"
 import {

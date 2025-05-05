@@ -16,8 +16,8 @@
  * @license
  */
 
-import type {Result} from "../../ext/result.ts"
-import {error, ok} from "../../ext/result.ts"
+import type {Result} from "../../util/result.ts"
+import {error, ok} from "../../util/result.ts"
 import type {Client} from "../client.ts"
 import type {Response} from "./internal/response.ts"
 

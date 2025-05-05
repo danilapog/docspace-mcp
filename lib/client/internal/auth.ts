@@ -1,4 +1,4 @@
-import {safeNew, safeSync} from "../../../ext/result.ts"
+import {safeNew, safeSync} from "../../../util/result.ts"
 import type {Client} from "../../client.ts"
 import type {AuthenticateMeOptions} from "../auth.ts"
 
