@@ -1,5 +1,12 @@
 # ONLYOFFICE DocSpace MCP Server
 
+<!--generate badges-start-->
+
+[![Open in VS Code using npx command](https://badgen.net/static/Open%20in%20VS%20Code/npx/blue)](https://insiders.vscode.dev/redirect/mcp/install?name=onlyoffice-docspace&inputs=%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22docspace_base_url%22%2C%22description%22%3A%22The+base+URL+of+the+DocSpace+instance.+This+configuration+is+required+for+making+API+requests+to+DocSpace.%22%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22docspace_api_key%22%2C%22description%22%3A%22The+API+key+for+accessing+the+DocSpace+API.+This+configuration+is+required+if+nether+DOCSPACE_AUTH_TOKEN+nor+DOCSPACE_USERNAME+and+DOCSPACE_PASSWORD+are+provided.%22%2C%22password%22%3Atrue%7D%5D&config=%7B%22env%22%3A%7B%22DOCSPACE_BASE_URL%22%3A%22%24%7Binput%3Adocspace_base_url%7D%22%2C%22DOCSPACE_API_KEY%22%3A%22%24%7Binput%3Adocspace_api_key%7D%22%7D%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22--yes%22%2C%22%40onlyoffice%2Fdocspace-mcp%22%5D%7D)
+[![Open in VS Code Insiders using npx command](https://badgen.net/static/Open%20in%20VS%20Code%20Insiders/npx/cyan)](https://insiders.vscode.dev/redirect/mcp/install?name=onlyoffice-docspace&inputs=%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22docspace_base_url%22%2C%22description%22%3A%22The+base+URL+of+the+DocSpace+instance.+This+configuration+is+required+for+making+API+requests+to+DocSpace.%22%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22docspace_api_key%22%2C%22description%22%3A%22The+API+key+for+accessing+the+DocSpace+API.+This+configuration+is+required+if+nether+DOCSPACE_AUTH_TOKEN+nor+DOCSPACE_USERNAME+and+DOCSPACE_PASSWORD+are+provided.%22%2C%22password%22%3Atrue%7D%5D&config=%7B%22env%22%3A%7B%22DOCSPACE_BASE_URL%22%3A%22%24%7Binput%3Adocspace_base_url%7D%22%2C%22DOCSPACE_API_KEY%22%3A%22%24%7Binput%3Adocspace_api_key%7D%22%7D%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22--yes%22%2C%22%40onlyoffice%2Fdocspace-mcp%22%5D%7D&quality=insiders)
+
+<!--generate badges-end-->
+
 [Model Context Protocol] (MCP) is a standardized protocol for managing context between large language models (LLMs) and external systems. This repository provides an MCP server for [ONLYOFFICE DocSpace.]
 
 ## Installation
