@@ -212,6 +212,11 @@ export class Server {
 					description: "Get supported cultures.",
 					inputSchema: toInputSchema(z.object({})),
 				},
+				{
+					name: "settings_get_time_zones",
+					description: "Get time zones.",
+					inputSchema: toInputSchema(z.object({})),
+				},
 			],
 		}
 	}
@@ -295,6 +300,9 @@ export class Server {
 
 			case "settings_get_supported_cultures":
 				cr = await this.settings.getSupportedCultures(extra.signal)
+				break
+			case "settings_get_time_zones":
+				cr = await this.settings.getTimeZones(extra.signal)
 				break
 
 			default:

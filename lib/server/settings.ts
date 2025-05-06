@@ -45,4 +45,18 @@ export class SettingsToolset {
 
 		return ok(res)
 	}
+
+	/**
+	 * {@link SettingsService.getTimeZones}
+	 */
+	async getTimeZones(signal: AbortSignal): Promise<Result<Response, Error>> {
+		let gr = await this.s.client.settings.getTimeZones(signal)
+		if (gr.err) {
+			return error(new Error("Getting time zones.", {cause: gr.err}))
+		}
+
+		let [, res] = gr.v
+
+		return ok(res)
+	}
 }
