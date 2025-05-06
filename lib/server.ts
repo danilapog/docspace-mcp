@@ -215,6 +215,11 @@ export class Server {
 					description: "Get tariff.",
 					inputSchema: toInputSchema(z.object({})),
 				},
+				{
+					name: "portal_get_quota",
+					description: "Get quota.",
+					inputSchema: toInputSchema(z.object({})),
+				},
 
 				{
 					name: "settings_get_supported_cultures",
@@ -309,6 +314,9 @@ export class Server {
 
 			case "portal_get_tariff":
 				cr = await this.portal.getTariff(extra.signal)
+				break
+			case "portal_get_quota":
+				cr = await this.portal.getQuota(extra.signal)
 				break
 
 			case "settings_get_supported_cultures":

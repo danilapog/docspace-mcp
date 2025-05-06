@@ -45,4 +45,18 @@ export class PortalToolset {
 
 		return ok(res)
 	}
+
+	/**
+	 * {@link PortalService.getQuota}
+	 */
+	async getQuota(signal: AbortSignal): Promise<Result<Response, Error>> {
+		let gr = await this.s.client.portal.getQuota(signal)
+		if (gr.err) {
+			return error(new Error("Getting quota.", {cause: gr.err}))
+		}
+
+		let [, res] = gr.v
+
+		return ok(res)
+	}
 }
