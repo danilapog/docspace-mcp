@@ -390,10 +390,18 @@ export const FileOperationDtoSchema = z.
 	passthrough()
 
 /**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Core/HttpHandlers/ChunkedUploaderHandler.cs/#L218 | DocSpace Reference}
+ */
+export const UploadChunkErrorResponseSchema = z.object({
+	success: z.literal(false),
+	message: z.string(),
+})
+
+/**
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Core/HttpHandlers/ChunkedUploaderHandler.cs/#L233 | DocSpace Reference}
  */
-export const UploadChunkResponseSchema = z.object({
-	success: z.boolean(),
+export const UploadChunkSuccessResponseSchema = z.object({
+	success: z.literal(true),
 	data: TypeObjectSchema,
 	message: z.string(),
 })
