@@ -50,6 +50,7 @@ import type {CallToolRequest} from "./server/internal/protocol.ts"
 import {toInputSchema} from "./server/internal/protocol.ts"
 import {DownloadAsTextInputSchema, OthersToolset, UploadFileInputSchema} from "./server/others.ts"
 import {PeopleToolset} from "./server/people.ts"
+import {SettingsToolset} from "./server/settings.ts"
 import type {Uploader} from "./uploader.ts"
 
 export interface Config {
@@ -68,6 +69,7 @@ export class Server {
 	files: FilesToolset
 	others: OthersToolset
 	people: PeopleToolset
+	settings: SettingsToolset
 
 	constructor(config: Config) {
 		this.server = config.server
@@ -78,6 +80,7 @@ export class Server {
 		this.files = new FilesToolset(this)
 		this.others = new OthersToolset(this)
 		this.people = new PeopleToolset(this)
+		this.settings = new SettingsToolset(this)
 
 		this.server.setRequestHandler(ListToolsRequestSchema, this.listTools.bind(this))
 		this.server.setRequestHandler(CallToolRequestSchema, this.callTools.bind(this))
@@ -203,6 +206,12 @@ export class Server {
 					description: "Get all people.",
 					inputSchema: toInputSchema(z.object({})),
 				},
+
+				{
+					name: "settings_get_supported_cultures",
+					description: "Get supported cultures.",
+					inputSchema: toInputSchema(z.object({})),
+				},
 			],
 		}
 	}
@@ -282,6 +291,10 @@ export class Server {
 
 			case "people_get_all":
 				cr = await this.people.getAll(extra.signal)
+				break
+
+			case "settings_get_supported_cultures":
+				cr = await this.settings.getSupportedCultures(extra.signal)
 				break
 
 			default:
