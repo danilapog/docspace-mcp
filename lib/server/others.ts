@@ -27,8 +27,8 @@ export const DownloadAsTextInputSchema = z.object({
 })
 
 export const UploadFileInputSchema = z.object({
-	folderId: z.number().describe("The ID of the folder to upload the file to."),
-	filename: z.string().describe("The name of the file to upload."),
+	parentId: z.number().describe("The ID of the room or folder to upload the file to."),
+	filename: z.string().describe("The file name with an extension to upload."),
 	content: z.string().describe("The content of the file to upload."),
 })
 
@@ -144,7 +144,7 @@ export class OthersToolset {
 			createOn: new Date().toISOString(),
 		}
 
-		let sr = await this.s.client.files.createUploadSession(signal, pr.data.folderId, so)
+		let sr = await this.s.client.files.createUploadSession(signal, pr.data.parentId, so)
 		if (sr.err) {
 			return error(new Error("Creating upload session.", {cause: sr.err}))
 		}

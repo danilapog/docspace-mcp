@@ -46,12 +46,12 @@ export const GetFileInfoInputSchema = z.object({
 
 export const UpdateFileInputSchema = z.object({
 	fileId: z.number().describe("The ID of the file to update."),
-	title: z.string().describe("The new title of the file."),
+	title: z.string().describe("The new title of the file to set."),
 })
 
 export const CreateFolderInputSchema = z.object({
-	parentId: z.number().describe("The ID of the parent folder."),
-	title: z.string().describe("The title of the folder."),
+	parentId: z.number().describe("The ID of the room or folder to create the folder in."),
+	title: z.string().describe("The title of the folder to create."),
 })
 
 export const DeleteFolderInputSchema = z.object({
@@ -60,7 +60,7 @@ export const DeleteFolderInputSchema = z.object({
 
 export const GetFolderInputSchema = z.object({
 	folderId: z.number().describe("The ID of the folder to get."),
-	filters: FiltersSchema.optional().describe("The filters to apply to the folder."),
+	filters: FiltersSchema.optional().describe("The filters to apply to the contents of the folder."),
 })
 
 export const GetFolderInfoInputSchema = z.object({
@@ -73,7 +73,7 @@ export const GetFoldersInputSchema = z.object({
 
 export const RenameFolderInputSchema = z.object({
 	folderId: z.number().describe("The ID of the folder to rename."),
-	title: z.string().describe("The new title of the folder."),
+	title: z.string().describe("The new title of the folder to set."),
 })
 
 export const CopyBatchItemsInputSchema = z.object({
@@ -94,7 +94,7 @@ export const CopyBatchItemsInputSchema = z.object({
 		// union([z.number(), z.string()]).
 		unknown().
 		optional().
-		describe("The ID of the destination folder."),
+		describe("The ID of the destination folder to copy the items to."),
 })
 
 export const MoveBatchItemsInputSchema = z.object({
@@ -115,7 +115,7 @@ export const MoveBatchItemsInputSchema = z.object({
 		// union([z.number(), z.string()]).
 		unknown().
 		optional().
-		describe("The ID of the destination folder."),
+		describe("The ID of the destination folder to move the items to."),
 })
 
 export const CreateRoomInputSchema = z.object({
@@ -124,16 +124,16 @@ export const CreateRoomInputSchema = z.object({
 		describe("The title of the room to create."),
 	roomType: z.
 		union([
-			z.literal(1).describe("The number representation of the Filling Forms Room type."),
-			z.literal(2).describe("The number representation of the Editing Room type."),
-			z.literal(5).describe("The number representation of the Custom Room type."),
-			z.literal(6).describe("The number representation of the Public Room type."),
-			z.literal(8).describe("The number representation of the Virtual Data Room type."),
-			z.literal("FillingFormsRoom").describe("The string representation of the Filling Forms Room type."),
-			z.literal("EditingRoom").describe("The string representation of the Editing Room type."),
-			z.literal("CustomRoom").describe("The string representation of the Custom Room type."),
-			z.literal("PublicRoom").describe("The string representation of the Public Room type."),
-			z.literal("VirtualDataRoom").describe("The string representation of the Virtual Data Room type."),
+			z.literal("FillingFormsRoom").describe("Upload PDF forms into the room. Invite members and guests to fill out a PDF form. Review completed forms and analyze data automatically collected in a spreadsheet."),
+			z.literal("EditingRoom").describe("Collaborate on one or multiple documents with your team."),
+			z.literal("CustomRoom").describe("Apply your own settings to use this room for any custom purpose."),
+			z.literal("PublicRoom").describe("Share documents for viewing, editing, commenting, or reviewing without registration. You can also embed this room into any web interface."),
+			z.literal("VirtualDataRoom").describe("Use VDR for advanced file security and transparency. Set watermarks, automatically index and track all content, restrict downloading and copying."),
+			z.literal(1).describe("The number representation of the FillingFormsRoom type."),
+			z.literal(2).describe("The number representation of the EditingRoom type."),
+			z.literal(5).describe("The number representation of the CustomRoom type."),
+			z.literal(6).describe("The number representation of the PublicRoom type."),
+			z.literal(8).describe("The number representation of the VirtualData Room type."),
 		]).
 		optional().
 		default("PublicRoom").
@@ -156,7 +156,7 @@ export const ArchiveRoomInputSchema = z.object({
 export const SetRoomSecurityInputSchema = z.object({
 	roomId: z.
 		number().
-		describe("The ID of the room to set security for."),
+		describe("The ID of the room to invite or remove users from."),
 	invitations: z.
 		array(
 			z.
@@ -164,11 +164,11 @@ export const SetRoomSecurityInputSchema = z.object({
 					id: z.
 						string().
 						optional().
-						describe("The ID of the user to invite. Mutually exclusive with User Email."),
+						describe("The ID of the user to invite or remove. Mutually exclusive with User Email."),
 					email: z.
 						string().
 						optional().
-						describe("The email of the user to invite. Mutually exclusive with User ID."),
+						describe("The email of the user to invite or remove. Mutually exclusive with User ID."),
 					access: z.
 						union([
 							z.literal("None").describe("No access to the room."),
@@ -185,7 +185,7 @@ export const SetRoomSecurityInputSchema = z.object({
 						optional().
 						describe("The access level to grant to the user."),
 				}).
-				describe("The invitation to send. Must contain either User ID or User Email.").
+				describe("The invitation or removal of a user. Must contain either User ID or User Email.").
 				refine(
 					(o) => o.id !== undefined || o.email !== undefined,
 					{
@@ -194,7 +194,7 @@ export const SetRoomSecurityInputSchema = z.object({
 					},
 				),
 		).
-		describe("The invitations to send."),
+		describe("The invitations or removals to perform."),
 	notify: z.
 		boolean().
 		optional().
@@ -202,7 +202,7 @@ export const SetRoomSecurityInputSchema = z.object({
 	message: z.
 		string().
 		optional().
-		describe("The message to send to the user."),
+		describe("The message to use for the invitation."),
 	culture: z.
 		string().
 		optional().
@@ -210,7 +210,7 @@ export const SetRoomSecurityInputSchema = z.object({
 })
 
 export const GetRoomSecurityInfoInputSchema = z.object({
-	roomId: z.number().describe("The ID of the room to get security info for."),
+	roomId: z.number().describe("The ID of the room to get a list of users with their access level for."),
 })
 
 export class FilesToolset {

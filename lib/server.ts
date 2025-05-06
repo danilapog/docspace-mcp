@@ -179,12 +179,12 @@ export class Server {
 				},
 				{
 					name: "files_set_room_security",
-					description: "Set room access rights.",
+					description: "Invite or remove users from a room.",
 					inputSchema: toInputSchema(SetRoomSecurityInputSchema),
 				},
 				{
 					name: "files_get_room_security_info",
-					description: "Get room access rights.",
+					description: "Get a list of users with their access levels to a room.",
 					inputSchema: toInputSchema(GetRoomSecurityInfoInputSchema),
 				},
 				{
@@ -212,23 +212,23 @@ export class Server {
 
 				{
 					name: "portal_get_tariff",
-					description: "Get tariff.",
+					description: "Get the current tariff.",
 					inputSchema: toInputSchema(z.object({})),
 				},
 				{
 					name: "portal_get_quota",
-					description: "Get quota.",
+					description: "Get the current quota.",
 					inputSchema: toInputSchema(z.object({})),
 				},
 
 				{
 					name: "settings_get_supported_cultures",
-					description: "Get supported cultures.",
+					description: "Get a list of the supported cultures, languages.",
 					inputSchema: toInputSchema(z.object({})),
 				},
 				{
 					name: "settings_get_time_zones",
-					description: "Get time zones.",
+					description: "Get a list of the available time zones.",
 					inputSchema: toInputSchema(z.object({})),
 				},
 			],
