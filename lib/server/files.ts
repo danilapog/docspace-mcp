@@ -152,17 +152,59 @@ export const ArchiveRoomInputSchema = z.object({
 })
 
 export const SetRoomSecurityInputSchema = z.object({
-	roomId: z.number().describe("The ID of the room to set security for."),
-	invitations: z.array(
-		z.union([
-			z.object({
-				id: z.string().describe("The ID of the user to invite."),
-			}),
-			z.object({
-				email: z.string().describe("The email of the user to invite."),
-			}),
-		]),
-	),
+	roomId: z.
+		number().
+		describe("The ID of the room to set security for."),
+	invitations: z.
+		array(
+			z.
+				object({
+					id: z.
+						string().
+						optional().
+						describe("The ID of the user to invite. Mutually exclusive with User Email."),
+					email: z.
+						string().
+						optional().
+						describe("The email of the user to invite. Mutually exclusive with User ID."),
+					access: z.
+						union([
+							z.literal("None").describe("No access to the room."),
+							z.literal("Read").describe("File viewing."),
+							z.literal("RoomManager").describe("(Paid) Room managers can manage the assigned rooms, invite new users and assign roles below their level."),
+							z.literal("Editing").describe("Operations with existing files: viewing, editing, form filling, reviewing, commenting."),
+							z.literal("ContentCreator").describe("Content creators can create and edit files in the room, but can't manage users, or access settings."),
+							z.literal(0).describe("The number representation of the None access level."),
+							z.literal(2).describe("The number representation of the Read access level."),
+							z.literal(9).describe("The number representation of the RoomManager access level."),
+							z.literal(10).describe("The number representation of the Editing access level."),
+							z.literal(11).describe("The number representation of the ContentCreator access level."),
+						]).
+						optional().
+						describe("The access level to grant to the user."),
+				}).
+				describe("The invitation to send. Must contain either User ID or User Email.").
+				refine(
+					(o) => o.id !== undefined || o.email !== undefined,
+					{
+						message: "Either User ID or User Email must be provided.",
+						path: ["id", "email"],
+					},
+				),
+		).
+		describe("The invitations to send."),
+	notify: z.
+		boolean().
+		optional().
+		describe("Whether to notify the user."),
+	message: z.
+		string().
+		optional().
+		describe("The message to send to the user."),
+	culture: z.
+		string().
+		optional().
+		describe("The languages to use for the invitation."),
 })
 
 export const GetRoomSecurityInfoInputSchema = z.object({
@@ -572,6 +614,8 @@ export class FilesToolset {
 
 		let so: SetRoomSecurityOptions = {
 			invitations: pr.data.invitations,
+			notify: pr.data.notify,
+			message: pr.data.message,
 		}
 
 		let sr = await this.s.client.files.setRoomSecurity(signal, pr.data.roomId, so)
