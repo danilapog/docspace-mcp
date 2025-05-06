@@ -22,7 +22,8 @@ import {error, ok, safeAsync, safeSync} from "../../../util/result.ts"
 import {
 	ErrorApiResponseSchema,
 	SuccessApiResponseSchema,
-	UploadChunkResponseSchema,
+	UploadChunkErrorResponseSchema,
+	UploadChunkSuccessResponseSchema,
 	UploadSessionObjectSchema,
 } from "./schemas.ts"
 
@@ -47,32 +48,103 @@ export class ErrorResponse extends Error {
 	}
 }
 
+const SuccessResponseSchema = z.
+	union([
+		SuccessApiResponseSchema,
+		UploadChunkSuccessResponseSchema,
+	]).
+	transform((o) => {
+		let t: {
+			data: unknown
+		} = {
+			data: undefined,
+		}
+
+		switch (true) {
+		case "response" in o:
+			let u = UploadSessionObjectSchema.safeParse(o.response)
+			if (u.success) {
+				t.data = u.data.data
+			} else {
+				t.data = o.response
+			}
+			break
+
+		case "data" in o:
+			t.data = o.data
+			break
+
+		// no default
+		}
+
+		return t
+	})
+
+const ErrorResponseSchema = z.
+	union([
+		ErrorApiResponseSchema,
+		UploadChunkErrorResponseSchema,
+	]).
+	transform((o) => {
+		let t: {
+			message: string
+		} = {
+			message: "",
+		}
+
+		switch (true) {
+		case "error" in o:
+			t.message = o.error.message
+			break
+
+		case "message" in o:
+			t.message = o.message
+			break
+
+		// no default
+		}
+
+		return t
+	})
+
 export async function checkResponse(req: Request, res: globalThis.Response): Promise<Error | undefined> {
+	// DocSpace does not always respect HTTP status codes. Even when it returns
+	// HTTP 2xx, it may still include an error in the response body. Therefore,
+	// try to first parse the response body for errors before checking the status
+	// codes.
+
+	let err = await (async(): Promise<Error> => {
+		let c = safeSync(res.clone.bind(res))
+		if (c.err) {
+			return new Error("Cloning response.", {cause: c.err})
+		}
+
+		let b = await safeAsync(c.v.json.bind(c.v))
+		if (b.err) {
+			return new Error("Parsing response body.", {cause: b.err})
+		}
+
+		let s = ErrorResponseSchema.safeParse(b.v)
+		if (!s.success) {
+			return new Error("Parsing error response.", {cause: s.error})
+		}
+
+		let r = new Response(req, res)
+		let m = `${req.method} ${req.url}: ${res.status} ${s.data.message}`
+		let e = new ErrorResponse(r, m)
+
+		return e
+	})()
+
+	if (err instanceof ErrorResponse) {
+		return err
+	}
+
 	if (res.status >= 200 && res.status <= 299) {
 		return
 	}
 
-	let c = safeSync(res.clone.bind(res))
-	if (c.err) {
-		return new Error("Cloning response.", {cause: c.err})
-	}
-
-	let b = await safeAsync(c.v.json.bind(c.v))
-	if (b.err) {
-		return new Error("Parsing response body.", {cause: b.err})
-	}
-
-	let s = ErrorApiResponseSchema.safeParse(b.v)
-	if (!s.success) {
-		return new Error("Parsing error response.", {cause: s.error})
-	}
-
-	let r = new Response(req, res)
-
-	let m = `${req.method} ${req.url}: ${res.status} ${s.data.error.message}`
-	let e = new ErrorResponse(r, m)
-
-	return e
+	return err
 }
 
 export async function parseResponse(req: Request, res: globalThis.Response): Promise<Result<[unknown, Response], Error>> {
@@ -86,31 +158,11 @@ export async function parseResponse(req: Request, res: globalThis.Response): Pro
 		return error(new Error("Parsing response body.", {cause: b.err}))
 	}
 
-	let u = z.union([
-		SuccessApiResponseSchema,
-		UploadChunkResponseSchema,
-	])
-
-	let s = u.safeParse(b.v)
+	let s = SuccessResponseSchema.safeParse(b.v)
 	if (!s.success) {
 		return error(new Error("Parsing success response.", {cause: s.error}))
 	}
 
-	if ("response" in s.data) {
-		let u = UploadSessionObjectSchema.safeParse(s.data.response)
-		if (u.success) {
-			let r = new Response(req, res)
-			return ok([u.data.data, r])
-		}
-
-		let r = new Response(req, res)
-		return ok([s.data.response, r])
-	}
-
-	if ("data" in s.data) {
-		let r = new Response(req, res)
-		return ok([s.data.data, r])
-	}
-
-	return error(new Error("Unknown success response format."))
+	let r = new Response(req, res)
+	return ok([s.data.data, r])
 }

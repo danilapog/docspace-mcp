@@ -17,18 +17,20 @@
  */
 
 import * as z from "zod"
+import {zodToJsonSchema} from "zod-to-json-schema"
 import type {Result} from "../../util/result.ts"
 import {error, ok, safeAsync, safeSync} from "../../util/result.ts"
 import type {BulkDownloadOptions, CreateUploadSessionOptions, Response} from "../client.ts"
 import type {Server} from "../server.ts"
+import {RoomInvitationAccessSchema, RoomTypeSchema} from "./internal/schemas.ts"
 
 export const DownloadAsTextInputSchema = z.object({
 	fileId: z.number().describe("The ID of the file to download as text."),
 })
 
 export const UploadFileInputSchema = z.object({
-	folderId: z.number().describe("The ID of the folder to upload the file to."),
-	filename: z.string().describe("The name of the file to upload."),
+	parentId: z.number().describe("The ID of the room or folder to upload the file to."),
+	filename: z.string().describe("The file name with an extension to upload."),
 	content: z.string().describe("The content of the file to upload."),
 })
 
@@ -37,6 +39,14 @@ export class OthersToolset {
 
 	constructor(s: Server) {
 		this.s = s
+	}
+
+	getAvailableRoomTypes(): Result<object, Error> {
+		return ok(zodToJsonSchema(RoomTypeSchema))
+	}
+
+	getAvailableRoomInvitationAccess(): Result<object, Error> {
+		return ok(zodToJsonSchema(RoomInvitationAccessSchema))
 	}
 
 	async downloadAsText(signal: AbortSignal, p: unknown): Promise<Result<string, Error>> {
@@ -144,7 +154,7 @@ export class OthersToolset {
 			createOn: new Date().toISOString(),
 		}
 
-		let sr = await this.s.client.files.createUploadSession(signal, pr.data.folderId, so)
+		let sr = await this.s.client.files.createUploadSession(signal, pr.data.parentId, so)
 		if (sr.err) {
 			return error(new Error("Creating upload session.", {cause: sr.err}))
 		}

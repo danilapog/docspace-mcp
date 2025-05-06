@@ -31,9 +31,10 @@ import type {
 	Response,
 	SetRoomSecurityOptions,
 	UpdateFileOptions,
+	UpdateRoomOptions,
 } from "../client.ts"
 import type {Server} from "../server.ts"
-import {FiltersSchema} from "./internal/schemas.ts"
+import {FiltersSchema, RoomInvitationAccessSchema, RoomTypeSchema} from "./internal/schemas.ts"
 
 export const DeleteFileInputSchema = z.object({
 	fileId: z.number().describe("The ID of the file to delete."),
@@ -45,12 +46,12 @@ export const GetFileInfoInputSchema = z.object({
 
 export const UpdateFileInputSchema = z.object({
 	fileId: z.number().describe("The ID of the file to update."),
-	title: z.string().describe("The new title of the file."),
+	title: z.string().describe("The new title of the file to set."),
 })
 
 export const CreateFolderInputSchema = z.object({
-	parentId: z.number().describe("The ID of the parent folder."),
-	title: z.string().describe("The title of the folder."),
+	parentId: z.number().describe("The ID of the room or folder to create the folder in."),
+	title: z.string().describe("The title of the folder to create."),
 })
 
 export const DeleteFolderInputSchema = z.object({
@@ -59,7 +60,7 @@ export const DeleteFolderInputSchema = z.object({
 
 export const GetFolderInputSchema = z.object({
 	folderId: z.number().describe("The ID of the folder to get."),
-	filters: FiltersSchema.optional().describe("The filters to apply to the folder."),
+	filters: FiltersSchema.optional().describe("The filters to apply to the contents of the folder."),
 })
 
 export const GetFolderInfoInputSchema = z.object({
@@ -72,7 +73,7 @@ export const GetFoldersInputSchema = z.object({
 
 export const RenameFolderInputSchema = z.object({
 	folderId: z.number().describe("The ID of the folder to rename."),
-	title: z.string().describe("The new title of the folder."),
+	title: z.string().describe("The new title of the folder to set."),
 })
 
 export const CopyBatchItemsInputSchema = z.object({
@@ -93,7 +94,7 @@ export const CopyBatchItemsInputSchema = z.object({
 		// union([z.number(), z.string()]).
 		unknown().
 		optional().
-		describe("The ID of the destination folder."),
+		describe("The ID of the destination folder to copy the items to."),
 })
 
 export const MoveBatchItemsInputSchema = z.object({
@@ -114,29 +115,12 @@ export const MoveBatchItemsInputSchema = z.object({
 		// union([z.number(), z.string()]).
 		unknown().
 		optional().
-		describe("The ID of the destination folder."),
+		describe("The ID of the destination folder to move the items to."),
 })
 
 export const CreateRoomInputSchema = z.object({
-	title: z.
-		string().
-		describe("The title of the room to create."),
-	roomType: z.
-		union([
-			z.literal(1).describe("The number representation of the Filling Forms Room type."),
-			z.literal(2).describe("The number representation of the Editing Room type."),
-			z.literal(5).describe("The number representation of the Custom Room type."),
-			z.literal(6).describe("The number representation of the Public Room type."),
-			z.literal(8).describe("The number representation of the Virtual Data Room type."),
-			z.literal("FillingFormsRoom").describe("The string representation of the Filling Forms Room type."),
-			z.literal("EditingRoom").describe("The string representation of the Editing Room type."),
-			z.literal("CustomRoom").describe("The string representation of the Custom Room type."),
-			z.literal("PublicRoom").describe("The string representation of the Public Room type."),
-			z.literal("VirtualDataRoom").describe("The string representation of the Virtual Data Room type."),
-		]).
-		optional().
-		default("PublicRoom").
-		describe("The type of the room to create."),
+	title: z.string().describe("The title of the room to create."),
+	roomType: RoomTypeSchema.optional().default("PublicRoom").describe("The type of the room to create."),
 })
 
 export const GetRoomInfoInputSchema = z.object({
@@ -145,6 +129,7 @@ export const GetRoomInfoInputSchema = z.object({
 
 export const UpdateRoomInputSchema = z.object({
 	roomId: z.number().describe("The ID of the room to update."),
+	title: z.string().optional().describe("The new title of the room to set."),
 })
 
 export const ArchiveRoomInputSchema = z.object({
@@ -152,21 +137,51 @@ export const ArchiveRoomInputSchema = z.object({
 })
 
 export const SetRoomSecurityInputSchema = z.object({
-	roomId: z.number().describe("The ID of the room to set security for."),
-	invitations: z.array(
-		z.union([
-			z.object({
-				id: z.string().describe("The ID of the user to invite."),
-			}),
-			z.object({
-				email: z.string().describe("The email of the user to invite."),
-			}),
-		]),
-	),
+	roomId: z.
+		number().
+		describe("The ID of the room to invite or remove users from."),
+	invitations: z.
+		array(
+			z.
+				object({
+					id: z.
+						string().
+						optional().
+						describe("The ID of the user to invite or remove. Mutually exclusive with User Email."),
+					email: z.
+						string().
+						optional().
+						describe("The email of the user to invite or remove. Mutually exclusive with User ID."),
+					access: RoomInvitationAccessSchema.
+						optional().
+						describe("The access level to grant to the user."),
+				}).
+				describe("The invitation or removal of a user. Must contain either User ID or User Email.").
+				refine(
+					(o) => o.id !== undefined || o.email !== undefined,
+					{
+						message: "Either User ID or User Email must be provided.",
+						path: ["id", "email"],
+					},
+				),
+		).
+		describe("The invitations or removals to perform."),
+	notify: z.
+		boolean().
+		optional().
+		describe("Whether to notify the user."),
+	message: z.
+		string().
+		optional().
+		describe("The message to use for the invitation."),
+	culture: z.
+		string().
+		optional().
+		describe("The languages to use for the invitation."),
 })
 
 export const GetRoomSecurityInfoInputSchema = z.object({
-	roomId: z.number().describe("The ID of the room to get security info for."),
+	roomId: z.number().describe("The ID of the room to get a list of users with their access level for."),
 })
 
 export class FilesToolset {
@@ -527,7 +542,11 @@ export class FilesToolset {
 			return error(new Error("Parsing input.", {cause: pr.error}))
 		}
 
-		let ur = await this.s.client.files.updateRoom(signal, pr.data.roomId, {})
+		let uo: UpdateRoomOptions = {
+			title: pr.data.title,
+		}
+
+		let ur = await this.s.client.files.updateRoom(signal, pr.data.roomId, uo)
 		if (ur.err) {
 			return error(new Error("Updating room.", {cause: ur.err}))
 		}
@@ -572,6 +591,8 @@ export class FilesToolset {
 
 		let so: SetRoomSecurityOptions = {
 			invitations: pr.data.invitations,
+			notify: pr.data.notify,
+			message: pr.data.message,
 		}
 
 		let sr = await this.s.client.files.setRoomSecurity(signal, pr.data.roomId, so)

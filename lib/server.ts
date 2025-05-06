@@ -24,7 +24,8 @@ import * as z from "zod"
 import {format} from "../util/format.ts"
 import type {Result} from "../util/result.ts"
 import {error, ok, safeAsync, safeSync} from "../util/result.ts"
-import type {Client, Response} from "./client.ts"
+import type {Client} from "./client.ts"
+import {Response} from "./client.ts"
 import type {Resolver} from "./resolver.ts"
 import {
 	ArchiveRoomInputSchema,
@@ -50,6 +51,8 @@ import type {CallToolRequest} from "./server/internal/protocol.ts"
 import {toInputSchema} from "./server/internal/protocol.ts"
 import {DownloadAsTextInputSchema, OthersToolset, UploadFileInputSchema} from "./server/others.ts"
 import {PeopleToolset} from "./server/people.ts"
+import {PortalToolset} from "./server/portal.ts"
+import {SettingsToolset} from "./server/settings.ts"
 import type {Uploader} from "./uploader.ts"
 
 export interface Config {
@@ -68,6 +71,8 @@ export class Server {
 	files: FilesToolset
 	others: OthersToolset
 	people: PeopleToolset
+	portal: PortalToolset
+	settings: SettingsToolset
 
 	constructor(config: Config) {
 		this.server = config.server
@@ -78,6 +83,8 @@ export class Server {
 		this.files = new FilesToolset(this)
 		this.others = new OthersToolset(this)
 		this.people = new PeopleToolset(this)
+		this.portal = new PortalToolset(this)
+		this.settings = new SettingsToolset(this)
 
 		this.server.setRequestHandler(ListToolsRequestSchema, this.listTools.bind(this))
 		this.server.setRequestHandler(CallToolRequestSchema, this.callTools.bind(this))
@@ -173,12 +180,12 @@ export class Server {
 				},
 				{
 					name: "files_set_room_security",
-					description: "Set room access rights.",
+					description: "Invite or remove users from a room.",
 					inputSchema: toInputSchema(SetRoomSecurityInputSchema),
 				},
 				{
 					name: "files_get_room_security_info",
-					description: "Get room access rights.",
+					description: "Get a list of users with their access levels to a room.",
 					inputSchema: toInputSchema(GetRoomSecurityInfoInputSchema),
 				},
 				{
@@ -187,6 +194,16 @@ export class Server {
 					inputSchema: toInputSchema(z.object({})),
 				},
 
+				{
+					name: "others_get_available_room_types",
+					description: "Get a list of available room types.",
+					inputSchema: toInputSchema(z.object({})),
+				},
+				{
+					name: "others_get_available_room_invitation_access",
+					description: "Get a list of available room invitation access levels.",
+					inputSchema: toInputSchema(z.object({})),
+				},
 				{
 					name: "others_download_as_text",
 					description: "Download a file as text.",
@@ -203,12 +220,34 @@ export class Server {
 					description: "Get all people.",
 					inputSchema: toInputSchema(z.object({})),
 				},
+
+				{
+					name: "portal_get_tariff",
+					description: "Get the current tariff.",
+					inputSchema: toInputSchema(z.object({})),
+				},
+				{
+					name: "portal_get_quota",
+					description: "Get the current quota.",
+					inputSchema: toInputSchema(z.object({})),
+				},
+
+				{
+					name: "settings_get_supported_cultures",
+					description: "Get a list of the supported cultures, languages.",
+					inputSchema: toInputSchema(z.object({})),
+				},
+				{
+					name: "settings_get_time_zones",
+					description: "Get a list of the available time zones.",
+					inputSchema: toInputSchema(z.object({})),
+				},
 			],
 		}
 	}
 
 	async callTools(req: CallToolRequest, extra: RequestHandlerExtra): Promise<CallToolResult> {
-		let cr: Result<string | Response, Error>
+		let cr: Result<Response | string | object, Error>
 
 		try {
 			switch (req.params.name) {
@@ -273,6 +312,12 @@ export class Server {
 				cr = await this.files.getRoomsFolder(extra.signal)
 				break
 
+			case "others_get_available_room_types":
+				cr = this.others.getAvailableRoomTypes()
+				break
+			case "others_get_available_room_invitation_access":
+				cr = this.others.getAvailableRoomInvitationAccess()
+				break
 			case "others_download_as_text":
 				cr = await this.others.downloadAsText(extra.signal, req.params.arguments)
 				break
@@ -282,6 +327,20 @@ export class Server {
 
 			case "people_get_all":
 				cr = await this.people.getAll(extra.signal)
+				break
+
+			case "portal_get_tariff":
+				cr = await this.portal.getTariff(extra.signal)
+				break
+			case "portal_get_quota":
+				cr = await this.portal.getQuota(extra.signal)
+				break
+
+			case "settings_get_supported_cultures":
+				cr = await this.settings.getSupportedCultures(extra.signal)
+				break
+			case "settings_get_time_zones":
+				cr = await this.settings.getTimeZones(extra.signal)
 				break
 
 			default:
@@ -301,39 +360,52 @@ export class Server {
 				return error(cr.err)
 			}
 
+			if (cr.v instanceof Response) {
+				let h = cr.v.response.headers.get("Content-Type")
+				if (h === null) {
+					return error(new Error("Content-Type header is missing"))
+				}
+
+				if (h.startsWith("application/json")) {
+					let p = await safeAsync(cr.v.response.json.bind(cr.v.response))
+					if (p.err) {
+						return error(new Error("Parsing json response", {cause: p.err}))
+					}
+
+					let s = safeSync(JSON.stringify, p.v, undefined, 2)
+					if (s.err) {
+						return error(new Error("Stringifying json value", {cause: s.err}))
+					}
+
+					return ok(s.v)
+				}
+
+				if (h.startsWith("text/")) {
+					let t = await safeAsync(cr.v.response.text.bind(cr.v.response))
+					if (t.err) {
+						return error(new Error("Parsing text response", {cause: t.err}))
+					}
+
+					return ok(t.v)
+				}
+
+				return error(new Error(`Content-Type ${h} is not supported`))
+			}
+
 			if (typeof cr.v === "string") {
 				return ok(cr.v)
 			}
 
-			let h = cr.v.response.headers.get("Content-Type")
-			if (h === null) {
-				return error(new Error("Content-Type header is missing"))
-			}
-
-			if (h.startsWith("application/json")) {
-				let p = await safeAsync(cr.v.response.json.bind(cr.v.response))
-				if (p.err) {
-					return error(new Error("Parsing json response", {cause: p.err}))
-				}
-
-				let s = safeSync(JSON.stringify, p.v, undefined, 2)
+			if (typeof cr.v === "object") {
+				let s = safeSync(JSON.stringify, cr.v, undefined, 2)
 				if (s.err) {
-					return error(new Error("Stringifying json value", {cause: s.err}))
+					return error(new Error("Stringifying object value", {cause: s.err}))
 				}
 
 				return ok(s.v)
 			}
 
-			if (h.startsWith("text/")) {
-				let t = await safeAsync(cr.v.response.text.bind(cr.v.response))
-				if (t.err) {
-					return error(new Error("Parsing text response", {cause: t.err}))
-				}
-
-				return ok(t.v)
-			}
-
-			return error(new Error(`Content-Type ${h} is not supported`))
+			return error(new Error(`Unknown result type ${typeof cr.v}`))
 		})()
 
 		if (pr.err) {
