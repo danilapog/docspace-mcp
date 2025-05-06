@@ -53,4 +53,26 @@ export class SettingsService {
 
 		return ok(f.v)
 	}
+
+	/**
+	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/web/ASC.Web.Api/Api/Settings/SettingsController.cs/#L492 | DocSpace Reference}
+	 */
+	async getTimeZones(s: AbortSignal): Promise<Result<[unknown, Response], Error>> {
+		let u = this.c.createUrl("api/2.0/settings/timezones")
+		if (u.err) {
+			return error(new Error("Creating URL.", {cause: u.err}))
+		}
+
+		let req = this.c.createRequest(s, "GET", u.v)
+		if (req.err) {
+			return error(new Error("Creating request.", {cause: req.err}))
+		}
+
+		let f = await this.c.fetch(req.v)
+		if (f.err) {
+			return error(new Error("Fetching request.", {cause: f.err}))
+		}
+
+		return ok(f.v)
+	}
 }
