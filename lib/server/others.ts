@@ -134,9 +134,13 @@ export class OthersToolset {
 			return error(new Error("Parsing input.", {cause: pr.error}))
 		}
 
+		let te = new TextEncoder()
+
+		let buf = te.encode(pr.data.content)
+
 		let so: CreateUploadSessionOptions = {
 			fileName: pr.data.filename,
-			fileSize: pr.data.content.length,
+			fileSize: buf.length,
 			createOn: new Date().toISOString(),
 		}
 
@@ -151,7 +155,7 @@ export class OthersToolset {
 			return error(new Error("Upload session ID is not defined."))
 		}
 
-		let ur = await this.s.uploader.upload(signal, sd.id, pr.data.content)
+		let ur = await this.s.uploader.upload(signal, sd.id, buf)
 		if (ur.err) {
 			return error(new Error("Uploading file.", {cause: ur.err}))
 		}
