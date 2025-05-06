@@ -50,6 +50,7 @@ import type {CallToolRequest} from "./server/internal/protocol.ts"
 import {toInputSchema} from "./server/internal/protocol.ts"
 import {DownloadAsTextInputSchema, OthersToolset, UploadFileInputSchema} from "./server/others.ts"
 import {PeopleToolset} from "./server/people.ts"
+import {PortalToolset} from "./server/portal.ts"
 import {SettingsToolset} from "./server/settings.ts"
 import type {Uploader} from "./uploader.ts"
 
@@ -69,6 +70,7 @@ export class Server {
 	files: FilesToolset
 	others: OthersToolset
 	people: PeopleToolset
+	portal: PortalToolset
 	settings: SettingsToolset
 
 	constructor(config: Config) {
@@ -80,6 +82,7 @@ export class Server {
 		this.files = new FilesToolset(this)
 		this.others = new OthersToolset(this)
 		this.people = new PeopleToolset(this)
+		this.portal = new PortalToolset(this)
 		this.settings = new SettingsToolset(this)
 
 		this.server.setRequestHandler(ListToolsRequestSchema, this.listTools.bind(this))
@@ -208,6 +211,12 @@ export class Server {
 				},
 
 				{
+					name: "portal_get_tariff",
+					description: "Get tariff.",
+					inputSchema: toInputSchema(z.object({})),
+				},
+
+				{
 					name: "settings_get_supported_cultures",
 					description: "Get supported cultures.",
 					inputSchema: toInputSchema(z.object({})),
@@ -296,6 +305,10 @@ export class Server {
 
 			case "people_get_all":
 				cr = await this.people.getAll(extra.signal)
+				break
+
+			case "portal_get_tariff":
+				cr = await this.portal.getTariff(extra.signal)
 				break
 
 			case "settings_get_supported_cultures":
