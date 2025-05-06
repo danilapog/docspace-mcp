@@ -200,6 +200,11 @@ export class Server {
 					inputSchema: toInputSchema(z.object({})),
 				},
 				{
+					name: "others_get_available_room_invitation_access",
+					description: "Get a list of available room invitation access levels.",
+					inputSchema: toInputSchema(z.object({})),
+				},
+				{
 					name: "others_download_as_text",
 					description: "Download a file as text.",
 					inputSchema: toInputSchema(DownloadAsTextInputSchema),
@@ -309,6 +314,9 @@ export class Server {
 
 			case "others_get_available_room_types":
 				cr = this.others.getAvailableRoomTypes()
+				break
+			case "others_get_available_room_invitation_access":
+				cr = this.others.getAvailableRoomInvitationAccess()
 				break
 			case "others_download_as_text":
 				cr = await this.others.downloadAsText(extra.signal, req.params.arguments)

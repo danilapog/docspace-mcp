@@ -69,3 +69,16 @@ export const RoomTypeSchema = z.union([
 	z.literal(6).describe("The number representation of the PublicRoom type."),
 	z.literal(8).describe("The number representation of the VirtualData Room type."),
 ])
+
+export const RoomInvitationAccessSchema = z.union([
+	z.literal("None").describe("No access to the room."),
+	z.literal("Read").describe("File viewing."),
+	z.literal("RoomManager").describe("(Paid) Room managers can manage the assigned rooms, invite new users and assign roles below their level."),
+	z.literal("Editing").describe("Operations with existing files: viewing, editing, form filling, reviewing, commenting."),
+	z.literal("ContentCreator").describe("Content creators can create and edit files in the room, but can't manage users, or access settings."),
+	z.literal(0).describe("The number representation of the None access level."),
+	z.literal(2).describe("The number representation of the Read access level."),
+	z.literal(9).describe("The number representation of the RoomManager access level."),
+	z.literal(10).describe("The number representation of the Editing access level."),
+	z.literal(11).describe("The number representation of the ContentCreator access level."),
+])

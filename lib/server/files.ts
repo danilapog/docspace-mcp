@@ -34,7 +34,7 @@ import type {
 	UpdateRoomOptions,
 } from "../client.ts"
 import type {Server} from "../server.ts"
-import {FiltersSchema, RoomTypeSchema} from "./internal/schemas.ts"
+import {FiltersSchema, RoomInvitationAccessSchema, RoomTypeSchema} from "./internal/schemas.ts"
 
 export const DeleteFileInputSchema = z.object({
 	fileId: z.number().describe("The ID of the file to delete."),
@@ -152,19 +152,7 @@ export const SetRoomSecurityInputSchema = z.object({
 						string().
 						optional().
 						describe("The email of the user to invite or remove. Mutually exclusive with User ID."),
-					access: z.
-						union([
-							z.literal("None").describe("No access to the room."),
-							z.literal("Read").describe("File viewing."),
-							z.literal("RoomManager").describe("(Paid) Room managers can manage the assigned rooms, invite new users and assign roles below their level."),
-							z.literal("Editing").describe("Operations with existing files: viewing, editing, form filling, reviewing, commenting."),
-							z.literal("ContentCreator").describe("Content creators can create and edit files in the room, but can't manage users, or access settings."),
-							z.literal(0).describe("The number representation of the None access level."),
-							z.literal(2).describe("The number representation of the Read access level."),
-							z.literal(9).describe("The number representation of the RoomManager access level."),
-							z.literal(10).describe("The number representation of the Editing access level."),
-							z.literal(11).describe("The number representation of the ContentCreator access level."),
-						]).
+					access: RoomInvitationAccessSchema.
 						optional().
 						describe("The access level to grant to the user."),
 				}).

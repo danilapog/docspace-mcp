@@ -22,7 +22,7 @@ import type {Result} from "../../util/result.ts"
 import {error, ok, safeAsync, safeSync} from "../../util/result.ts"
 import type {BulkDownloadOptions, CreateUploadSessionOptions, Response} from "../client.ts"
 import type {Server} from "../server.ts"
-import {RoomTypeSchema} from "./internal/schemas.ts"
+import {RoomInvitationAccessSchema, RoomTypeSchema} from "./internal/schemas.ts"
 
 export const DownloadAsTextInputSchema = z.object({
 	fileId: z.number().describe("The ID of the file to download as text."),
@@ -43,6 +43,10 @@ export class OthersToolset {
 
 	getAvailableRoomTypes(): Result<object, Error> {
 		return ok(zodToJsonSchema(RoomTypeSchema))
+	}
+
+	getAvailableRoomInvitationAccess(): Result<object, Error> {
+		return ok(zodToJsonSchema(RoomInvitationAccessSchema))
 	}
 
 	async downloadAsText(signal: AbortSignal, p: unknown): Promise<Result<string, Error>> {
