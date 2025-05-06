@@ -31,6 +31,7 @@ import type {
 	Response,
 	SetRoomSecurityOptions,
 	UpdateFileOptions,
+	UpdateRoomOptions,
 } from "../client.ts"
 import type {Server} from "../server.ts"
 import {FiltersSchema} from "./internal/schemas.ts"
@@ -145,6 +146,7 @@ export const GetRoomInfoInputSchema = z.object({
 
 export const UpdateRoomInputSchema = z.object({
 	roomId: z.number().describe("The ID of the room to update."),
+	title: z.string().optional().describe("The new title of the room to set."),
 })
 
 export const ArchiveRoomInputSchema = z.object({
@@ -569,7 +571,11 @@ export class FilesToolset {
 			return error(new Error("Parsing input.", {cause: pr.error}))
 		}
 
-		let ur = await this.s.client.files.updateRoom(signal, pr.data.roomId, {})
+		let uo: UpdateRoomOptions = {
+			title: pr.data.title,
+		}
+
+		let ur = await this.s.client.files.updateRoom(signal, pr.data.roomId, uo)
 		if (ur.err) {
 			return error(new Error("Updating room.", {cause: ur.err}))
 		}
