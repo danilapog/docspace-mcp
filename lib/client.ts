@@ -26,6 +26,7 @@ import {checkBasicAuth, injectAuthKey, injectAuthToken} from "./client/internal/
 import type {Response} from "./client/internal/response.ts"
 import {checkResponse, parseResponse} from "./client/internal/response.ts"
 import {PeopleService} from "./client/people.ts"
+import {PortalService} from "./client/portal.ts"
 import {SettingsService} from "./client/settings.ts"
 
 export {ErrorResponse, Response} from "./client/internal/response.ts"
@@ -33,6 +34,7 @@ export {ErrorResponse, Response} from "./client/internal/response.ts"
 export * from "./client/auth.ts"
 export * from "./client/files.ts"
 export * from "./client/people.ts"
+export * from "./client/portal.ts"
 export * from "./client/settings.ts"
 
 export interface Config {
@@ -49,6 +51,7 @@ export class Client {
 	auth: AuthService
 	files: FilesService
 	people: PeopleService
+	portal: PortalService
 	settings: SettingsService
 
 	constructor(config: Config) {
@@ -59,6 +62,7 @@ export class Client {
 		this.auth = new AuthService(this)
 		this.files = new FilesService(this)
 		this.people = new PeopleService(this)
+		this.portal = new PortalService(this)
 		this.settings = new SettingsService(this)
 	}
 
