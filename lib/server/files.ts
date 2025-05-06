@@ -34,7 +34,7 @@ import type {
 	UpdateRoomOptions,
 } from "../client.ts"
 import type {Server} from "../server.ts"
-import {FiltersSchema} from "./internal/schemas.ts"
+import {FiltersSchema, RoomTypeSchema} from "./internal/schemas.ts"
 
 export const DeleteFileInputSchema = z.object({
 	fileId: z.number().describe("The ID of the file to delete."),
@@ -119,25 +119,8 @@ export const MoveBatchItemsInputSchema = z.object({
 })
 
 export const CreateRoomInputSchema = z.object({
-	title: z.
-		string().
-		describe("The title of the room to create."),
-	roomType: z.
-		union([
-			z.literal("FillingFormsRoom").describe("Upload PDF forms into the room. Invite members and guests to fill out a PDF form. Review completed forms and analyze data automatically collected in a spreadsheet."),
-			z.literal("EditingRoom").describe("Collaborate on one or multiple documents with your team."),
-			z.literal("CustomRoom").describe("Apply your own settings to use this room for any custom purpose."),
-			z.literal("PublicRoom").describe("Share documents for viewing, editing, commenting, or reviewing without registration. You can also embed this room into any web interface."),
-			z.literal("VirtualDataRoom").describe("Use VDR for advanced file security and transparency. Set watermarks, automatically index and track all content, restrict downloading and copying."),
-			z.literal(1).describe("The number representation of the FillingFormsRoom type."),
-			z.literal(2).describe("The number representation of the EditingRoom type."),
-			z.literal(5).describe("The number representation of the CustomRoom type."),
-			z.literal(6).describe("The number representation of the PublicRoom type."),
-			z.literal(8).describe("The number representation of the VirtualData Room type."),
-		]).
-		optional().
-		default("PublicRoom").
-		describe("The type of the room to create."),
+	title: z.string().describe("The title of the room to create."),
+	roomType: RoomTypeSchema.optional().default("PublicRoom").describe("The type of the room to create."),
 })
 
 export const GetRoomInfoInputSchema = z.object({

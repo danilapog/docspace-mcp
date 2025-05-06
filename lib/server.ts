@@ -24,7 +24,8 @@ import * as z from "zod"
 import {format} from "../util/format.ts"
 import type {Result} from "../util/result.ts"
 import {error, ok, safeAsync, safeSync} from "../util/result.ts"
-import type {Client, Response} from "./client.ts"
+import type {Client} from "./client.ts"
+import {Response} from "./client.ts"
 import type {Resolver} from "./resolver.ts"
 import {
 	ArchiveRoomInputSchema,
@@ -194,6 +195,11 @@ export class Server {
 				},
 
 				{
+					name: "others_get_available_room_types",
+					description: "Get a list of available room types.",
+					inputSchema: toInputSchema(z.object({})),
+				},
+				{
 					name: "others_download_as_text",
 					description: "Download a file as text.",
 					inputSchema: toInputSchema(DownloadAsTextInputSchema),
@@ -236,7 +242,7 @@ export class Server {
 	}
 
 	async callTools(req: CallToolRequest, extra: RequestHandlerExtra): Promise<CallToolResult> {
-		let cr: Result<string | Response, Error>
+		let cr: Result<Response | string | object, Error>
 
 		try {
 			switch (req.params.name) {
@@ -301,6 +307,9 @@ export class Server {
 				cr = await this.files.getRoomsFolder(extra.signal)
 				break
 
+			case "others_get_available_room_types":
+				cr = this.others.getAvailableRoomTypes()
+				break
 			case "others_download_as_text":
 				cr = await this.others.downloadAsText(extra.signal, req.params.arguments)
 				break
@@ -343,39 +352,52 @@ export class Server {
 				return error(cr.err)
 			}
 
+			if (cr.v instanceof Response) {
+				let h = cr.v.response.headers.get("Content-Type")
+				if (h === null) {
+					return error(new Error("Content-Type header is missing"))
+				}
+
+				if (h.startsWith("application/json")) {
+					let p = await safeAsync(cr.v.response.json.bind(cr.v.response))
+					if (p.err) {
+						return error(new Error("Parsing json response", {cause: p.err}))
+					}
+
+					let s = safeSync(JSON.stringify, p.v, undefined, 2)
+					if (s.err) {
+						return error(new Error("Stringifying json value", {cause: s.err}))
+					}
+
+					return ok(s.v)
+				}
+
+				if (h.startsWith("text/")) {
+					let t = await safeAsync(cr.v.response.text.bind(cr.v.response))
+					if (t.err) {
+						return error(new Error("Parsing text response", {cause: t.err}))
+					}
+
+					return ok(t.v)
+				}
+
+				return error(new Error(`Content-Type ${h} is not supported`))
+			}
+
 			if (typeof cr.v === "string") {
 				return ok(cr.v)
 			}
 
-			let h = cr.v.response.headers.get("Content-Type")
-			if (h === null) {
-				return error(new Error("Content-Type header is missing"))
-			}
-
-			if (h.startsWith("application/json")) {
-				let p = await safeAsync(cr.v.response.json.bind(cr.v.response))
-				if (p.err) {
-					return error(new Error("Parsing json response", {cause: p.err}))
-				}
-
-				let s = safeSync(JSON.stringify, p.v, undefined, 2)
+			if (typeof cr.v === "object") {
+				let s = safeSync(JSON.stringify, cr.v, undefined, 2)
 				if (s.err) {
-					return error(new Error("Stringifying json value", {cause: s.err}))
+					return error(new Error("Stringifying object value", {cause: s.err}))
 				}
 
 				return ok(s.v)
 			}
 
-			if (h.startsWith("text/")) {
-				let t = await safeAsync(cr.v.response.text.bind(cr.v.response))
-				if (t.err) {
-					return error(new Error("Parsing text response", {cause: t.err}))
-				}
-
-				return ok(t.v)
-			}
-
-			return error(new Error(`Content-Type ${h} is not supported`))
+			return error(new Error(`Unknown result type ${typeof cr.v}`))
 		})()
 
 		if (pr.err) {

@@ -56,3 +56,16 @@ export const FiltersSchema = z.object({
 	filterValue: z.string().optional().describe("The value to filter by."),
 	updatedSince: z.string().optional().describe("The date to filter items updated or created since."),
 })
+
+export const RoomTypeSchema = z.union([
+	z.literal("FillingFormsRoom").describe("Upload PDF forms into the room. Invite members and guests to fill out a PDF form. Review completed forms and analyze data automatically collected in a spreadsheet."),
+	z.literal("EditingRoom").describe("Collaborate on one or multiple documents with your team."),
+	z.literal("CustomRoom").describe("Apply your own settings to use this room for any custom purpose."),
+	z.literal("PublicRoom").describe("Share documents for viewing, editing, commenting, or reviewing without registration. You can also embed this room into any web interface."),
+	z.literal("VirtualDataRoom").describe("Use VDR for advanced file security and transparency. Set watermarks, automatically index and track all content, restrict downloading and copying."),
+	z.literal(1).describe("The number representation of the FillingFormsRoom type."),
+	z.literal(2).describe("The number representation of the EditingRoom type."),
+	z.literal(5).describe("The number representation of the CustomRoom type."),
+	z.literal(6).describe("The number representation of the PublicRoom type."),
+	z.literal(8).describe("The number representation of the VirtualData Room type."),
+])
