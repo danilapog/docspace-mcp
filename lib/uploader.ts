@@ -16,11 +16,11 @@
  * @license
  */
 
-import type {Result} from "../ext/result.ts"
-import {error, ok} from "../ext/result.ts"
+import type {Result} from "../util/result.ts"
+import {error, ok} from "../util/result.ts"
 import type {Response} from "./client.ts"
 
-const maxChunkSize = 1024 * 1024 * 10 // 10mb
+const maxChunkSize = 10 * 1024 * 1024 // 10mb
 
 export interface Client {
 	files: FilesService
@@ -37,18 +37,18 @@ export class Uploader {
 		this.client = client
 	}
 
-	async upload(signal: AbortSignal, id: string, content: string): Promise<Result<[unknown, Response], Error>> {
+	async upload(signal: AbortSignal, id: string, buf: Uint8Array): Promise<Result<[unknown, Response], Error>> {
 		let cd: unknown
 		let res: Response | undefined
 
 		let done = false
 
-		let chunks = Math.ceil(content.length / maxChunkSize)
+		let chunks = Math.ceil(buf.length / maxChunkSize)
 
 		for (let i = 0; i < chunks; i += 1) {
 			let s = i * maxChunkSize
 			let e = (i + 1) * maxChunkSize
-			let c = content.slice(s, e)
+			let c = buf.slice(s, e)
 			let b = new Blob([c], {type: "text/plain"})
 
 			let cr = await this.client.files.uploadChunk(signal, id, b)

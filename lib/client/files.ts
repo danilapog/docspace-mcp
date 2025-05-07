@@ -17,10 +17,11 @@
  */
 
 import * as z from "zod"
-import type {Result} from "../../../ext/result.ts"
-import {error, ok, safeNew} from "../../../ext/result.ts"
-import type {Response} from "../response.ts"
-import type {Filters} from "../schemas.ts"
+import type {Result} from "../../util/result.ts"
+import {error, ok, safeNew} from "../../util/result.ts"
+import type {Client} from "../client.ts"
+import type {Response} from "./internal/response.ts"
+import type {Filters} from "./internal/schemas.ts"
 import {
 	ArchiveRoomRequestSchema,
 	BatchRequestDtoSchema,
@@ -37,8 +38,7 @@ import {
 	UpdateFileSchema,
 	UpdateRoomRequestSchema,
 	UploadSessionObjectDataSchema,
-} from "../schemas.ts"
-import {Service} from "../service.ts"
+} from "./internal/schemas.ts"
 
 // FilesController: Options
 export type DeleteFileOptions = z.input<typeof DeleteSchema>
@@ -86,7 +86,13 @@ export type ArchiveRoomResponse = z.output<typeof FileOperationDtoSchema>
 /**
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/tree/v3.0.4-server/products/ASC.Files/ | DocSpace Reference}
  */
-export class FilesService extends Service {
+export class FilesService {
+	private c: Client
+
+	constructor(s: Client) {
+		this.c = s
+	}
+
 	//
 	// FilesController
 	//

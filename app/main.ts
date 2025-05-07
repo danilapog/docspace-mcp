@@ -20,15 +20,15 @@
 
 import {Server as ProtocolServer} from "@modelcontextprotocol/sdk/server/index.js"
 import {StdioServerTransport} from "@modelcontextprotocol/sdk/server/stdio.js"
+import type {Config as ClientConfig} from "../lib/client.ts"
 import {Client} from "../lib/client.ts"
 import {Resolver} from "../lib/resolver.ts"
+import type {Config as ServerConfig} from "../lib/server.ts"
+import {Server} from "../lib/server.ts"
 import {Uploader} from "../lib/uploader.ts"
 import pack from "../package.json" with {type: "json"}
 import type {Config as AppConfig} from "./config.ts"
 import {ConfigSchema} from "./config.ts"
-import type {Config as ServerConfig} from "./server/base.ts"
-import {format} from "./format.ts"
-import {Server} from "./server.ts"
 
 async function main(): Promise<void> {
 	let ac = ConfigSchema.safeParse(process.env)
@@ -59,7 +59,6 @@ async function main(): Promise<void> {
 		client: lc,
 		resolver: lr,
 		uploader: lu,
-		format,
 	}
 
 	let _ = new Server(sc)
@@ -70,16 +69,17 @@ async function main(): Promise<void> {
 }
 
 function createClient(config: AppConfig): Client {
-	let f = fetch
+	let f: ClientConfig = {
+		baseUrl: config.baseUrl,
+		userAgent: config.userAgent,
+		fetch,
+	}
 
 	if (config.origin) {
-		f = withOrigin(f, config.origin)
+		f.fetch = withOrigin(f.fetch, config.origin)
 	}
 
 	let c = new Client(f)
-
-	c.baseUrl = config.baseUrl
-	c.userAgent = config.userAgent
 
 	if (config.apiKey) {
 		c = c.withApiKey(config.apiKey)

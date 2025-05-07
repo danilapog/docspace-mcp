@@ -16,15 +16,21 @@
  * @license
  */
 
-import type {Result} from "../../../ext/result.ts"
-import {error, ok} from "../../../ext/result.ts"
-import type {Response} from "../response.ts"
-import {Service} from "../service.ts"
+import type {Result} from "../../util/result.ts"
+import {error, ok} from "../../util/result.ts"
+import type {Client} from "../client.ts"
+import type {Response} from "./internal/response.ts"
 
 /**
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/tree/v3.0.4-server/products/ASC.People/ | DocSpace Reference}
  */
-export class PeopleService extends Service {
+export class PeopleService {
+	private c: Client
+
+	constructor(s: Client) {
+		this.c = s
+	}
+
 	/**
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.People/Server/Api/UserController.cs/#L681 | DocSpace Reference}
 	 */

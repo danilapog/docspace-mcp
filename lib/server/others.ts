@@ -17,22 +17,38 @@
  */
 
 import * as z from "zod"
-import type {Result} from "../../../ext/result.ts"
-import {error, ok, safeAsync, safeSync} from "../../../ext/result.ts"
-import type {BulkDownloadOptions, CreateUploadSessionOptions, Response} from "../../../lib/client.ts"
-import {Toolset} from "../toolset.ts"
+import {zodToJsonSchema} from "zod-to-json-schema"
+import type {Result} from "../../util/result.ts"
+import {error, ok, safeAsync, safeSync} from "../../util/result.ts"
+import type {BulkDownloadOptions, CreateUploadSessionOptions, Response} from "../client.ts"
+import type {Server} from "../server.ts"
+import {RoomInvitationAccessSchema, RoomTypeSchema} from "./internal/schemas.ts"
 
 export const DownloadAsTextInputSchema = z.object({
 	fileId: z.number().describe("The ID of the file to download as text."),
 })
 
 export const UploadFileInputSchema = z.object({
-	folderId: z.number().describe("The ID of the folder to upload the file to."),
-	filename: z.string().describe("The name of the file to upload."),
+	parentId: z.number().describe("The ID of the room or folder to upload the file to."),
+	filename: z.string().describe("The file name with an extension to upload."),
 	content: z.string().describe("The content of the file to upload."),
 })
 
-export class OthersToolset extends Toolset {
+export class OthersToolset {
+	private s: Server
+
+	constructor(s: Server) {
+		this.s = s
+	}
+
+	getAvailableRoomTypes(): Result<object, Error> {
+		return ok(zodToJsonSchema(RoomTypeSchema))
+	}
+
+	getAvailableRoomInvitationAccess(): Result<object, Error> {
+		return ok(zodToJsonSchema(RoomInvitationAccessSchema))
+	}
+
 	async downloadAsText(signal: AbortSignal, p: unknown): Promise<Result<string, Error>> {
 		let pr = DownloadAsTextInputSchema.safeParse(p)
 		if (!pr.success) {
@@ -128,13 +144,17 @@ export class OthersToolset extends Toolset {
 			return error(new Error("Parsing input.", {cause: pr.error}))
 		}
 
+		let te = new TextEncoder()
+
+		let buf = te.encode(pr.data.content)
+
 		let so: CreateUploadSessionOptions = {
 			fileName: pr.data.filename,
-			fileSize: pr.data.content.length,
+			fileSize: buf.length,
 			createOn: new Date().toISOString(),
 		}
 
-		let sr = await this.s.client.files.createUploadSession(signal, pr.data.folderId, so)
+		let sr = await this.s.client.files.createUploadSession(signal, pr.data.parentId, so)
 		if (sr.err) {
 			return error(new Error("Creating upload session.", {cause: sr.err}))
 		}
@@ -145,7 +165,7 @@ export class OthersToolset extends Toolset {
 			return error(new Error("Upload session ID is not defined."))
 		}
 
-		let ur = await this.s.uploader.upload(signal, sd.id, pr.data.content)
+		let ur = await this.s.uploader.upload(signal, sd.id, buf)
 		if (ur.err) {
 			return error(new Error("Uploading file.", {cause: ur.err}))
 		}

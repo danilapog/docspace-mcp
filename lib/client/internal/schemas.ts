@@ -248,10 +248,73 @@ export const DeleteFolderSchema = z.object({
 })
 
 /**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Core/Core/Security/FileShare.cs/#L31 | DocSpace Reference}
+ */
+export const FileShareSchema = z.
+	union([
+		z.literal(0),
+		z.literal(1),
+		z.literal(2),
+		z.literal(3),
+		z.literal(4),
+		z.literal(5),
+		z.literal(6),
+		z.literal(7),
+		z.literal(8),
+		z.literal(9),
+		z.literal(10),
+		z.literal(11),
+		z.literal("None"),
+		z.literal("ReadWrite"),
+		z.literal("Read"),
+		z.literal("Restrict"),
+		z.literal("Varies"),
+		z.literal("Review"),
+		z.literal("Comment"),
+		z.literal("FillForms"),
+		z.literal("CustomFilter"),
+		z.literal("RoomManager"),
+		z.literal("Editing"),
+		z.literal("ContentCreator"),
+	]).
+	transform((v) => {
+		// DocSpace has a bug that does not allow the use string literals.
+		switch (v) {
+		case "None":
+			return 0
+		case "ReadWrite":
+			return 1
+		case "Read":
+			return 2
+		case "Restrict":
+			return 3
+		case "Varies":
+			return 4
+		case "Review":
+			return 5
+		case "Comment":
+			return 6
+		case "FillForms":
+			return 7
+		case "CustomFilter":
+			return 8
+		case "RoomManager":
+			return 9
+		case "Editing":
+			return 10
+		case "ContentCreator":
+			return 11
+		default:
+			return v
+		}
+	})
+
+/**
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Core/ApiModels/RequestDto/RoomInvitation.cs/#L29 | DocSpace Reference}
  */
 export const RoomInvitationSchema = EmailInvitationDtoSchema.extend({
 	id: z.string().optional(),
+	access: FileShareSchema.optional(),
 })
 
 /**
@@ -259,6 +322,9 @@ export const RoomInvitationSchema = EmailInvitationDtoSchema.extend({
  */
 export const RoomInvitationRequestSchema = z.object({
 	invitations: z.array(RoomInvitationSchema).optional(),
+	notify: z.boolean().optional(),
+	message: z.string().optional(),
+	culture: z.string().optional(),
 })
 
 /**
@@ -324,10 +390,18 @@ export const FileOperationDtoSchema = z.
 	passthrough()
 
 /**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Core/HttpHandlers/ChunkedUploaderHandler.cs/#L218 | DocSpace Reference}
+ */
+export const UploadChunkErrorResponseSchema = z.object({
+	success: z.literal(false),
+	message: z.string(),
+})
+
+/**
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Core/HttpHandlers/ChunkedUploaderHandler.cs/#L233 | DocSpace Reference}
  */
-export const UploadChunkResponseSchema = z.object({
-	success: z.boolean(),
+export const UploadChunkSuccessResponseSchema = z.object({
+	success: z.literal(true),
 	data: TypeObjectSchema,
 	message: z.string(),
 })
