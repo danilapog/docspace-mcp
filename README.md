@@ -58,31 +58,37 @@ Below is a table with the names of available tools and their descriptions:
 
 <!--generate tools-start-->
 
-| #   | Name                           | Description                    |
-| --- | ------------------------------ | ------------------------------ |
-| 1   | `files.archive_room`           | Archive a room.                |
-| 2   | `files.copy_batch_items`       | Copy to a folder.              |
-| 3   | `files.create_folder`          | Create a folder.               |
-| 4   | `files.create_room`            | Create a room.                 |
-| 5   | `files.delete_file`            | Delete a file.                 |
-| 6   | `files.delete_folder`          | Delete a folder.               |
-| 7   | `files.get_file_info`          | Get file information.          |
-| 8   | `files.get_folder`             | Get content of a folder.       |
-| 9   | `files.get_folder_info`        | Get folder information.        |
-| 10  | `files.get_folders`            | Get subfolders of a folder.    |
-| 11  | `files.get_my_folder`          | Get the 'My Documents' folder. |
-| 12  | `files.get_operation_statuses` | Get active file operations.    |
-| 13  | `files.get_room_info`          | Get room information.          |
-| 14  | `files.get_room_security_info` | Get room access rights.        |
-| 15  | `files.get_rooms_folder`       | Get the 'Rooms' folder.        |
-| 16  | `files.move_batch_items`       | Move to a folder.              |
-| 17  | `files.rename_folder`          | Rename a folder.               |
-| 18  | `files.set_room_security`      | Set room access rights.        |
-| 19  | `files.update_file`            | Update a file.                 |
-| 20  | `files.update_room`            | Update a room.                 |
-| 21  | `others.download_as_text`      | Download a file as text.       |
-| 22  | `others.upload_file`           | Upload a file.                 |
-| 23  | `people.get_all`               | Get all people.                |
+| #   | Name                                          | Description                                             |
+| --- | --------------------------------------------- | ------------------------------------------------------- |
+| 1   | `files_archive_room`                          | Archive a room.                                         |
+| 2   | `files_copy_batch_items`                      | Copy to a folder.                                       |
+| 3   | `files_create_folder`                         | Create a folder.                                        |
+| 4   | `files_create_room`                           | Create a room.                                          |
+| 5   | `files_delete_file`                           | Delete a file.                                          |
+| 6   | `files_delete_folder`                         | Delete a folder.                                        |
+| 7   | `files_get_file_info`                         | Get file information.                                   |
+| 8   | `files_get_folder`                            | Get content of a folder.                                |
+| 9   | `files_get_folder_info`                       | Get folder information.                                 |
+| 10  | `files_get_folders`                           | Get subfolders of a folder.                             |
+| 11  | `files_get_my_folder`                         | Get the 'My Documents' folder.                          |
+| 12  | `files_get_operation_statuses`                | Get active file operations.                             |
+| 13  | `files_get_room_info`                         | Get room information.                                   |
+| 14  | `files_get_room_security_info`                | Get a list of users with their access levels to a room. |
+| 15  | `files_get_rooms_folder`                      | Get the 'Rooms' folder.                                 |
+| 16  | `files_move_batch_items`                      | Move to a folder.                                       |
+| 17  | `files_rename_folder`                         | Rename a folder.                                        |
+| 18  | `files_set_room_security`                     | Invite or remove users from a room.                     |
+| 19  | `files_update_file`                           | Update a file.                                          |
+| 20  | `files_update_room`                           | Update a room.                                          |
+| 21  | `others_download_as_text`                     | Download a file as text.                                |
+| 22  | `others_get_available_room_invitation_access` | Get a list of available room invitation access levels.  |
+| 23  | `others_get_available_room_types`             | Get a list of available room types.                     |
+| 24  | `others_upload_file`                          | Upload a file.                                          |
+| 25  | `people_get_all`                              | Get all people.                                         |
+| 26  | `portal_get_quota`                            | Get the current quota.                                  |
+| 27  | `portal_get_tariff`                           | Get the current tariff.                                 |
+| 28  | `settings_get_supported_cultures`             | Get a list of the supported cultures, languages.        |
+| 29  | `settings_get_time_zones`                     | Get a list of the available time zones.                 |
 
 <!--generate tools-end-->
 
