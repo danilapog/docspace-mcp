@@ -390,6 +390,15 @@ export const FileOperationDtoSchema = z.
 	passthrough()
 
 /**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.0-server/products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs/#L32 | DocSpace Reference}
+ */
+export const FolderDtoSchema = z.
+	object({
+		roomType: RoomTypeSchema.optional(),
+	}).
+	passthrough()
+
+/**
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Core/HttpHandlers/ChunkedUploaderHandler.cs/#L218 | DocSpace Reference}
  */
 export const UploadChunkErrorResponseSchema = z.object({
