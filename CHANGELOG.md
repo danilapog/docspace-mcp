@@ -6,6 +6,13 @@ This document records all notable changes to the project, following the [Keep a 
 
 There are no noticeable changes in version [unreleased].
 
+## [1.0.0] - 2025-05-13
+
+### Changed
+
+- Clarify that the room invitation access level may vary depending on the room type ([52afde9], [ded370e]).
+- Clarify the names of the room types in their descriptions ([77aa941]).
+
 ## [0.2.0] - 2025-05-07
 
 ### Added
@@ -58,13 +65,17 @@ There are no noticeable changes in version [unreleased].
 [Keep a Changelog]: https://keepachangelog.com/en/1.1.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
-[Unreleased]: https://github.com/onlyoffice/docspace-mcp/compare/v0.2.0...HEAD/
+[Unreleased]: https://github.com/onlyoffice/docspace-mcp/compare/v1.0.0...HEAD/
+[1.0.0]: https://github.com/onlyoffice/docspace-mcp/compare/v0.2.0...v1.0.0/
 [0.2.0]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.3...v0.2.0/
 [0.1.3]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.2...v0.1.3/
 [0.1.2]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.1...v0.1.2/
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[77aa941]: https://github.com/onlyoffice/docspace-mcp/commit/77aa941cf0240d547d5c18a06dc26e26418313aa/
+[ded370e]: https://github.com/onlyoffice/docspace-mcp/commit/ded370eb903008e6b8311d1e08604abe6ced464f/
+[52afde9]: https://github.com/onlyoffice/docspace-mcp/commit/52afde93fdb637cd6b08af8564358ad95b25f99f/
 [7e0ff48]: https://github.com/onlyoffice/docspace-mcp/commit/7e0ff480719118b0954e4cfcfc1a90d063f428c9/
 [50ff80a]: https://github.com/onlyoffice/docspace-mcp/commit/50ff80a8ce87e4a838c6cb747fa927a284568242/
 [ec8948c]: https://github.com/onlyoffice/docspace-mcp/commit/ec8948c271eb26eae2e953b886918afeb034215a/

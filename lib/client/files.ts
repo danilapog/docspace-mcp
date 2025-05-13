@@ -33,6 +33,7 @@ import {
 	FileDtoSchema,
 	FileOperationDtoSchema,
 	FiltersSchema,
+	FolderDtoSchema,
 	RoomInvitationRequestSchema,
 	SessionRequestSchema,
 	UpdateFileSchema,
@@ -81,6 +82,7 @@ export type ArchiveRoomOptions = z.input<typeof ArchiveRoomRequestSchema>
 export type SetRoomSecurityOptions = z.input<typeof RoomInvitationRequestSchema>
 
 // VirtualRoomsController: Responses
+export type GetRoomInfoResponse = z.output<typeof FolderDtoSchema>
 export type ArchiveRoomResponse = z.output<typeof FileOperationDtoSchema>
 
 /**
@@ -592,7 +594,7 @@ export class FilesService {
 	/**
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/VirtualRoomsController.cs/#L165 | DocSpace Reference}
 	 */
-	async getRoomInfo(s: AbortSignal, id: number): Promise<Result<[unknown, Response], Error>> {
+	async getRoomInfo(s: AbortSignal, id: number): Promise<Result<[GetRoomInfoResponse, Response], Error>> {
 		let u = this.c.createUrl(`api/2.0/files/rooms/${id}`)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
@@ -608,7 +610,14 @@ export class FilesService {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
 
-		return ok(f.v)
+		let [p, res] = f.v
+
+		let e = FolderDtoSchema.safeParse(p)
+		if (!e.success) {
+			return error(new Error("Parsing response.", {cause: e.error}))
+		}
+
+		return ok([e.data, res])
 	}
 
 	/**
