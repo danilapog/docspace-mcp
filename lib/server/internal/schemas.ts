@@ -16,6 +16,8 @@
  * @license
  */
 
+/* eslint-disable no-underscore-dangle */
+
 import * as z from "zod"
 
 export const SortedByTypeSchema = z.union([
@@ -71,14 +73,75 @@ export const RoomTypeSchema = z.union([
 ])
 
 export const RoomInvitationAccessSchema = z.union([
-	z.literal("None").describe("No access to the room."),
-	z.literal("Read").describe("File viewing."),
-	z.literal("RoomManager").describe("(Paid) Room managers can manage the assigned rooms, invite new users and assign roles below their level."),
-	z.literal("Editing").describe("Operations with existing files: viewing, editing, form filling, reviewing, commenting."),
-	z.literal("ContentCreator").describe("Content creators can create and edit files in the room, but can't manage users, or access settings."),
+	z.literal("None").describe("None. No access to the room."),
+	z.literal("Read").describe("Viewer. File viewing."),
+	z.literal("Review").describe("Reviewer. Operations with existing files: viewing, reviewing, commenting."),
+	z.literal("Comment").describe("Commenter. Operations with existing files: viewing, commenting."),
+	z.literal("FillForms").describe("Form filler. Form fillers can fill out forms and view only their completed/started forms within the Complete and In Process folders."),
+	z.literal("RoomManager").describe("Room manager (Paid). Room managers can manage the assigned rooms, invite new users and assign roles below their level."),
+	z.literal("Editing").describe("Editor. Operations with existing files: viewing, editing, form filling, reviewing, commenting."),
+	z.literal("ContentCreator").describe("Content creator. Content creators can create and edit files in the room, but can't manage users, or access settings."),
 	z.literal(0).describe("The number representation of the None access level."),
 	z.literal(2).describe("The number representation of the Read access level."),
+	z.literal(5).describe("The number representation of the Review access level."),
+	z.literal(6).describe("The number representation of the Comment access level."),
+	z.literal(7).describe("The number representation of the FillForms access level."),
 	z.literal(9).describe("The number representation of the RoomManager access level."),
 	z.literal(10).describe("The number representation of the Editing access level."),
 	z.literal(11).describe("The number representation of the ContentCreator access level."),
+])
+
+export const FormFillingRoomInvitationAccessSchema = z.union([
+	RoomInvitationAccessSchema._def.options[4],
+	RoomInvitationAccessSchema._def.options[5],
+	RoomInvitationAccessSchema._def.options[7],
+	RoomInvitationAccessSchema._def.options[12],
+	RoomInvitationAccessSchema._def.options[13],
+	RoomInvitationAccessSchema._def.options[15],
+])
+
+export const CollaborationRoomInvitationAccessSchema = z.union([
+	RoomInvitationAccessSchema._def.options[1],
+	RoomInvitationAccessSchema._def.options[5],
+	RoomInvitationAccessSchema._def.options[6],
+	RoomInvitationAccessSchema._def.options[7],
+	RoomInvitationAccessSchema._def.options[9],
+	RoomInvitationAccessSchema._def.options[13],
+	RoomInvitationAccessSchema._def.options[14],
+	RoomInvitationAccessSchema._def.options[15],
+])
+
+export const CustomRoomInvitationAccessSchema = z.union([
+	RoomInvitationAccessSchema._def.options[1],
+	RoomInvitationAccessSchema._def.options[2],
+	RoomInvitationAccessSchema._def.options[3],
+	RoomInvitationAccessSchema._def.options[5],
+	RoomInvitationAccessSchema._def.options[6],
+	RoomInvitationAccessSchema._def.options[7],
+	RoomInvitationAccessSchema._def.options[9],
+	RoomInvitationAccessSchema._def.options[10],
+	RoomInvitationAccessSchema._def.options[11],
+	RoomInvitationAccessSchema._def.options[13],
+	RoomInvitationAccessSchema._def.options[14],
+	RoomInvitationAccessSchema._def.options[15],
+])
+
+export const PublicRoomInvitationAccessSchema = z.union([
+	RoomInvitationAccessSchema._def.options[5],
+	RoomInvitationAccessSchema._def.options[7],
+	RoomInvitationAccessSchema._def.options[13],
+	RoomInvitationAccessSchema._def.options[15],
+])
+
+export const VirtualDataRoomInvitationAccessSchema = z.union([
+	RoomInvitationAccessSchema._def.options[1],
+	RoomInvitationAccessSchema._def.options[4],
+	RoomInvitationAccessSchema._def.options[5],
+	RoomInvitationAccessSchema._def.options[6],
+	RoomInvitationAccessSchema._def.options[7],
+	RoomInvitationAccessSchema._def.options[9],
+	RoomInvitationAccessSchema._def.options[12],
+	RoomInvitationAccessSchema._def.options[13],
+	RoomInvitationAccessSchema._def.options[14],
+	RoomInvitationAccessSchema._def.options[15],
 ])
