@@ -58,11 +58,11 @@ export const FiltersSchema = z.object({
 })
 
 export const RoomTypeSchema = z.union([
-	z.literal("FillingFormsRoom").describe("Upload PDF forms into the room. Invite members and guests to fill out a PDF form. Review completed forms and analyze data automatically collected in a spreadsheet."),
-	z.literal("EditingRoom").describe("Collaborate on one or multiple documents with your team."),
-	z.literal("CustomRoom").describe("Apply your own settings to use this room for any custom purpose."),
-	z.literal("PublicRoom").describe("Share documents for viewing, editing, commenting, or reviewing without registration. You can also embed this room into any web interface."),
-	z.literal("VirtualDataRoom").describe("Use VDR for advanced file security and transparency. Set watermarks, automatically index and track all content, restrict downloading and copying."),
+	z.literal("FillingFormsRoom").describe("Form Filling Room. Upload PDF forms into the room. Invite members and guests to fill out a PDF form. Review completed forms and analyze data automatically collected in a spreadsheet."),
+	z.literal("EditingRoom").describe("Collaboration room. Collaborate on one or multiple documents with your team."),
+	z.literal("CustomRoom").describe("Custom room. Apply your own settings to use this room for any custom purpose."),
+	z.literal("PublicRoom").describe("Public room. Share documents for viewing, editing, commenting, or reviewing without registration. You can also embed this room into any web interface."),
+	z.literal("VirtualDataRoom").describe("Virtual Data Room. Use VDR for advanced file security and transparency. Set watermarks, automatically index and track all content, restrict downloading and copying."),
 	z.literal(1).describe("The number representation of the FillingFormsRoom type."),
 	z.literal(2).describe("The number representation of the EditingRoom type."),
 	z.literal(5).describe("The number representation of the CustomRoom type."),
