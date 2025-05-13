@@ -154,7 +154,7 @@ export const SetRoomSecurityInputSchema = z.object({
 						describe("The email of the user to invite or remove. Mutually exclusive with User ID."),
 					access: RoomInvitationAccessSchema.
 						optional().
-						describe("The access level to grant to the user."),
+						describe("The access level to grant to the user. May vary depending on the type of room."),
 				}).
 				describe("The invitation or removal of a user. Must contain either User ID or User Email.").
 				refine(

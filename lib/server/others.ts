@@ -22,7 +22,18 @@ import type {Result} from "../../util/result.ts"
 import {error, ok, safeAsync, safeSync} from "../../util/result.ts"
 import type {BulkDownloadOptions, CreateUploadSessionOptions, Response} from "../client.ts"
 import type {Server} from "../server.ts"
-import {RoomInvitationAccessSchema, RoomTypeSchema} from "./internal/schemas.ts"
+import {
+	CollaborationRoomInvitationAccessSchema,
+	CustomRoomInvitationAccessSchema,
+	FormFillingRoomInvitationAccessSchema,
+	PublicRoomInvitationAccessSchema,
+	RoomTypeSchema,
+	VirtualDataRoomInvitationAccessSchema,
+} from "./internal/schemas.ts"
+
+export const GetAvailableRoomInvitationAccessSchema = z.object({
+	roomId: z.number().describe("The ID of the room to get the invitation access for."),
+})
 
 export const DownloadAsTextInputSchema = z.object({
 	fileId: z.number().describe("The ID of the file to download as text."),
@@ -45,8 +56,44 @@ export class OthersToolset {
 		return ok(zodToJsonSchema(RoomTypeSchema))
 	}
 
-	getAvailableRoomInvitationAccess(): Result<object, Error> {
-		return ok(zodToJsonSchema(RoomInvitationAccessSchema))
+	async getAvailableRoomInvitationAccess(signal: AbortSignal, p: unknown): Promise<Result<object, Error>> {
+		let pr = GetAvailableRoomInvitationAccessSchema.safeParse(p)
+		if (!pr.success) {
+			return error(new Error("Parsing input.", {cause: pr.error}))
+		}
+
+		let gr = await this.s.client.files.getRoomInfo(signal, pr.data.roomId)
+		if (gr.err) {
+			return error(new Error("Getting room info.", {cause: gr.err}))
+		}
+
+		let [gd] = gr.v
+
+		if (!gd.roomType) {
+			return error(new Error("Room type is not defined."))
+		}
+
+		let sh: z.ZodSchema<unknown>
+
+		switch (gd.roomType) {
+		case 1:
+			sh = FormFillingRoomInvitationAccessSchema
+			break
+		case 2:
+			sh = CollaborationRoomInvitationAccessSchema
+			break
+		case 5:
+			sh = CustomRoomInvitationAccessSchema
+			break
+		case 6:
+			sh = PublicRoomInvitationAccessSchema
+			break
+		case 8:
+			sh = VirtualDataRoomInvitationAccessSchema
+			break
+		}
+
+		return ok(zodToJsonSchema(sh))
 	}
 
 	async downloadAsText(signal: AbortSignal, p: unknown): Promise<Result<string, Error>> {
