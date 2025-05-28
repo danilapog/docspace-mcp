@@ -60,7 +60,7 @@ export const DeleteFolderInputSchema = z.object({
 
 export const GetFolderInputSchema = z.object({
 	folderId: z.number().describe("The ID of the folder to get."),
-	filters: FiltersSchema.optional().describe("The filters to apply to the contents of the folder."),
+	filters: FiltersSchema.optional().default({count: 30}).describe("The filters to apply to the contents of the folder."),
 })
 
 export const GetFolderInfoInputSchema = z.object({
