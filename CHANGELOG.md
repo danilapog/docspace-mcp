@@ -4,7 +4,16 @@ This document records all notable changes to the project, following the [Keep a 
 
 ## [Unreleased]
 
-There are no noticeable changes in version [unreleased].
+<!-- There are no noticeable changes in version [unreleased]. -->
+
+### Added
+
+- Add the filters option to the `files_get_rooms_folder` tool ([ecb261e]).
+- Add the filters option to the `people_get_all` tool ([97e4d73]).
+
+### Changed
+
+- Change the default `filters.count` value to `30` for the `files_get_folder` tool ([036098d]).
 
 ## [1.0.0] - 2025-05-13
 
@@ -73,6 +82,9 @@ There are no noticeable changes in version [unreleased].
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[036098d]: https://github.com/onlyoffice/docspace-mcp/commit/036098db62ab4c4b29ab5e0b40c34ef1ced4efaa/
+[97e4d73]: https://github.com/onlyoffice/docspace-mcp/commit/97e4d73bf6a740939e7b2223414ef82c45d4f8f0/
+[ecb261e]: https://github.com/onlyoffice/docspace-mcp/commit/ecb261e0072f80bd6f989b813cc5f2823ac16c5d/
 [77aa941]: https://github.com/onlyoffice/docspace-mcp/commit/77aa941cf0240d547d5c18a06dc26e26418313aa/
 [ded370e]: https://github.com/onlyoffice/docspace-mcp/commit/ded370eb903008e6b8311d1e08604abe6ced464f/
 [52afde9]: https://github.com/onlyoffice/docspace-mcp/commit/52afde93fdb637cd6b08af8564358ad95b25f99f/
