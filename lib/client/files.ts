@@ -733,8 +733,19 @@ export class FilesService {
 	/**
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/VirtualRoomsController.cs/#L649 | DocSpace Reference}
 	 */
-	async getRoomsFolder(s: AbortSignal): Promise<Result<[unknown, Response], Error>> {
-		let u = this.c.createUrl("api/2.0/files/rooms")
+	async getRoomsFolder(s: AbortSignal, filters?: Filters): Promise<Result<[unknown, Response], Error>> {
+		let q: object | undefined
+
+		if (filters) {
+			let f = FiltersSchema.safeParse(filters)
+			if (!f.success) {
+				return error(new Error("Parsing filters.", {cause: f.error}))
+			}
+
+			q = f.data
+		}
+
+		let u = this.c.createUrl("api/2.0/files/rooms", q)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}

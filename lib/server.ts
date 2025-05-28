@@ -41,6 +41,7 @@ import {
 	GetFoldersInputSchema,
 	GetRoomInfoInputSchema,
 	GetRoomSecurityInfoInputSchema,
+	GetRoomsFolderInputSchema,
 	MoveBatchItemsInputSchema,
 	RenameFolderInputSchema,
 	SetRoomSecurityInputSchema,
@@ -196,7 +197,7 @@ export class Server {
 				{
 					name: "files_get_rooms_folder",
 					description: "Get the 'Rooms' folder.",
-					inputSchema: toInputSchema(z.object({})),
+					inputSchema: toInputSchema(GetRoomsFolderInputSchema),
 				},
 
 				{
@@ -314,7 +315,7 @@ export class Server {
 				cr = await this.files.getRoomSecurityInfo(extra.signal, req.params.arguments)
 				break
 			case "files_get_rooms_folder":
-				cr = await this.files.getRoomsFolder(extra.signal)
+				cr = await this.files.getRoomsFolder(extra.signal, req.params.arguments)
 				break
 
 			case "others_get_available_room_types":
