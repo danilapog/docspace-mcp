@@ -60,7 +60,7 @@ export const DeleteFolderInputSchema = z.object({
 
 export const GetFolderInputSchema = z.object({
 	folderId: z.number().describe("The ID of the folder to get."),
-	filters: FiltersSchema.optional().describe("The filters to apply to the contents of the folder."),
+	filters: FiltersSchema.optional().default({count: 30}).describe("The filters to apply to the contents of the folder."),
 })
 
 export const GetFolderInfoInputSchema = z.object({
@@ -182,6 +182,10 @@ export const SetRoomSecurityInputSchema = z.object({
 
 export const GetRoomSecurityInfoInputSchema = z.object({
 	roomId: z.number().describe("The ID of the room to get a list of users with their access level for."),
+})
+
+export const GetRoomsFolderInputSchema = z.object({
+	filters: FiltersSchema.optional().default({count: 30}).describe("The filters to apply to the rooms folder."),
 })
 
 export class FilesToolset {
@@ -627,8 +631,13 @@ export class FilesToolset {
 	/**
 	 * {@link FilesService.getRoomsFolder}
 	 */
-	async getRoomsFolder(signal: AbortSignal): Promise<Result<Response, Error>> {
-		let gr = await this.s.client.files.getRoomsFolder(signal)
+	async getRoomsFolder(signal: AbortSignal, p: unknown): Promise<Result<Response, Error>> {
+		let pr = GetRoomsFolderInputSchema.safeParse(p)
+		if (!pr.success) {
+			return error(new Error("Parsing input.", {cause: pr.error}))
+		}
+
+		let gr = await this.s.client.files.getRoomsFolder(signal, pr.data.filters)
 		if (gr.err) {
 			return error(new Error("Getting rooms folder.", {cause: gr.err}))
 		}

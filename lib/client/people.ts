@@ -20,6 +20,8 @@ import type {Result} from "../../util/result.ts"
 import {error, ok} from "../../util/result.ts"
 import type {Client} from "../client.ts"
 import type {Response} from "./internal/response.ts"
+import type {Filters} from "./internal/schemas.ts"
+import {FiltersSchema} from "./internal/schemas.ts"
 
 /**
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/tree/v3.0.4-server/products/ASC.People/ | DocSpace Reference}
@@ -34,8 +36,19 @@ export class PeopleService {
 	/**
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.People/Server/Api/UserController.cs/#L681 | DocSpace Reference}
 	 */
-	async getAll(s: AbortSignal): Promise<Result<[unknown, Response], Error>> {
-		let u = this.c.createUrl("api/2.0/people")
+	async getAll(s: AbortSignal, filters?: Filters): Promise<Result<[unknown, Response], Error>> {
+		let q: object | undefined
+
+		if (filters) {
+			let f = FiltersSchema.safeParse(filters)
+			if (!f.success) {
+				return error(new Error("Parsing filters.", {cause: f.error}))
+			}
+
+			q = f.data
+		}
+
+		let u = this.c.createUrl("api/2.0/people", q)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
