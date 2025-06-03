@@ -16,6 +16,7 @@
  * @license
  */
 
+import * as z from "zod"
 import type {Result} from "../../util/result.ts"
 import {error, ok} from "../../util/result.ts"
 // eslint-disable-next-line import-newlines/enforce
@@ -24,6 +25,11 @@ import type {
 	Response,
 } from "../client.ts"
 import type {Server} from "../server.ts"
+import {FiltersSchema} from "./internal/schemas.ts"
+
+export const GetAllInputSchema = z.object({
+	filters: FiltersSchema.optional().default({count: 30}).describe("The filters to apply to the list of people."),
+})
 
 export class PeopleToolset {
 	private s: Server
@@ -35,8 +41,13 @@ export class PeopleToolset {
 	/**
 	 * {@link PeopleService.getAll}
 	 */
-	async getAll(signal: AbortSignal): Promise<Result<Response, Error>> {
-		let gr = await this.s.client.people.getAll(signal)
+	async getAll(signal: AbortSignal, p: unknown): Promise<Result<Response, Error>> {
+		let pr = GetAllInputSchema.safeParse(p)
+		if (!pr.success) {
+			return error(new Error("Parsing input.", {cause: pr.error}))
+		}
+
+		let gr = await this.s.client.people.getAll(signal, pr.data.filters)
 		if (gr.err) {
 			return error(new Error("Getting people.", {cause: gr.err}))
 		}

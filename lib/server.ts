@@ -41,6 +41,7 @@ import {
 	GetFoldersInputSchema,
 	GetRoomInfoInputSchema,
 	GetRoomSecurityInfoInputSchema,
+	GetRoomsFolderInputSchema,
 	MoveBatchItemsInputSchema,
 	RenameFolderInputSchema,
 	SetRoomSecurityInputSchema,
@@ -55,7 +56,7 @@ import {
 	OthersToolset,
 	UploadFileInputSchema,
 } from "./server/others.ts"
-import {PeopleToolset} from "./server/people.ts"
+import {GetAllInputSchema, PeopleToolset} from "./server/people.ts"
 import {PortalToolset} from "./server/portal.ts"
 import {SettingsToolset} from "./server/settings.ts"
 import type {Uploader} from "./uploader.ts"
@@ -196,7 +197,7 @@ export class Server {
 				{
 					name: "files_get_rooms_folder",
 					description: "Get the 'Rooms' folder.",
-					inputSchema: toInputSchema(z.object({})),
+					inputSchema: toInputSchema(GetRoomsFolderInputSchema),
 				},
 
 				{
@@ -223,7 +224,7 @@ export class Server {
 				{
 					name: "people_get_all",
 					description: "Get all people.",
-					inputSchema: toInputSchema(z.object({})),
+					inputSchema: toInputSchema(GetAllInputSchema),
 				},
 
 				{
@@ -314,7 +315,7 @@ export class Server {
 				cr = await this.files.getRoomSecurityInfo(extra.signal, req.params.arguments)
 				break
 			case "files_get_rooms_folder":
-				cr = await this.files.getRoomsFolder(extra.signal)
+				cr = await this.files.getRoomsFolder(extra.signal, req.params.arguments)
 				break
 
 			case "others_get_available_room_types":
@@ -331,7 +332,7 @@ export class Server {
 				break
 
 			case "people_get_all":
-				cr = await this.people.getAll(extra.signal)
+				cr = await this.people.getAll(extra.signal, req.params.arguments)
 				break
 
 			case "portal_get_tariff":
