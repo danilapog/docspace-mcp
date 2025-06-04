@@ -206,7 +206,7 @@ export class Server {
 					inputSchema: toInputSchema(z.object({})),
 				},
 				{
-					name: "others_get_available_room_invitation_access",
+					name: "others_get_available_room_inv_access",
 					description: "Get a list of available room invitation access levels.",
 					inputSchema: toInputSchema(GetAvailableRoomInvitationAccessSchema),
 				},
