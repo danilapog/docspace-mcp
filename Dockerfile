@@ -1,5 +1,5 @@
 FROM node:22.15.0-alpine3.21 AS build
-WORKDIR /srv/onlyoffice-docspace
+WORKDIR /srv/onlyoffice-docspace-mcp
 COPY app app
 COPY lib lib
 COPY util util
@@ -10,7 +10,7 @@ RUN npm install --global pnpm@9.15.5 && pnpm install --frozen-lockfile && pnpm b
 
 FROM node:22.15.0-alpine3.21
 ENV NODE_ENV=production
-WORKDIR /srv/onlyoffice-docspace
+WORKDIR /srv/onlyoffice-docspace-mcp
 COPY --from=build /srv/onlyoffice-docspace-mcp/bin bin
 COPY LICENSE LICENSE
 ENTRYPOINT ["./bin/onlyoffice-docspace-mcp"]
