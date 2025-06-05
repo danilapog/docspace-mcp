@@ -1,4 +1,4 @@
-FROM node:22.15.0-alpine3.21 AS build
+FROM node:24.1.0-alpine3.22 AS build
 WORKDIR /srv/onlyoffice-docspace-mcp
 COPY app app
 COPY lib lib
@@ -6,9 +6,12 @@ COPY util util
 COPY package.json package.json
 COPY pnpm-lock.yaml pnpm-lock.yaml
 COPY tsconfig.json tsconfig.json
-RUN npm install --global pnpm@9.15.5 && pnpm install --frozen-lockfile && pnpm build
+RUN \
+	npm install --global pnpm@10.11.0 && \
+	pnpm install --frozen-lockfile && \
+	pnpm build
 
-FROM node:22.15.0-alpine3.21
+FROM node:24.1.0-alpine3.22
 ENV NODE_ENV=production
 WORKDIR /srv/onlyoffice-docspace-mcp
 COPY --from=build /srv/onlyoffice-docspace-mcp/bin bin
