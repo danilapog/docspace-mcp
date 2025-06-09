@@ -6,6 +6,11 @@ This document records all notable changes to the project, following the [Keep a 
 
 <!-- There are no noticeable changes in version [unreleased]. -->
 
+### Added
+
+- Add `fields` filter to `files_get_file_info`, `files_create_folder`, `files_get_folder`, `files_get_folder_info`, `files_get_folders`, `files_rename_folder`, `files_get_my_folder`, `files_create_room`, `files_get_room_info`, `files_update_room`, `files_set_room_security`, `files_get_room_security_info`, `files_get_rooms_folder`, and `people_get_all` tools ([88f0581]).
+- Add general filters to `files_set_room_security` and `files_get_room_security_info` tools ([88f0581]).
+
 ### Changed
 
 - Rename tool `others_get_available_room_invitation_access` to `others_get_available_room_access` ([cf92803])
@@ -89,6 +94,7 @@ This document records all notable changes to the project, following the [Keep a 
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[88f0581]: https://github.com/onlyoffice/docspace-mcp/commit/88f058197e951b5451fb33378c5afed8164ff696/
 [cf92803]: https://github.com/onlyoffice/docspace-mcp/commit/cf92803be37618cfef7bd1a313411ce775ea3cea/
 [036098d]: https://github.com/onlyoffice/docspace-mcp/commit/036098db62ab4c4b29ab5e0b40c34ef1ced4efaa/
 [97e4d73]: https://github.com/onlyoffice/docspace-mcp/commit/97e4d73bf6a740939e7b2223414ef82c45d4f8f0/
