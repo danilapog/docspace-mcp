@@ -31,7 +31,7 @@ import {
 	VirtualDataRoomInvitationAccessSchema,
 } from "./internal/schemas.ts"
 
-export const GetAvailableRoomInvitationAccessSchema = z.object({
+export const GetAvailableRoomAccessSchema = z.object({
 	roomId: z.number().describe("The ID of the room to get the invitation access for."),
 })
 
@@ -56,8 +56,8 @@ export class OthersToolset {
 		return ok(zodToJsonSchema(RoomTypeSchema))
 	}
 
-	async getAvailableRoomInvitationAccess(signal: AbortSignal, p: unknown): Promise<Result<object, Error>> {
-		let pr = GetAvailableRoomInvitationAccessSchema.safeParse(p)
+	async getAvailableRoomAccess(signal: AbortSignal, p: unknown): Promise<Result<object, Error>> {
+		let pr = GetAvailableRoomAccessSchema.safeParse(p)
 		if (!pr.success) {
 			return error(new Error("Parsing input.", {cause: pr.error}))
 		}
