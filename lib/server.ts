@@ -52,7 +52,7 @@ import type {CallToolRequest} from "./server/internal/protocol.ts"
 import {toInputSchema} from "./server/internal/protocol.ts"
 import {
 	DownloadAsTextInputSchema,
-	GetAvailableRoomInvitationAccessSchema,
+	GetAvailableRoomAccessSchema,
 	OthersToolset,
 	UploadFileInputSchema,
 } from "./server/others.ts"
@@ -206,9 +206,9 @@ export class Server {
 					inputSchema: toInputSchema(z.object({})),
 				},
 				{
-					name: "others_get_available_room_inv_access",
+					name: "others_get_available_room_access",
 					description: "Get a list of available room invitation access levels.",
-					inputSchema: toInputSchema(GetAvailableRoomInvitationAccessSchema),
+					inputSchema: toInputSchema(GetAvailableRoomAccessSchema),
 				},
 				{
 					name: "others_download_as_text",
@@ -321,8 +321,8 @@ export class Server {
 			case "others_get_available_room_types":
 				cr = this.others.getAvailableRoomTypes()
 				break
-			case "others_get_available_room_invitation_access":
-				cr = await this.others.getAvailableRoomInvitationAccess(extra.signal, req.params.arguments)
+			case "others_get_available_room_access":
+				cr = await this.others.getAvailableRoomAccess(extra.signal, req.params.arguments)
 				break
 			case "others_download_as_text":
 				cr = await this.others.downloadAsText(extra.signal, req.params.arguments)

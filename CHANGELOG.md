@@ -4,7 +4,11 @@ This document records all notable changes to the project, following the [Keep a 
 
 ## [Unreleased]
 
-There are no noticeable changes in version [unreleased].
+<!-- There are no noticeable changes in version [unreleased]. -->
+
+### Changed
+
+- Rename tool `others_get_available_room_invitation_access` to `others_get_available_room_access` ([cf92803])
 
 ## [1.1.0] - 2025-06-02
 
@@ -85,6 +89,7 @@ There are no noticeable changes in version [unreleased].
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[cf92803]: https://github.com/onlyoffice/docspace-mcp/commit/cf92803be37618cfef7bd1a313411ce775ea3cea/
 [036098d]: https://github.com/onlyoffice/docspace-mcp/commit/036098db62ab4c4b29ab5e0b40c34ef1ced4efaa/
 [97e4d73]: https://github.com/onlyoffice/docspace-mcp/commit/97e4d73bf6a740939e7b2223414ef82c45d4f8f0/
 [ecb261e]: https://github.com/onlyoffice/docspace-mcp/commit/ecb261e0072f80bd6f989b813cc5f2823ac16c5d/
