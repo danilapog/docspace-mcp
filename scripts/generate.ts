@@ -18,10 +18,9 @@
 
 import {existsSync} from "node:fs"
 import {readFile, writeFile} from "node:fs/promises"
-import type {ListToolsResult} from "@modelcontextprotocol/sdk/types.js"
 import {RawConfigSchema} from "../app/config.ts"
-import type {Config as ServerConfig} from "../lib/server.ts"
-import {Server} from "../lib/server.ts"
+import type {SimplifiedToolInfo} from "../lib/server/internal/protocol.ts"
+import * as server from "../lib/server.ts"
 
 /**
  * {@link https://code.visualstudio.com/docs/reference/variables-reference/#_input-variables | VS Code Reference}
@@ -56,26 +55,15 @@ async function main(): Promise<void> {
 
 	let input = await readFile("README.md", "utf8")
 
-	let c: ServerConfig = {
-		// @ts-ignore
-		server: {
-			setRequestHandler() {},
-		},
-	}
-
-	let s = new Server(c)
-
-	let ls = s.listTools().tools.sort((a, b) => {
-		return a.name.localeCompare(b.name)
-	})
-
 	let badges = createBadges(RawConfigSchema.shape)
 	let config = formatConfig(RawConfigSchema.shape)
-	let tools = formatTools(ls)
+	let toolsets = formatTools(server.toolsets)
+	let tools = formatTools(server.tools)
 
 	let output = input
 	output = insert("badges", output, badges)
 	output = insert("config", output, config)
+	output = insert("toolsets", output, toolsets)
 	output = insert("tools", output, tools)
 
 	await writeFile("README.md", output, "utf8")
@@ -146,7 +134,11 @@ function formatConfig(shape: typeof RawConfigSchema.shape): string {
 	return c
 }
 
-function formatTools(tools: ListToolsResult["tools"]): string {
+function formatTools(tools: SimplifiedToolInfo[]): string {
+	tools = tools.sort((a, b) => {
+		return a.name.localeCompare(b.name)
+	})
+
 	let c = "| # | Name | Description |\n|-|-|-|\n"
 
 	for (let [i, t] of tools.entries()) {

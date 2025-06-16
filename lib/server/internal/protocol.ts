@@ -1,6 +1,21 @@
-import type {CallToolRequestSchema, ListToolsResult} from "@modelcontextprotocol/sdk/types.js"
+import type {RequestHandlerExtra} from "@modelcontextprotocol/sdk/shared/protocol.js"
+import type {
+	CallToolRequestSchema,
+	ListToolsResult,
+	ServerNotification,
+	ServerRequest,
+} from "@modelcontextprotocol/sdk/types.js"
 import type * as z from "zod"
 import {zodToJsonSchema} from "zod-to-json-schema"
+
+export type Extra = RequestHandlerExtra<ServerRequest, ServerNotification>
+
+export type ToolInfo = ListToolsResult["tools"][0]
+
+export interface SimplifiedToolInfo {
+	name: string
+	description?: string
+}
 
 export type CallToolRequest = z.infer<typeof CallToolRequestSchema>
 
