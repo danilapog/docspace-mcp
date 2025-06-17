@@ -77,7 +77,7 @@ export const FilterOpSchema = z.union([
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/common/ASC.Api.Core/Core/ApiContext.cs/#L32 | DocSpace Reference}
  */
 export const FiltersSchema = z.object({
-	count: z.number().optional().describe("The number of items to return."),
+	count: z.number().min(1).max(50).optional().describe("The number of items to return."),
 	startIndex: z.number().optional().describe("The number of items to skip before starting to return items."),
 	sortBy: z.union([SortedByTypeSchema, z.string()]).optional().describe("The field to sort by."),
 	sortOrder: SortOderSchema.optional().describe("The order to sort by."),
