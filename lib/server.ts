@@ -18,7 +18,12 @@
 
 import type {Server as McpServer} from "@modelcontextprotocol/sdk/server/index.js"
 import type {RequestHandlerExtra} from "@modelcontextprotocol/sdk/shared/protocol.js"
-import type {CallToolResult, ListToolsResult} from "@modelcontextprotocol/sdk/types.js"
+import type {
+	CallToolResult,
+	ListToolsResult,
+	ServerNotification,
+	ServerRequest,
+} from "@modelcontextprotocol/sdk/types.js"
 import {CallToolRequestSchema, ListToolsRequestSchema} from "@modelcontextprotocol/sdk/types.js"
 import * as z from "zod"
 import {format} from "../util/format.ts"
@@ -252,7 +257,7 @@ export class Server {
 		}
 	}
 
-	async callTools(req: CallToolRequest, extra: RequestHandlerExtra): Promise<CallToolResult> {
+	async callTools(req: CallToolRequest, extra: RequestHandlerExtra<ServerRequest, ServerNotification>): Promise<CallToolResult> {
 		let cr: Result<Response | string | object, Error>
 
 		try {
