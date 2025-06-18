@@ -77,7 +77,7 @@ export const FilterOpSchema = z.union([
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/common/ASC.Api.Core/Core/ApiContext.cs/#L32 | DocSpace Reference}
  */
 export const FiltersSchema = z.object({
-	count: z.number().min(1).max(50).optional().describe("The number of items to return."),
+	count: z.number().min(1).max(50).default(30).describe("The number of items to return."),
 	startIndex: z.number().optional().describe("The number of items to skip before starting to return items."),
 	sortBy: z.union([SortedByTypeSchema, z.string()]).optional().describe("The field to sort by."),
 	sortOrder: SortOderSchema.optional().describe("The order to sort by."),
@@ -736,57 +736,57 @@ export const AuthenticationTokenDtoSchema = z.
 	passthrough()
 
 export const GetFileInfoFiltersSchema = z.object({
-	fields: z.array(FileDtoFieldSchema).optional().describe("The fields to include in the response."),
+	fields: z.array(FileDtoFieldSchema).describe("The fields to include in the response."),
 })
 
 export const CreateFolderFiltersSchema = z.object({
-	fields: z.array(FolderDtoFieldSchema).optional().describe("The fields to include in the response."),
+	fields: z.array(FolderDtoFieldSchema).describe("The fields to include in the response."),
 })
 
 export const GetFolderFiltersSchema = FiltersSchema.extend({
-	fields: z.array(FolderContentDtoFieldSchema).optional().describe("The fields to include in the response."),
+	fields: z.array(FolderContentDtoFieldSchema).describe("The fields to include in the response."),
 })
 
 export const GetFolderInfoFiltersSchema = z.object({
-	fields: z.array(FolderDtoFieldSchema).optional().describe("The fields to include in the response."),
+	fields: z.array(FolderDtoFieldSchema).describe("The fields to include in the response."),
 })
 
 export const GetFoldersFiltersSchema = z.object({
-	fields: z.array(FileEntryDtoFieldSchema).optional().describe("The fields to include in the response."),
+	fields: z.array(FileEntryDtoFieldSchema).describe("The fields to include in the response."),
 })
 
 export const RenameFolderFiltersSchema = z.object({
-	fields: z.array(FolderDtoFieldSchema).optional().describe("The fields to include in the response."),
+	fields: z.array(FolderDtoFieldSchema).describe("The fields to include in the response."),
 })
 
 export const GetMyFolderFiltersSchema = FiltersSchema.extend({
-	fields: z.array(FolderContentDtoFieldSchema).optional().describe("The fields to include in the response."),
+	fields: z.array(FolderContentDtoFieldSchema).describe("The fields to include in the response."),
 })
 
 export const CreateRoomFiltersSchema = z.object({
-	fields: z.array(FolderDtoFieldSchema).optional().describe("The fields to include in the response."),
+	fields: z.array(FolderDtoFieldSchema).describe("The fields to include in the response."),
 })
 
 export const GetRoomInfoFiltersSchema = z.object({
-	fields: z.array(FolderDtoFieldSchema).optional().describe("The fields to include in the response."),
+	fields: z.array(FolderDtoFieldSchema).describe("The fields to include in the response."),
 })
 
 export const UpdateRoomFiltersSchema = z.object({
-	fields: z.array(FolderDtoFieldSchema).optional().describe("The fields to include in the response."),
+	fields: z.array(FolderDtoFieldSchema).describe("The fields to include in the response."),
 })
 
 export const SetRoomSecurityFiltersSchema = FiltersSchema.extend({
-	fields: z.array(RoomSecurityDtoFieldSchema).optional().describe("The fields to include in the response."),
+	fields: z.array(RoomSecurityDtoFieldSchema).describe("The fields to include in the response."),
 })
 
 export const GetRoomSecurityFiltersSchema = FiltersSchema.extend({
-	fields: z.array(RoomSecurityDtoFieldSchema).optional().describe("The fields to include in the response."),
+	fields: z.array(RoomSecurityDtoFieldSchema).describe("The fields to include in the response."),
 })
 
 export const GetRoomsFolderFiltersSchema = FiltersSchema.extend({
-	fields: z.array(FolderContentDtoFieldSchema).optional().describe("The fields to include in the response."),
+	fields: z.array(FolderContentDtoFieldSchema).describe("The fields to include in the response."),
 })
 
 export const GetAllFiltersSchema = FiltersSchema.extend({
-	fields: z.array(EmployeeFullDtoFieldSchema).optional().describe("The fields to include in the response."),
+	fields: z.array(EmployeeFullDtoFieldSchema).describe("The fields to include in the response."),
 })
