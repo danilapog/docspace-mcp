@@ -18,7 +18,6 @@
 
 import {existsSync} from "node:fs"
 import {readFile, writeFile} from "node:fs/promises"
-import {RawConfigSchema} from "../app/config.ts"
 import type {SimplifiedToolInfo} from "../lib/server/internal/protocol.ts"
 import * as server from "../lib/server.ts"
 
@@ -55,21 +54,21 @@ async function main(): Promise<void> {
 
 	let input = await readFile("README.md", "utf8")
 
-	let badges = createBadges(RawConfigSchema.shape)
-	let config = formatConfig(RawConfigSchema.shape)
+	let badges = createBadges()
 	let toolsets = formatTools(server.toolsets)
+	let dynamic = formatTools(server.metaTools)
 	let tools = formatTools(server.tools)
 
 	let output = input
 	output = insert("badges", output, badges)
-	output = insert("config", output, config)
 	output = insert("toolsets", output, toolsets)
+	output = insert("dynamic", output, dynamic)
 	output = insert("tools", output, tools)
 
 	await writeFile("README.md", output, "utf8")
 }
 
-function createBadges(shape: typeof RawConfigSchema.shape): string {
+function createBadges(): string {
 	let bru = "https://badgen.net/static/Open%20in%20VS%20Code/npx/blue"
 	let biu = "https://badgen.net/static/Open%20in%20VS%20Code%20Insiders/npx/cyan"
 
@@ -77,12 +76,12 @@ function createBadges(shape: typeof RawConfigSchema.shape): string {
 		{
 			type: "promptString",
 			id: "docspace_base_url",
-			description: String(shape.DOCSPACE_BASE_URL.description).replaceAll("`", ""),
+			description: "The base URL of the DocSpace instance for API requests.",
 		},
 		{
 			type: "promptString",
 			id: "docspace_api_key",
-			description: String(shape.DOCSPACE_API_KEY.description).replaceAll("`", ""),
+			description: "The API key for accessing the DocSpace API.",
 			password: true,
 		},
 	]
@@ -116,20 +115,6 @@ function createBadges(shape: typeof RawConfigSchema.shape): string {
 
 	c += `[![Open in VS Code using npx command](${bru})](${vru})\n`
 	c += `[![Open in VS Code Insiders using npx command](${biu})](${viu})`
-
-	return c
-}
-
-function formatConfig(shape: typeof RawConfigSchema.shape): string {
-	let c = "| Name | Description |\n|-|-|\n"
-
-	for (let [k, v] of Object.entries(shape)) {
-		c += `| \`${k}\` | ${v.description} |\n`
-	}
-
-	if (c.length !== 0) {
-		c = c.slice(0, -1)
-	}
 
 	return c
 }

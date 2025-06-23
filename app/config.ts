@@ -24,51 +24,18 @@ import {error, ok} from "../util/result.ts"
 
 export type Config = z.infer<typeof ConfigSchema>
 
-export const RawConfigSchema = z.
+export const ConfigSchema = z.
 	object({
-		DOCSPACE_BASE_URL: z.
-			string().
-			url().
-			describe("The base URL of the DocSpace instance. This configuration is required for making API requests to DocSpace."),
-		DOCSPACE_ORIGIN: z.
-			string().
-			url().
-			optional().
-			describe("The origin of the DocSpace instance. This configuration is not required but can be used to specify the `Origin` header in requests to DocSpace."),
-		DOCSPACE_USER_AGENT: z.
-			string().
-			optional().
-			describe("The user agent to use for requests. This configuration is not required but can be used to specify the `User-Agent` header in requests to DocSpace.").
-			default(`${pack.name} v${pack.version}`),
-		DOCSPACE_API_KEY: z.
-			string().
-			optional().
-			describe("The API key for accessing the DocSpace API. This configuration is required if nether `DOCSPACE_AUTH_TOKEN` nor `DOCSPACE_USERNAME` and `DOCSPACE_PASSWORD` are provided."),
-		DOCSPACE_AUTH_TOKEN: z.
-			string().
-			optional().
-			describe("The authentication token for accessing the DocSpace API. This configuration is required if neither `DOCSPACE_API_KEY` nor `DOCSPACE_USERNAME` and `DOCSPACE_PASSWORD` are provided."),
-		DOCSPACE_USERNAME: z.
-			string().
-			optional().
-			describe("The username for accessing the DocSpace API using basic authentication. This configuration is required if neither `DOCSPACE_API_KEY` nor `DOCSPACE_AUTH_TOKEN` are provided. This is used in conjunction with `DOCSPACE_PASSWORD`."),
-		DOCSPACE_PASSWORD: z.
-			string().
-			optional().
-			describe("The password for accessing the DocSpace API using basic authentication. This configuration is required if neither `DOCSPACE_API_KEY` nor `DOCSPACE_AUTH_TOKEN` are provided. This is used in conjunction with `DOCSPACE_USERNAME`."),
-		DOCSPACE_DYNAMIC: z.
-			string().
-			optional().
-			default("false").
-			describe("Whether to enable dynamic toolsets."),
-		DOCSPACE_TOOLSETS: z.
-			string().
-			optional().
-			default("all").
-			describe("The comma-separated list of toolset names to use. If set to 'all', all available toolsets will be used."),
-	})
-
-export const ConfigSchema = RawConfigSchema.
+		DOCSPACE_BASE_URL: z.string().url(),
+		DOCSPACE_ORIGIN: z.string().url().optional(),
+		DOCSPACE_USER_AGENT: z.string().optional().default(`${pack.name} v${pack.version}`),
+		DOCSPACE_API_KEY: z.string().optional(),
+		DOCSPACE_AUTH_TOKEN: z.string().optional(),
+		DOCSPACE_USERNAME: z.string().optional(),
+		DOCSPACE_PASSWORD: z.string().optional(),
+		DOCSPACE_DYNAMIC: z.string().optional().default("false"),
+		DOCSPACE_TOOLSETS: z.string().optional().default("all"),
+	}).
 	refine(
 		(o) => {
 			let a = Boolean(o.DOCSPACE_USERNAME)
