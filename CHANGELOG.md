@@ -14,6 +14,7 @@ This document records all notable changes to the project, following the [Keep a 
 ### Changed
 
 - Rename tool `others_get_available_room_invitation_access` to `others_get_available_room_access` ([cf92803])
+- Require the `count` filter field be in the range from 1 to 50 ([ae0c83a]).
 
 ## [1.1.0] - 2025-06-02
 
@@ -94,6 +95,7 @@ This document records all notable changes to the project, following the [Keep a 
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[ae0c83a]: https://github.com/onlyoffice/docspace-mcp/commit/ae0c83aa87de4db1cf539547b866d656831eae94/
 [88f0581]: https://github.com/onlyoffice/docspace-mcp/commit/88f058197e951b5451fb33378c5afed8164ff696/
 [cf92803]: https://github.com/onlyoffice/docspace-mcp/commit/cf92803be37618cfef7bd1a313411ce775ea3cea/
 [036098d]: https://github.com/onlyoffice/docspace-mcp/commit/036098db62ab4c4b29ab5e0b40c34ef1ced4efaa/
