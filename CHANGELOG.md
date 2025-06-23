@@ -10,6 +10,7 @@ This document records all notable changes to the project, following the [Keep a 
 
 - Add `fields` filter to `files_get_file_info`, `files_create_folder`, `files_get_folder`, `files_get_folder_info`, `files_get_folders`, `files_rename_folder`, `files_get_my_folder`, `files_create_room`, `files_get_room_info`, `files_update_room`, `files_set_room_security`, `files_get_room_security_info`, `files_get_rooms_folder`, and `people_get_all` tools ([88f0581]).
 - Add general filters to `files_set_room_security` and `files_get_room_security_info` tools ([88f0581]).
+- Add `DOCSPACE_DYNAMIC` and `DOCSPACE_TOOLSETS` options ([8e2e54a]).
 
 ### Changed
 
@@ -95,6 +96,7 @@ This document records all notable changes to the project, following the [Keep a 
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[8e2e54a]: https://github.com/onlyoffice/docspace-mcp/commit/8e2e54a3f67647ea844047e90be189714baf677d/
 [ae0c83a]: https://github.com/onlyoffice/docspace-mcp/commit/ae0c83aa87de4db1cf539547b866d656831eae94/
 [88f0581]: https://github.com/onlyoffice/docspace-mcp/commit/88f058197e951b5451fb33378c5afed8164ff696/
 [cf92803]: https://github.com/onlyoffice/docspace-mcp/commit/cf92803be37618cfef7bd1a313411ce775ea3cea/

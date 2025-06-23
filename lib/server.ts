@@ -17,13 +17,7 @@
  */
 
 import type {Server as McpServer} from "@modelcontextprotocol/sdk/server/index.js"
-import type {RequestHandlerExtra} from "@modelcontextprotocol/sdk/shared/protocol.js"
-import type {
-	CallToolResult,
-	ListToolsResult,
-	ServerNotification,
-	ServerRequest,
-} from "@modelcontextprotocol/sdk/types.js"
+import type {CallToolResult, ListToolsResult} from "@modelcontextprotocol/sdk/types.js"
 import {CallToolRequestSchema, ListToolsRequestSchema} from "@modelcontextprotocol/sdk/types.js"
 import * as z from "zod"
 import {format} from "../util/format.ts"
@@ -54,8 +48,9 @@ import {
 	UpdateFileInputSchema,
 	UpdateRoomInputSchema,
 } from "./server/files.ts"
-import type {CallToolRequest} from "./server/internal/protocol.ts"
+import type {CallToolRequest, Extra, SimplifiedToolInfo, ToolInfo, ToolInputSchema} from "./server/internal/protocol.ts"
 import {toInputSchema} from "./server/internal/protocol.ts"
+import {CallToolInputSchema, GetToolInputSchemaInputSchema, ListToolsInputSchema, MetaToolset} from "./server/meta.ts"
 import {
 	DownloadAsTextInputSchema,
 	GetAvailableRoomAccessSchema,
@@ -67,11 +62,211 @@ import {PortalToolset} from "./server/portal.ts"
 import {SettingsToolset} from "./server/settings.ts"
 import type {Uploader} from "./uploader.ts"
 
+export const metaTools: ToolInfo[] = [
+	{
+		name: "list_toolsets",
+		description: "This is a meta-tool for listing available toolsets. Toolset is a set of available tools.",
+		inputSchema: toInputSchema(z.object({})),
+	},
+	{
+		name: "list_tools",
+		description: "This is a meta-tool for listing available tools of a specific toolset. The list of available toolsets can be obtained using the list_toolsets meta-tool.",
+		inputSchema: toInputSchema(ListToolsInputSchema),
+	},
+	{
+		name: "get_tool_input_schema",
+		description: "This is a meta-tool for getting an input schema for a specific tool. The list of available tools can be obtained using the list_tools meta-tool.",
+		inputSchema: toInputSchema(GetToolInputSchemaInputSchema),
+	},
+	{
+		name: "call_tool",
+		description: "This is a meta-tool for calling a tool. The list of available tools can be obtained using the list_tools meta-tool. The input schema can be obtained using the get_tool_input_schema meta-tool.",
+		inputSchema: toInputSchema(CallToolInputSchema),
+	},
+]
+
+export const toolsets: SimplifiedToolInfo[] = [
+	{
+		name: "files",
+		description: "Operations for working with files, folders, and rooms.",
+	},
+	{
+		name: "others",
+		description: "Operations for listing additional enumeration values. Operations for downloading and uploading files.",
+	},
+	{
+		name: "people",
+		description: "Operations for working with users.",
+	},
+	{
+		name: "portal",
+		description: "Operations for working with the portal.",
+	},
+	{
+		name: "settings",
+		description: "Operations for working with settings.",
+	},
+]
+
+export const tools: ToolInfo[] = [
+	{
+		name: "files_delete_file",
+		description: "Delete a file.",
+		inputSchema: toInputSchema(DeleteFileInputSchema),
+	},
+	{
+		name: "files_get_file_info",
+		description: "Get file information.",
+		inputSchema: toInputSchema(GetFileInfoInputSchema),
+	},
+	{
+		name: "files_update_file",
+		description: "Update a file.",
+		inputSchema: toInputSchema(UpdateFileInputSchema),
+	},
+	{
+		name: "files_create_folder",
+		description: "Create a folder.",
+		inputSchema: toInputSchema(CreateFolderInputSchema),
+	},
+	{
+		name: "files_delete_folder",
+		description: "Delete a folder.",
+		inputSchema: toInputSchema(DeleteFolderInputSchema),
+	},
+	{
+		name: "files_get_folder",
+		description: "Get content of a folder.",
+		inputSchema: toInputSchema(GetFolderInputSchema),
+	},
+	{
+		name: "files_get_folder_info",
+		description: "Get folder information.",
+		inputSchema: toInputSchema(GetFolderInfoInputSchema),
+	},
+	{
+		name: "files_get_folders",
+		description: "Get subfolders of a folder.",
+		inputSchema: toInputSchema(GetFoldersInputSchema),
+	},
+	{
+		name: "files_rename_folder",
+		description: "Rename a folder.",
+		inputSchema: toInputSchema(RenameFolderInputSchema),
+	},
+	{
+		name: "files_get_my_folder",
+		description: "Get the 'My Documents' folder.",
+		inputSchema: toInputSchema(GetMyFolderInputSchema),
+	},
+	{
+		name: "files_copy_batch_items",
+		description: "Copy to a folder.",
+		inputSchema: toInputSchema(CopyBatchItemsInputSchema),
+	},
+	{
+		name: "files_get_operation_statuses",
+		description: "Get active file operations.",
+		inputSchema: toInputSchema(z.object({})),
+	},
+	{
+		name: "files_move_batch_items",
+		description: "Move to a folder.",
+		inputSchema: toInputSchema(MoveBatchItemsInputSchema),
+	},
+	{
+		name: "files_create_room",
+		description: "Create a room.",
+		inputSchema: toInputSchema(CreateRoomInputSchema),
+	},
+	{
+		name: "files_get_room_info",
+		description: "Get room information.",
+		inputSchema: toInputSchema(GetRoomInfoInputSchema),
+	},
+	{
+		name: "files_update_room",
+		description: "Update a room.",
+		inputSchema: toInputSchema(UpdateRoomInputSchema),
+	},
+	{
+		name: "files_archive_room",
+		description: "Archive a room.",
+		inputSchema: toInputSchema(ArchiveRoomInputSchema),
+	},
+	{
+		name: "files_set_room_security",
+		description: "Invite or remove users from a room.",
+		inputSchema: toInputSchema(SetRoomSecurityInputSchema),
+	},
+	{
+		name: "files_get_room_security_info",
+		description: "Get a list of users with their access levels to a room.",
+		inputSchema: toInputSchema(GetRoomSecurityInfoInputSchema),
+	},
+	{
+		name: "files_get_rooms_folder",
+		description: "Get the 'Rooms' folder.",
+		inputSchema: toInputSchema(GetRoomsFolderInputSchema),
+	},
+
+	{
+		name: "others_get_available_room_types",
+		description: "Get a list of available room types.",
+		inputSchema: toInputSchema(z.object({})),
+	},
+	{
+		name: "others_get_available_room_access",
+		description: "Get a list of available room invitation access levels.",
+		inputSchema: toInputSchema(GetAvailableRoomAccessSchema),
+	},
+	{
+		name: "others_download_as_text",
+		description: "Download a file as text.",
+		inputSchema: toInputSchema(DownloadAsTextInputSchema),
+	},
+	{
+		name: "others_upload_file",
+		description: "Upload a file.",
+		inputSchema: toInputSchema(UploadFileInputSchema),
+	},
+
+	{
+		name: "people_get_all",
+		description: "Get all people.",
+		inputSchema: toInputSchema(GetAllInputSchema),
+	},
+
+	{
+		name: "portal_get_tariff",
+		description: "Get the current tariff.",
+		inputSchema: toInputSchema(z.object({})),
+	},
+	{
+		name: "portal_get_quota",
+		description: "Get the current quota.",
+		inputSchema: toInputSchema(z.object({})),
+	},
+
+	{
+		name: "settings_get_supported_cultures",
+		description: "Get a list of the supported cultures, languages.",
+		inputSchema: toInputSchema(z.object({})),
+	},
+	{
+		name: "settings_get_time_zones",
+		description: "Get a list of the available time zones.",
+		inputSchema: toInputSchema(z.object({})),
+	},
+]
+
 export interface Config {
 	server: McpServer
 	client: Client
 	resolver: Resolver
 	uploader: Uploader
+	dynamic: boolean
+	toolsets: string[]
 }
 
 export class Server {
@@ -81,10 +276,17 @@ export class Server {
 	uploader: Uploader
 
 	files: FilesToolset
+	meta: MetaToolset
 	others: OthersToolset
 	people: PeopleToolset
 	portal: PortalToolset
 	settings: SettingsToolset
+
+	activeToolsets: SimplifiedToolInfo[] = []
+	activeTools: ToolInfo[] = []
+	listableTools: ToolInfo[] = []
+
+	routeTool: (req: CallToolRequest, extra: Extra) => Promise<Result<string, Error>>
 
 	constructor(config: Config) {
 		this.server = config.server
@@ -93,172 +295,116 @@ export class Server {
 		this.uploader = config.uploader
 
 		this.files = new FilesToolset(this)
+		this.meta = new MetaToolset(this)
 		this.others = new OthersToolset(this)
 		this.people = new PeopleToolset(this)
 		this.portal = new PortalToolset(this)
 		this.settings = new SettingsToolset(this)
 
+		for (let n of config.toolsets) {
+			for (let t of toolsets) {
+				if (t.name === n) {
+					this.activeToolsets.push(t)
+					break
+				}
+			}
+
+			for (let t of tools) {
+				if (t.name.startsWith(`${n}_`)) {
+					this.activeTools.push(t)
+				}
+			}
+		}
+
+		if (config.dynamic) {
+			this.listableTools = [...metaTools]
+			this.routeTool = this.routeMetaTool.bind(this)
+		} else {
+			this.listableTools = [...this.activeTools]
+			this.routeTool = this.routeRegularTool.bind(this)
+		}
+
 		this.server.setRequestHandler(ListToolsRequestSchema, this.listTools.bind(this))
-		this.server.setRequestHandler(CallToolRequestSchema, this.callTools.bind(this))
+		this.server.setRequestHandler(CallToolRequestSchema, this.callTool.bind(this))
 	}
 
 	listTools(): ListToolsResult {
 		return {
-			tools: [
-				{
-					name: "files_delete_file",
-					description: "Delete a file.",
-					inputSchema: toInputSchema(DeleteFileInputSchema),
-				},
-				{
-					name: "files_get_file_info",
-					description: "Get file information.",
-					inputSchema: toInputSchema(GetFileInfoInputSchema),
-				},
-				{
-					name: "files_update_file",
-					description: "Update a file.",
-					inputSchema: toInputSchema(UpdateFileInputSchema),
-				},
-				{
-					name: "files_create_folder",
-					description: "Create a folder.",
-					inputSchema: toInputSchema(CreateFolderInputSchema),
-				},
-				{
-					name: "files_delete_folder",
-					description: "Delete a folder.",
-					inputSchema: toInputSchema(DeleteFolderInputSchema),
-				},
-				{
-					name: "files_get_folder",
-					description: "Get content of a folder.",
-					inputSchema: toInputSchema(GetFolderInputSchema),
-				},
-				{
-					name: "files_get_folder_info",
-					description: "Get folder information.",
-					inputSchema: toInputSchema(GetFolderInfoInputSchema),
-				},
-				{
-					name: "files_get_folders",
-					description: "Get subfolders of a folder.",
-					inputSchema: toInputSchema(GetFoldersInputSchema),
-				},
-				{
-					name: "files_rename_folder",
-					description: "Rename a folder.",
-					inputSchema: toInputSchema(RenameFolderInputSchema),
-				},
-				{
-					name: "files_get_my_folder",
-					description: "Get the 'My Documents' folder.",
-					inputSchema: toInputSchema(GetMyFolderInputSchema),
-				},
-				{
-					name: "files_copy_batch_items",
-					description: "Copy to a folder.",
-					inputSchema: toInputSchema(CopyBatchItemsInputSchema),
-				},
-				{
-					name: "files_get_operation_statuses",
-					description: "Get active file operations.",
-					inputSchema: toInputSchema(z.object({})),
-				},
-				{
-					name: "files_move_batch_items",
-					description: "Move to a folder.",
-					inputSchema: toInputSchema(MoveBatchItemsInputSchema),
-				},
-				{
-					name: "files_create_room",
-					description: "Create a room.",
-					inputSchema: toInputSchema(CreateRoomInputSchema),
-				},
-				{
-					name: "files_get_room_info",
-					description: "Get room information.",
-					inputSchema: toInputSchema(GetRoomInfoInputSchema),
-				},
-				{
-					name: "files_update_room",
-					description: "Update a room.",
-					inputSchema: toInputSchema(UpdateRoomInputSchema),
-				},
-				{
-					name: "files_archive_room",
-					description: "Archive a room.",
-					inputSchema: toInputSchema(ArchiveRoomInputSchema),
-				},
-				{
-					name: "files_set_room_security",
-					description: "Invite or remove users from a room.",
-					inputSchema: toInputSchema(SetRoomSecurityInputSchema),
-				},
-				{
-					name: "files_get_room_security_info",
-					description: "Get a list of users with their access levels to a room.",
-					inputSchema: toInputSchema(GetRoomSecurityInfoInputSchema),
-				},
-				{
-					name: "files_get_rooms_folder",
-					description: "Get the 'Rooms' folder.",
-					inputSchema: toInputSchema(GetRoomsFolderInputSchema),
-				},
+			tools: this.listableTools,
+		}
+	}
 
-				{
-					name: "others_get_available_room_types",
-					description: "Get a list of available room types.",
-					inputSchema: toInputSchema(z.object({})),
-				},
-				{
-					name: "others_get_available_room_access",
-					description: "Get a list of available room invitation access levels.",
-					inputSchema: toInputSchema(GetAvailableRoomAccessSchema),
-				},
-				{
-					name: "others_download_as_text",
-					description: "Download a file as text.",
-					inputSchema: toInputSchema(DownloadAsTextInputSchema),
-				},
-				{
-					name: "others_upload_file",
-					description: "Upload a file.",
-					inputSchema: toInputSchema(UploadFileInputSchema),
-				},
+	async callTool(req: CallToolRequest, extra: Extra): Promise<CallToolResult> {
+		let pr = await this.routeTool(req, extra)
 
-				{
-					name: "people_get_all",
-					description: "Get all people.",
-					inputSchema: toInputSchema(GetAllInputSchema),
-				},
+		if (pr.err) {
+			return {
+				content: [
+					{
+						type: "text",
+						text: format(pr.err),
+					},
+				],
+				isError: true,
+			}
+		}
 
+		return {
+			content: [
 				{
-					name: "portal_get_tariff",
-					description: "Get the current tariff.",
-					inputSchema: toInputSchema(z.object({})),
-				},
-				{
-					name: "portal_get_quota",
-					description: "Get the current quota.",
-					inputSchema: toInputSchema(z.object({})),
-				},
-
-				{
-					name: "settings_get_supported_cultures",
-					description: "Get a list of the supported cultures, languages.",
-					inputSchema: toInputSchema(z.object({})),
-				},
-				{
-					name: "settings_get_time_zones",
-					description: "Get a list of the available time zones.",
-					inputSchema: toInputSchema(z.object({})),
+					type: "text",
+					text: pr.v,
 				},
 			],
 		}
 	}
 
-	async callTools(req: CallToolRequest, extra: RequestHandlerExtra<ServerRequest, ServerNotification>): Promise<CallToolResult> {
+	async routeMetaTool(req: CallToolRequest, extra: Extra): Promise<Result<string, Error>> {
+		let cr: Result<SimplifiedToolInfo[] | ToolInputSchema | string, Error>
+
+		try {
+			switch (req.params.name) {
+			case "list_toolsets":
+				cr = this.meta.listToolsets()
+				break
+			case "list_tools":
+				cr = this.meta.listTools(req.params.arguments)
+				break
+			case "get_tool_input_schema":
+				cr = this.meta.getToolInputSchema(req.params.arguments)
+				break
+			case "call_tool":
+				cr = await this.meta.callTool(req, extra)
+				break
+			default:
+				cr = error(new Error(`Tool ${req.params.name} not found.`))
+				break
+			}
+		} catch (err) {
+			if (err instanceof Error) {
+				cr = error(err)
+			} else {
+				cr = error(new Error("Unknown error.", {cause: err}))
+			}
+		}
+
+		if (cr.err) {
+			return error(cr.err)
+		}
+
+		if (typeof cr.v === "string") {
+			return ok(cr.v)
+		}
+
+		let s = safeSync(JSON.stringify, cr.v, undefined, 2)
+		if (s.err) {
+			return error(new Error("Stringifying value", {cause: s.err}))
+		}
+
+		return ok(s.v)
+	}
+
+	async routeRegularTool(req: CallToolRequest, extra: Extra): Promise<Result<string, Error>> {
 		let cr: Result<Response | string | object, Error>
 
 		try {
@@ -420,25 +566,6 @@ export class Server {
 			return error(new Error(`Unknown result type ${typeof cr.v}`))
 		})()
 
-		if (pr.err) {
-			return {
-				content: [
-					{
-						type: "text",
-						text: format(pr.err),
-					},
-				],
-				isError: true,
-			}
-		}
-
-		return {
-			content: [
-				{
-					type: "text",
-					text: pr.v,
-				},
-			],
-		}
+		return pr
 	}
 }

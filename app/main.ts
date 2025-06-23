@@ -59,6 +59,8 @@ async function main(): Promise<void> {
 		client: lc,
 		resolver: lr,
 		uploader: lu,
+		dynamic: ac.data.dynamic,
+		toolsets: ac.data.toolsets,
 	}
 
 	let _ = new Server(sc)
