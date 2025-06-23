@@ -50,7 +50,7 @@ DOCSPACE_ORIGIN=
 # The user agent to include in the User-Agent header for DocSpace API requests.
 # Type: String
 # Presence: Optional
-# Default: @onlyoffice/docspace-mcp v1.1.0
+# Default: @onlyoffice/docspace-mcp v1.2.0
 DOCSPACE_USER_AGENT=
 
 # The API key for accessing the DocSpace API.
