@@ -57,6 +57,14 @@ if (process.env.DOCSPACE_PASSWORD !== undefined) {
 	args.push("-e", `DOCSPACE_PASSWORD=${process.env.DOCSPACE_PASSWORD}`)
 }
 
+if (process.env.DOCSPACE_DYNAMIC !== undefined) {
+	args.push("-e", `DOCSPACE_DYNAMIC=${process.env.DOCSPACE_DYNAMIC}`)
+}
+
+if (process.env.DOCSPACE_TOOLSETS !== undefined) {
+	args.push("-e", `DOCSPACE_TOOLSETS=${process.env.DOCSPACE_TOOLSETS}`)
+}
+
 args.push("--", "node")
 
 if (process.env.HTTP_PROXY !== undefined) {

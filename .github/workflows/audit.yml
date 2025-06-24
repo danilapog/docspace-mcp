@@ -30,6 +30,9 @@ jobs:
     - name: Lint Package
       run: pnpm lint
 
+    - name: Check Package
+      run: pnpm check
+
     # Tests are not ready yet
     # - name: Test Package
     #   run: pnpm test

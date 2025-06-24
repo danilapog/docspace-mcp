@@ -17,45 +17,25 @@
  */
 
 import * as z from "zod"
+import * as server from "../lib/server.ts"
 import pack from "../package.json" with {type: "json"}
+import type {Result} from "../util/result.ts"
+import {error, ok} from "../util/result.ts"
 
 export type Config = z.infer<typeof ConfigSchema>
 
-export const RawConfigSchema = z.
+export const ConfigSchema = z.
 	object({
-		DOCSPACE_BASE_URL: z.
-			string().
-			url().
-			describe("The base URL of the DocSpace instance. This configuration is required for making API requests to DocSpace."),
-		DOCSPACE_ORIGIN: z.
-			string().
-			url().
-			optional().
-			describe("The origin of the DocSpace instance. This configuration is not required but can be used to specify the `Origin` header in requests to DocSpace."),
-		DOCSPACE_USER_AGENT: z.
-			string().
-			optional().
-			describe("The user agent to use for requests. This configuration is not required but can be used to specify the `User-Agent` header in requests to DocSpace.").
-			default(`${pack.name} v${pack.version}`),
-		DOCSPACE_API_KEY: z.
-			string().
-			optional().
-			describe("The API key for accessing the DocSpace API. This configuration is required if nether `DOCSPACE_AUTH_TOKEN` nor `DOCSPACE_USERNAME` and `DOCSPACE_PASSWORD` are provided."),
-		DOCSPACE_AUTH_TOKEN: z.
-			string().
-			optional().
-			describe("The authentication token for accessing the DocSpace API. This configuration is required if neither `DOCSPACE_API_KEY` nor `DOCSPACE_USERNAME` and `DOCSPACE_PASSWORD` are provided."),
-		DOCSPACE_USERNAME: z.
-			string().
-			optional().
-			describe("The username for accessing the DocSpace API using basic authentication. This configuration is required if neither `DOCSPACE_API_KEY` nor `DOCSPACE_AUTH_TOKEN` are provided. This is used in conjunction with `DOCSPACE_PASSWORD`."),
-		DOCSPACE_PASSWORD: z.
-			string().
-			optional().
-			describe("The password for accessing the DocSpace API using basic authentication. This configuration is required if neither `DOCSPACE_API_KEY` nor `DOCSPACE_AUTH_TOKEN` are provided. This is used in conjunction with `DOCSPACE_USERNAME`."),
-	})
-
-export const ConfigSchema = RawConfigSchema.
+		DOCSPACE_BASE_URL: z.string().url(),
+		DOCSPACE_ORIGIN: z.string().url().optional(),
+		DOCSPACE_USER_AGENT: z.string().optional().default(`${pack.name} v${pack.version}`),
+		DOCSPACE_API_KEY: z.string().optional(),
+		DOCSPACE_AUTH_TOKEN: z.string().optional(),
+		DOCSPACE_USERNAME: z.string().optional(),
+		DOCSPACE_PASSWORD: z.string().optional(),
+		DOCSPACE_DYNAMIC: z.string().optional().default("false"),
+		DOCSPACE_TOOLSETS: z.string().optional().default("all"),
+	}).
 	refine(
 		(o) => {
 			let a = Boolean(o.DOCSPACE_USERNAME)
@@ -79,19 +59,132 @@ export const ConfigSchema = RawConfigSchema.
 			message: "Only one of DOCSPACE_API_KEY, DOCSPACE_AUTH_TOKEN, or (DOCSPACE_USERNAME and DOCSPACE_PASSWORD) must be set.",
 		},
 	).
-	transform((o) => ({
-		baseUrl: ensureTrailingSlash(o.DOCSPACE_BASE_URL),
-		origin: o.DOCSPACE_ORIGIN,
-		userAgent: o.DOCSPACE_USER_AGENT,
-		apiKey: o.DOCSPACE_API_KEY,
-		authToken: o.DOCSPACE_AUTH_TOKEN,
-		username: o.DOCSPACE_USERNAME,
-		password: o.DOCSPACE_PASSWORD,
-	}))
+	refine(
+		(o) => {
+			let d = toBool(o.DOCSPACE_DYNAMIC)
+			if (d.err) {
+				return false
+			}
+			return true
+		},
+		{
+			path: ["DOCSPACE_DYNAMIC"],
+			message: "Invalid value for DOCSPACE_DYNAMIC. Must be one of: yes, y, true, 1, no, n, false, 0.",
+		},
+	).
+	refine(
+		(o) => {
+			let c = 0
+
+			for (let n of o.DOCSPACE_TOOLSETS.split(",")) {
+				n = n.trim().toLocaleLowerCase()
+
+				if (n === "") {
+					continue
+				}
+
+				if (n === "all") {
+					c += 1
+					continue
+				}
+
+				let has = false
+
+				for (let t of server.toolsets) {
+					if (t.name === n) {
+						has = true
+						break
+					}
+				}
+
+				if (has) {
+					c += 1
+					continue
+				}
+
+				return false
+			}
+
+			if (c === 0) {
+				return false
+			}
+
+			return true
+		},
+		{
+			path: ["DOCSPACE_TOOLSETS"],
+			message: (() => {
+				let n = ""
+
+				for (let t of server.toolsets) {
+					n += `${t.name}, `
+				}
+
+				if (n.length !== 0) {
+					n = n.slice(0, -2)
+				}
+
+				return `Invalid toolset name in DOCSPACE_TOOLSETS or no toolsets specified. Must be one of: ${n}, or 'all'.`
+			})(),
+		},
+	).
+	transform((o) => {
+		let dynamic = toBool(o.DOCSPACE_DYNAMIC)
+		if (dynamic.err) {
+			throw dynamic.err
+		}
+
+		let toolsets: string[] = []
+
+		for (let n of o.DOCSPACE_TOOLSETS.split(",")) {
+			n = n.trim().toLocaleLowerCase()
+
+			if (n === "") {
+				continue
+			}
+
+			if (n === "all") {
+				for (let t of server.toolsets) {
+					toolsets.push(t.name)
+				}
+				break
+			}
+
+			for (let t of server.toolsets) {
+				if (t.name === n) {
+					toolsets.push(t.name)
+					break
+				}
+			}
+		}
+
+		return {
+			baseUrl: ensureTrailingSlash(o.DOCSPACE_BASE_URL),
+			origin: o.DOCSPACE_ORIGIN,
+			userAgent: o.DOCSPACE_USER_AGENT,
+			apiKey: o.DOCSPACE_API_KEY,
+			authToken: o.DOCSPACE_AUTH_TOKEN,
+			username: o.DOCSPACE_USERNAME,
+			password: o.DOCSPACE_PASSWORD,
+			dynamic: dynamic.v,
+			toolsets,
+		}
+	})
 
 function ensureTrailingSlash(u: string): string {
 	if (!u.endsWith("/")) {
 		u = `${u}/`
 	}
 	return u
+}
+
+function toBool(s: string): Result<boolean, Error> {
+	s = s.trim().toLocaleLowerCase()
+	if (s === "yes" || s === "y" || s === "true" || s === "1") {
+		return ok(true)
+	}
+	if (s === "no" || s === "n" || s === "false" || s === "0") {
+		return ok(false)
+	}
+	return error(new Error(`Invalid boolean value: ${s}. Must be one of: yes, y, true, 1, no, n, false, 0.`))
 }
