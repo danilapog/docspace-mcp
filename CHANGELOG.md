@@ -16,7 +16,7 @@ There are no noticeable changes in version [unreleased].
 
 ### Changed
 
-- Rename tool `others_get_available_room_invitation_access` to `others_get_available_room_access` ([cf92803])
+- Rename tool `others_get_available_room_invitation_access` to `others_get_available_room_access` ([cf92803]).
 - Require the `count` filter field be in the range from 1 to 50 ([ae0c83a]).
 - Make all filters mandatory ([756fd7b]).
 

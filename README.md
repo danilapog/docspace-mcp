@@ -38,13 +38,13 @@ The only way to configure ONLYOFFICE DocSpace MCP server is through environment 
 # The base URL of the DocSpace instance for API requests.
 # Type: URL
 # Presence: Required
-# Example: https://your-instance.onlyoffice.io/
+# Example: https://your-instance.onlyoffice.com
 DOCSPACE_BASE_URL=
 
 # The origin URL to include in the Origin header for DocSpace API requests.
 # Type: URL
 # Presence: Optional
-# Example: https://your-instance.onlyoffice.io/
+# Example: https://your-instance.onlyoffice.com
 DOCSPACE_ORIGIN=
 
 # The user agent to include in the User-Agent header for DocSpace API requests.
