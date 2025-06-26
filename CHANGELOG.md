@@ -4,7 +4,19 @@ This document records all notable changes to the project, following the [Keep a 
 
 ## [Unreleased]
 
-There are no noticeable changes in version [unreleased].
+<!-- There are no noticeable changes in version [unreleased]. -->
+
+### Added
+
+- Add more filters for tools `get_folder`, `files_get_my_folder`, `files_get_room_security_info`, `files_get_rooms_folder`, and `people_get_all` ([6d36beb]).
+
+### Changed
+
+- Remove string literals from `RoomType`, `FileShare`, and `FileType` schemas ([6d36beb]).
+
+### Fixed
+
+- Remove invalid filters from tools `get_folder`, `files_get_my_folder`, `files_set_room_security`, `files_get_room_security_info`, `files_get_rooms_folder`, and `people_get_all_tool` ([6d36beb]]).
 
 ## [1.2.0] - 2025-06-24
 
@@ -100,6 +112,7 @@ There are no noticeable changes in version [unreleased].
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[6d36beb]: https://github.com/onlyoffice/docspace-mcp/commit/6d36beb94176e45acba35bd660e37294fc0fe22a/
 [756fd7b]: https://github.com/onlyoffice/docspace-mcp/commit/756fd7bb8b97f6d0721b369fbcd265efe1a3686c/
 [8e2e54a]: https://github.com/onlyoffice/docspace-mcp/commit/8e2e54a3f67647ea844047e90be189714baf677d/
 [ae0c83a]: https://github.com/onlyoffice/docspace-mcp/commit/ae0c83aa87de4db1cf539547b866d656831eae94/
