@@ -31,6 +31,7 @@ import {
 	GetRoomSecurityFiltersSchema,
 	GetRoomsFolderFiltersSchema,
 	RenameFolderFiltersSchema,
+	RoomTypeSchema,
 	SetRoomSecurityFiltersSchema,
 	UpdateRoomFiltersSchema,
 } from "../client/internal/schemas.ts"
@@ -49,7 +50,7 @@ import type {
 	UpdateRoomOptions,
 } from "../client.ts"
 import type {Server} from "../server.ts"
-import {RoomInvitationAccessSchema, RoomTypeSchema} from "./internal/schemas.ts"
+import {RoomInvitationAccessSchema} from "./internal/schemas.ts"
 
 export const DeleteFileInputSchema = z.object({
 	fileId: z.number().describe("The ID of the file to delete."),
@@ -144,7 +145,7 @@ export const MoveBatchItemsInputSchema = z.object({
 
 export const CreateRoomInputSchema = z.object({
 	title: z.string().describe("The title of the room to create."),
-	roomType: RoomTypeSchema.optional().default("PublicRoom").describe("The type of the room to create."),
+	roomType: RoomTypeSchema.optional().default(6).describe("The type of the room to create."),
 	filters: CreateRoomFiltersSchema.describe("The filters to apply to the room creation."),
 })
 
