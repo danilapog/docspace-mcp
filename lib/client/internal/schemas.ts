@@ -237,11 +237,11 @@ export const CreateFolderSchema = z.object({
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Core/ApiModels/RequestDto/CreateRoomRequestDto.cs/#L30 | DocSpace Reference}
  */
 export const RoomTypeSchema = z.union([
-	z.literal(1).describe("Form filling room"),
-	z.literal(2).describe("Collaboration room"),
-	z.literal(5).describe("Custom room"),
-	z.literal(6).describe("Public room"),
-	z.literal(8).describe("Virtual data room"),
+	z.literal(1).describe("Form Filling Room. Upload PDF forms into the room. Invite members and guests to fill out a PDF form. Review completed forms and analyze data automatically collected in a spreadsheet."),
+	z.literal(2).describe("Collaboration room. Collaborate on one or multiple documents with your team."),
+	z.literal(5).describe("Custom room. Apply your own settings to use this room for any custom purpose."),
+	z.literal(6).describe("Public room. Share documents for viewing, editing, commenting, or reviewing without registration. You can also embed this room into any web interface."),
+	z.literal(8).describe("Virtual Data Room. Use VDR for advanced file security and transparency. Set watermarks, automatically index and track all content, restrict downloading and copying."),
 ])
 
 /**
