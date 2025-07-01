@@ -17,7 +17,7 @@ This document records all notable changes to the project, following the [Keep a 
 ### Fixed
 
 - Fix handling error responses with a non-JSON body ([7e9be5d]).
-- Remove invalid filters from tools `get_folder`, `files_get_my_folder`, `files_set_room_security`, `files_get_room_security_info`, `files_get_rooms_folder`, and `people_get_all_tool` ([6d36beb]]).
+- Remove invalid filters from tools `get_folder`, `files_get_my_folder`, `files_set_room_security`, `files_get_room_security_info`, `files_get_rooms_folder`, and `people_get_all_tool` ([6d36beb]).
 
 ## [1.2.0] - 2025-06-24
 
