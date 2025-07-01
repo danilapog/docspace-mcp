@@ -95,7 +95,7 @@ This document records all notable changes to the project, following the [Keep a 
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
 [Unreleased]: https://github.com/onlyoffice/docspace-mcp/compare/v1.2.0...HEAD/
-[1.1.0]: https://github.com/onlyoffice/docspace-mcp/compare/v1.1.0...v1.2.0/
+[1.2.0]: https://github.com/onlyoffice/docspace-mcp/compare/v1.1.0...v1.2.0/
 [1.1.0]: https://github.com/onlyoffice/docspace-mcp/compare/v1.0.0...v1.1.0/
 [1.0.0]: https://github.com/onlyoffice/docspace-mcp/compare/v0.2.0...v1.0.0/
 [0.2.0]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.3...v0.2.0/
