@@ -144,7 +144,11 @@ export async function checkResponse(req: Request, res: globalThis.Response): Pro
 		return
 	}
 
-	return err
+	let r = new Response(req, res)
+	let m = `${req.method} ${req.url}: ${res.status} ${res.statusText}`
+	let e = new ErrorResponse(r, m)
+
+	return e
 }
 
 export async function parseResponse(req: Request, res: globalThis.Response): Promise<Result<[unknown, Response], Error>> {
