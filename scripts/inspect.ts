@@ -17,11 +17,17 @@
  */
 
 import {spawn} from "node:child_process"
-import {load} from "./env.ts"
+import {environ, load} from "./env.ts"
 
 load()
 
-const args: string[] = ["node"]
+const args: string[] = ["exec", "mcp-inspector"]
+
+for (let e of environ()) {
+	args.push("-e", e)
+}
+
+args.push("--", "node")
 
 if (process.env.HTTP_PROXY !== undefined) {
 	args.push("--require", "./util/proxy.ts")

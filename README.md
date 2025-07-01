@@ -9,6 +9,10 @@
 
 [Model Context Protocol] (MCP) is a standardized protocol for managing context between large language models (LLMs) and external systems. This repository provides an MCP server for [ONLYOFFICE DocSpace.]
 
+> [!WARNING]
+>
+> This ONLYOFFICE DocSpace MCP server is currently in **preview** state. While functional, it may undergo breaking changes, have incomplete features, or contain bugs. Use with caution in production environments and expect potential updates that could affect compatibility.
+
 ## Installation
 
 Most clients that implement the MCP protocol have a common configuration file in JSON format, inside which you can add ONLYOFFICE DocSpace MCP server as follows:
@@ -38,19 +42,19 @@ The only way to configure ONLYOFFICE DocSpace MCP server is through environment 
 # The base URL of the DocSpace instance for API requests.
 # Type: URL
 # Presence: Required
-# Example: https://your-instance.onlyoffice.io/
+# Example: https://your-instance.onlyoffice.com
 DOCSPACE_BASE_URL=
 
 # The origin URL to include in the Origin header for DocSpace API requests.
 # Type: URL
 # Presence: Optional
-# Example: https://your-instance.onlyoffice.io/
+# Example: https://your-instance.onlyoffice.com
 DOCSPACE_ORIGIN=
 
 # The user agent to include in the User-Agent header for DocSpace API requests.
 # Type: String
 # Presence: Optional
-# Default: @onlyoffice/docspace-mcp v1.2.0
+# Default: @onlyoffice/docspace-mcp v1.3.0
 DOCSPACE_USER_AGENT=
 
 # The API key for accessing the DocSpace API.

@@ -6,6 +6,21 @@ This document records all notable changes to the project, following the [Keep a 
 
 There are no noticeable changes in version [unreleased].
 
+## [1.3.0] - 2025-07-01
+
+### Added
+
+- Add more filters for tools `get_folder`, `files_get_my_folder`, `files_get_room_security_info`, `files_get_rooms_folder`, and `people_get_all` ([6d36beb]).
+
+### Changed
+
+- Remove string literals from `RoomType`, `FileShare`, and `FileType` schemas ([6d36beb], [97e1454]).
+
+### Fixed
+
+- Fix handling error responses with a non-JSON body ([7e9be5d]).
+- Remove invalid filters from tools `get_folder`, `files_get_my_folder`, `files_set_room_security`, `files_get_room_security_info`, `files_get_rooms_folder`, and `people_get_all_tool` ([6d36beb]).
+
 ## [1.2.0] - 2025-06-24
 
 ### Added
@@ -16,7 +31,7 @@ There are no noticeable changes in version [unreleased].
 
 ### Changed
 
-- Rename tool `others_get_available_room_invitation_access` to `others_get_available_room_access` ([cf92803])
+- Rename tool `others_get_available_room_invitation_access` to `others_get_available_room_access` ([cf92803]).
 - Require the `count` filter field be in the range from 1 to 50 ([ae0c83a]).
 - Make all filters mandatory ([756fd7b]).
 
@@ -90,8 +105,9 @@ There are no noticeable changes in version [unreleased].
 [Keep a Changelog]: https://keepachangelog.com/en/1.1.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
-[Unreleased]: https://github.com/onlyoffice/docspace-mcp/compare/v1.2.0...HEAD/
-[1.1.0]: https://github.com/onlyoffice/docspace-mcp/compare/v1.1.0...v1.2.0/
+[Unreleased]: https://github.com/onlyoffice/docspace-mcp/compare/v1.3.0...HEAD/
+[1.3.0]: https://github.com/onlyoffice/docspace-mcp/compare/v1.2.0...v1.3.0/
+[1.2.0]: https://github.com/onlyoffice/docspace-mcp/compare/v1.1.0...v1.2.0/
 [1.1.0]: https://github.com/onlyoffice/docspace-mcp/compare/v1.0.0...v1.1.0/
 [1.0.0]: https://github.com/onlyoffice/docspace-mcp/compare/v0.2.0...v1.0.0/
 [0.2.0]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.3...v0.2.0/
@@ -100,6 +116,9 @@ There are no noticeable changes in version [unreleased].
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[97e1454]: https://github.com/onlyoffice/docspace-mcp/commit/97e1454d28425b5549e4e0c7562d19e2136919c7/
+[7e9be5d]: https://github.com/onlyoffice/docspace-mcp/commit/7e9be5dd0fc59c9dca2964a9588db914d020472c/
+[6d36beb]: https://github.com/onlyoffice/docspace-mcp/commit/6d36beb94176e45acba35bd660e37294fc0fe22a/
 [756fd7b]: https://github.com/onlyoffice/docspace-mcp/commit/756fd7bb8b97f6d0721b369fbcd265efe1a3686c/
 [8e2e54a]: https://github.com/onlyoffice/docspace-mcp/commit/8e2e54a3f67647ea844047e90be189714baf677d/
 [ae0c83a]: https://github.com/onlyoffice/docspace-mcp/commit/ae0c83aa87de4db1cf539547b866d656831eae94/

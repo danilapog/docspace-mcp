@@ -20,6 +20,7 @@ import * as z from "zod"
 import {zodToJsonSchema} from "zod-to-json-schema"
 import type {Result} from "../../util/result.ts"
 import {error, ok, safeAsync, safeSync} from "../../util/result.ts"
+import {RoomTypeSchema} from "../client/internal/schemas.ts"
 import type {BulkDownloadOptions, CreateUploadSessionOptions, Response} from "../client.ts"
 import type {Server} from "../server.ts"
 import {
@@ -27,7 +28,6 @@ import {
 	CustomRoomInvitationAccessSchema,
 	FormFillingRoomInvitationAccessSchema,
 	PublicRoomInvitationAccessSchema,
-	RoomTypeSchema,
 	VirtualDataRoomInvitationAccessSchema,
 } from "./internal/schemas.ts"
 
@@ -116,16 +116,12 @@ export class OthersToolset {
 		let ex: string
 
 		switch (gd.fileType) {
-		case 5:
-		case "Spreadsheet":
+		case 5: // Spreadsheet
 			ex = ".csv"
 			break
-		case 6:
-		case "Presentation":
-		case 7:
-		case "Document":
-		case 10:
-		case "Pdf":
+		case 6: // Presentation
+		case 7: // Document
+		case 10: // Pdf
 			ex = ".txt"
 			break
 		default:

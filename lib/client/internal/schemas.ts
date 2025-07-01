@@ -36,56 +36,10 @@ export const TypeObjectSchema = z.union([
  */
 export const JsonElementSchema = z.union([z.string(), z.number()])
 
-/**
- * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Core/Core/Entries/OrderBy.cs/#L30 | DocSpace Reference}
- */
-export const SortedByTypeSchema = z.union([
-	z.literal("DateAndTime"),
-	z.literal("AZ"),
-	z.literal("Size"),
-	z.literal("Author"),
-	z.literal("Type"),
-	z.literal("New"),
-	z.literal("DateAndTimeCreation"),
-	z.literal("RoomType"),
-	z.literal("Tags"),
-	z.literal("Room"),
-	z.literal("CustomOrder"),
-	z.literal("LastOpened"),
-	z.literal("UsedSpace"),
+export const NumericSortOrderSchema = z.union([
+	z.literal(0).describe("Ascending order"),
+	z.literal(1).describe("Descending order"),
 ])
-
-/**
- * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/common/ASC.Api.Core/Core/ApiContext.cs/#L94 | DocSpace Reference}
- */
-export const SortOderSchema = z.union([
-	z.literal("ascending"),
-	z.literal("descending"),
-])
-
-/**
- * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/common/ASC.Api.Core/Core/ApiContext.cs/#L83 | DocSpace Reference}
- */
-export const FilterOpSchema = z.union([
-	z.literal("contains"),
-	z.literal("equals"),
-	z.literal("startsWith"),
-	z.literal("present"),
-])
-
-/**
- * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/common/ASC.Api.Core/Core/ApiContext.cs/#L32 | DocSpace Reference}
- */
-export const FiltersSchema = z.object({
-	count: z.number().min(1).max(50).default(30).describe("The number of items to return."),
-	startIndex: z.number().optional().describe("The number of items to skip before starting to return items."),
-	sortBy: z.union([SortedByTypeSchema, z.string()]).optional().describe("The field to sort by."),
-	sortOrder: SortOderSchema.optional().describe("The order to sort by."),
-	filterBy: z.string().optional().describe("The field to filter by."),
-	filterOp: FilterOpSchema.optional().describe("The operation to use for filtering."),
-	filterValue: z.string().optional().describe("The value to filter by."),
-	updatedSince: z.string().optional().describe("The date to filter items updated or created since."),
-})
 
 /**
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.1-server/common/ASC.Api.Core/Core/ApiDateTime.cs/#L36 | DocSpace Reference}
@@ -282,36 +236,13 @@ export const CreateFolderSchema = z.object({
 /**
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Core/ApiModels/RequestDto/CreateRoomRequestDto.cs/#L30 | DocSpace Reference}
  */
-export const RoomTypeSchema = z.
-	union([
-		z.literal(1),
-		z.literal(2),
-		z.literal(5),
-		z.literal(6),
-		z.literal(8),
-		z.literal("FillingFormsRoom"),
-		z.literal("EditingRoom"),
-		z.literal("CustomRoom"),
-		z.literal("PublicRoom"),
-		z.literal("VirtualDataRoom"),
-	]).
-	transform((v) => {
-		// DocSpace has a bug that does not allow the use string literals.
-		switch (v) {
-		case "FillingFormsRoom":
-			return 1
-		case "EditingRoom":
-			return 2
-		case "CustomRoom":
-			return 5
-		case "PublicRoom":
-			return 6
-		case "VirtualDataRoom":
-			return 8
-		default:
-			return v
-		}
-	})
+export const RoomTypeSchema = z.union([
+	z.literal(1).describe("Form Filling Room. Upload PDF forms into the room. Invite members and guests to fill out a PDF form. Review completed forms and analyze data automatically collected in a spreadsheet."),
+	z.literal(2).describe("Collaboration room. Collaborate on one or multiple documents with your team."),
+	z.literal(5).describe("Custom room. Apply your own settings to use this room for any custom purpose."),
+	z.literal(6).describe("Public room. Share documents for viewing, editing, commenting, or reviewing without registration. You can also embed this room into any web interface."),
+	z.literal(8).describe("Virtual Data Room. Use VDR for advanced file security and transparency. Set watermarks, automatically index and track all content, restrict downloading and copying."),
+])
 
 /**
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Core/ApiModels/RequestDto/UpdateRoomRequestDto.cs/#L32 | DocSpace Reference}
@@ -338,64 +269,20 @@ export const DeleteFolderSchema = z.object({
 /**
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Core/Core/Security/FileShare.cs/#L31 | DocSpace Reference}
  */
-export const FileShareSchema = z.
-	union([
-		z.literal(0),
-		z.literal(1),
-		z.literal(2),
-		z.literal(3),
-		z.literal(4),
-		z.literal(5),
-		z.literal(6),
-		z.literal(7),
-		z.literal(8),
-		z.literal(9),
-		z.literal(10),
-		z.literal(11),
-		z.literal("None"),
-		z.literal("ReadWrite"),
-		z.literal("Read"),
-		z.literal("Restrict"),
-		z.literal("Varies"),
-		z.literal("Review"),
-		z.literal("Comment"),
-		z.literal("FillForms"),
-		z.literal("CustomFilter"),
-		z.literal("RoomManager"),
-		z.literal("Editing"),
-		z.literal("ContentCreator"),
-	]).
-	transform((v) => {
-		// DocSpace has a bug that does not allow the use string literals.
-		switch (v) {
-		case "None":
-			return 0
-		case "ReadWrite":
-			return 1
-		case "Read":
-			return 2
-		case "Restrict":
-			return 3
-		case "Varies":
-			return 4
-		case "Review":
-			return 5
-		case "Comment":
-			return 6
-		case "FillForms":
-			return 7
-		case "CustomFilter":
-			return 8
-		case "RoomManager":
-			return 9
-		case "Editing":
-			return 10
-		case "ContentCreator":
-			return 11
-		default:
-			return v
-		}
-	})
+export const FileShareSchema = z.union([
+	z.literal(0).describe("None"),
+	z.literal(1).describe("Read and write"),
+	z.literal(2).describe("Read"),
+	z.literal(3).describe("Restrict"),
+	z.literal(4).describe("Varies"),
+	z.literal(5).describe("Review"),
+	z.literal(6).describe("Comment"),
+	z.literal(7).describe("Fill forms"),
+	z.literal(8).describe("Custom filter"),
+	z.literal(9).describe("Room manager"),
+	z.literal(10).describe("Editing"),
+	z.literal(11).describe("Content creator"),
+])
 
 /**
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Core/ApiModels/RequestDto/RoomInvitation.cs/#L29 | DocSpace Reference}
@@ -435,24 +322,15 @@ export const UpdateFileSchema = z.object({
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/web/ASC.Web.Core/Files/FileType.cs/#L32 | DocSpace Reference}
  */
 export const FileTypeSchema = z.union([
-	z.literal(0),
-	z.literal(1),
-	z.literal(2),
-	z.literal(3),
-	z.literal(4),
-	z.literal(5),
-	z.literal(6),
-	z.literal(7),
-	z.literal(10),
-	z.literal("Unknown"),
-	z.literal("Archive"),
-	z.literal("Video"),
-	z.literal("Audio"),
-	z.literal("Image"),
-	z.literal("Spreadsheet"),
-	z.literal("Presentation"),
-	z.literal("Document"),
-	z.literal("Pdf"),
+	z.literal(0).describe("Unknown"),
+	z.literal(1).describe("Archive"),
+	z.literal(2).describe("Video"),
+	z.literal(3).describe("Audio"),
+	z.literal(4).describe("Image"),
+	z.literal(5).describe("Spreadsheet"),
+	z.literal(6).describe("Presentation"),
+	z.literal(7).describe("Document"),
+	z.literal(10).describe("Pdf"),
 ])
 
 /**
@@ -684,6 +562,64 @@ export const RoomSecurityDtoFieldSchema = z.union([
 ])
 
 /**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.1-server/products/ASC.Files/Core/Core/ApplyFilterOption.cs/#L29 | DocSpace Reference}
+ */
+export const ApplyFilterOptionSchema = z.union([
+	z.literal("All"),
+	z.literal("Files"),
+	z.literal("Folders"),
+])
+
+/**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.1-server/products/ASC.Files/Core/Core/FilterTypeEnum.cs/#L32 | DocSpace Reference}
+ */
+export const FilterTypeSchema = z.union([
+	z.literal(0).describe("None"),
+	z.literal(1).describe("Files only"),
+	z.literal(2).describe("Folders only"),
+	z.literal(3).describe("Documents only"),
+	z.literal(4).describe("Presentations only"),
+	z.literal(5).describe("Spreadsheets only"),
+	z.literal(7).describe("Images only"),
+	z.literal(8).describe("By user"),
+	z.literal(9).describe("By department"),
+	z.literal(10).describe("Archive only"),
+	z.literal(11).describe("By extension"),
+	z.literal(12).describe("Media only"),
+	z.literal(13).describe("Filling forms rooms"),
+	z.literal(14).describe("Editing rooms"),
+	z.literal(17).describe("Custom rooms"),
+	z.literal(20).describe("Public rooms"),
+	z.literal(22).describe("Pdf"),
+	z.literal(23).describe("Pdf form"),
+	z.literal(24).describe("Virtual data rooms"),
+])
+
+/**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.1-server/products/ASC.Files/Core/Core/Security/SubjectType.cs/#L33 | DocSpace Reference}
+ */
+export const ShareFilterTypeSchema = z.union([
+	z.literal(0).describe("User or group"),
+	z.literal(1).describe("Invitation link"),
+	z.literal(2).describe("External link"),
+	z.literal(4).describe("Additional external link"),
+	z.literal(8).describe("Primary external link"),
+	z.literal(16).describe("User"),
+	z.literal(32).describe("Group"),
+])
+
+/**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.1-server/products/ASC.Files/Core/Core/VirtualRooms/SearchArea.cs/#L32 | DocSpace Reference}
+ */
+export const SearchAreaSchema = z.union([
+	z.literal("Active"),
+	z.literal("Archive"),
+	z.literal("Any"),
+	z.literal("RecentByLinks"),
+	z.literal("Template"),
+])
+
+/**
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Core/HttpHandlers/ChunkedUploaderHandler.cs/#L218 | DocSpace Reference}
  */
 export const UploadChunkErrorResponseSchema = z.object({
@@ -743,7 +679,24 @@ export const CreateFolderFiltersSchema = z.object({
 	fields: z.array(FolderDtoFieldSchema).describe("The fields to include in the response."),
 })
 
-export const GetFolderFiltersSchema = FiltersSchema.extend({
+/**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.1-server/products/ASC.Files/Core/ApiModels/RequestDto/GetFolderRequestDto.cs/#L32 | DocSpace Reference}
+ */
+export const GetFolderFiltersSchema = z.object({
+	userIdOrGroupId: z.string().uuid().optional().describe("The user or group ID."),
+	filterType: FilterTypeSchema.optional().describe("The filter type."),
+	roomId: z.number().optional().describe("The room ID."),
+	excludeSubject: z.boolean().optional().describe("Specifies whether to exclude search by user or group ID."),
+	applyFilterOption: ApplyFilterOptionSchema.optional().describe("Specifies whether to return only files, only folders or all elements from the specified folder."),
+	extension: z.string().optional().describe("Specifies whether to search for the specific file extension."),
+	searchArea: SearchAreaSchema.optional().describe("The search area."),
+	// formsItemKey: z.string().describe("The forms item key."),
+	// formsItemType: z.string().describe("The forms item type."),
+	count: z.number().min(1).max(50).default(30).describe("The maximum number of items to retrieve in the request."),
+	startIndex: z.number().optional().describe("The zero-based index of the first item to retrieve in a paginated request."),
+	sortBy: z.string().optional().describe("Specifies the property used for sorting the folder request results."),
+	sortOrder: NumericSortOrderSchema.optional().describe("The order in which the results are sorted."),
+	filterValue: z.string().optional().describe("The text value used as a filter parameter for folder queries."),
 	fields: z.array(FolderContentDtoFieldSchema).describe("The fields to include in the response."),
 })
 
@@ -759,7 +712,18 @@ export const RenameFolderFiltersSchema = z.object({
 	fields: z.array(FolderDtoFieldSchema).describe("The fields to include in the response."),
 })
 
-export const GetMyFolderFiltersSchema = FiltersSchema.extend({
+/**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.1-server/products/ASC.Files/Core/ApiModels/RequestDto/GetFolderRequestDto.cs/#L116 | DocSpace Reference}
+ */
+export const GetMyFolderFiltersSchema = z.object({
+	userIdOrGroupId: z.string().uuid().optional().describe("The user or group ID."),
+	filterType: FilterTypeSchema.optional().describe("The filter type."),
+	applyFilterOption: ApplyFilterOptionSchema.optional().describe("Specifies whether to return only files, only folders or all elements."),
+	count: z.number().min(1).max(50).default(30).describe("The maximum number of items to retrieve in the response."),
+	startIndex: z.number().optional().describe("The starting position of the items to be retrieved."),
+	sortBy: z.string().optional().describe("The property used to specify the sorting criteria for folder contents."),
+	sortOrder: NumericSortOrderSchema.optional().describe("The order in which the results are sorted."),
+	filterValue: z.string().optional().describe("The text used for filtering or searching folder contents."),
 	fields: z.array(FolderContentDtoFieldSchema).describe("The fields to include in the response."),
 })
 
@@ -775,18 +739,54 @@ export const UpdateRoomFiltersSchema = z.object({
 	fields: z.array(FolderDtoFieldSchema).describe("The fields to include in the response."),
 })
 
-export const SetRoomSecurityFiltersSchema = FiltersSchema.extend({
+export const SetRoomSecurityFiltersSchema = z.object({
 	fields: z.array(RoomSecurityDtoFieldSchema).describe("The fields to include in the response."),
 })
 
-export const GetRoomSecurityFiltersSchema = FiltersSchema.extend({
+/**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.1-server/products/ASC.Files/Core/ApiModels/RequestDto/RoomSecurityInfoRequestDto.cs/#L32 | DocSpace Reference}
+ */
+export const GetRoomSecurityFiltersSchema = z.object({
+	filterType: ShareFilterTypeSchema.optional().describe("The filter type of the access rights."),
+	count: z.number().min(1).max(50).default(30).describe("The number of items to be retrieved or processed."),
+	startIndex: z.number().optional().describe("The starting index of the items to retrieve in a paginated request."),
+	filterValue: z.string().optional().describe("The text filter value used for filtering room security information."),
 	fields: z.array(RoomSecurityDtoFieldSchema).describe("The fields to include in the response."),
 })
 
-export const GetRoomsFolderFiltersSchema = FiltersSchema.extend({
+/**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.1-server/products/ASC.Files/Core/ApiModels/RequestDto/RoomContentRequestDto.cs/#L32 | DocSpace Reference}
+ */
+export const GetRoomsFolderFiltersSchema = z.object({
+	type: z.array(RoomTypeSchema).optional().describe("The filter by room type."),
+	subjectId: z.string().optional().describe("The filter by user ID."),
+	searchArea: SearchAreaSchema.optional().describe("The room search area (Active, Archive, Any, Recent by links)."),
+	withoutTags: z.boolean().optional().describe("Specifies whether to search by tags or not."),
+	tags: z.string().optional().describe("The tags in the serialized format."),
+	excludeSubject: z.boolean().optional().describe("Specifies whether to exclude search by user or group ID."),
+	// eslint-disable-next-line stylistic/max-len
+	// provider: ProviderFilterSchema.optional().describe("The filter by provider name (None, Box, DropBox, GoogleDrive, kDrive, OneDrive, SharePoint, WebDav, Yandex, Storage)."),
+	// eslint-disable-next-line stylistic/max-len
+	// subjectFilter: SubjectFilterSchema.optional().describe("The filter by user (Owner - 0, Member - 1)."),
+	// eslint-disable-next-line stylistic/max-len
+	// quotaFilter: QuotaFilterSchema.optional().describe("The filter by quota (All - 0, Default - 1, Custom - 2)."),
+	// eslint-disable-next-line stylistic/max-len
+	// storageFilter: StorageFilterSchema.optional().describe("The filter by storage (None - 0, Internal - 1, ThirdParty - 2)."),
+	count: z.number().min(1).max(50).default(30).describe("Specifies the maximum number of items to retrieve."),
+	startIndex: z.number().optional().describe("The index from which to start retrieving the room content."),
+	sortBy: z.string().optional().describe("Specifies the field by which the room content should be sorted."),
+	sortOrder: NumericSortOrderSchema.optional().describe("The order in which the results are sorted."),
+	filterValue: z.string().optional().describe("The text used for filtering or searching folder contents."),
 	fields: z.array(FolderContentDtoFieldSchema).describe("The fields to include in the response."),
 })
 
-export const GetAllFiltersSchema = FiltersSchema.extend({
+export const GetAllFiltersSchema = z.object({
+	count: z.number().min(1).max(50).default(30).describe("The maximum number of items to be retrieved in the response."),
+	startIndex: z.number().optional().describe("The zero-based index of the first item to be retrieved in a filtered result set."),
+	filterBy: z.string().optional().describe("Specifies the filter criteria for user-related queries."),
+	sortBy: z.string().optional().describe("Specifies the property or field name by which the results should be sorted."),
+	sortOrder: NumericSortOrderSchema.optional().describe("The order in which the results are sorted."),
+	filterSeparator: z.string().optional().describe("The character or string used to separate multiple filter values in a filtering query."),
+	filterValue: z.string().optional().describe("The text value used as an additional filter criterion for profiles retrieval."),
 	fields: z.array(EmployeeFullDtoFieldSchema).describe("The fields to include in the response."),
 })
