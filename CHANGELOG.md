@@ -4,7 +4,11 @@ This document records all notable changes to the project, following the [Keep a 
 
 ## [Unreleased]
 
-There are no noticeable changes in version [unreleased].
+<!-- There are no noticeable changes in version [unreleased]. -->
+
+### Fixed
+
+- Fix handling error responses with a non-JSON body ([7e9be5d]).
 
 ## [1.2.0] - 2025-06-24
 
@@ -100,6 +104,7 @@ There are no noticeable changes in version [unreleased].
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[7e9be5d]: https://github.com/onlyoffice/docspace-mcp/commit/7e9be5dd0fc59c9dca2964a9588db914d020472c/
 [756fd7b]: https://github.com/onlyoffice/docspace-mcp/commit/756fd7bb8b97f6d0721b369fbcd265efe1a3686c/
 [8e2e54a]: https://github.com/onlyoffice/docspace-mcp/commit/8e2e54a3f67647ea844047e90be189714baf677d/
 [ae0c83a]: https://github.com/onlyoffice/docspace-mcp/commit/ae0c83aa87de4db1cf539547b866d656831eae94/
