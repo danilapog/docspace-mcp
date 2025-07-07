@@ -269,7 +269,38 @@ export interface Config {
 	toolsets: string[]
 }
 
-export class Server {
+export class MisconfiguredServer {
+	server: McpServer
+	err: Error
+
+	constructor(server: McpServer, err: Error) {
+		this.server = server
+		this.err = err
+
+		this.server.setRequestHandler(ListToolsRequestSchema, this.listTools.bind(this))
+		this.server.setRequestHandler(CallToolRequestSchema, this.callTool.bind(this))
+	}
+
+	listTools(): ListToolsResult {
+		return {
+			tools,
+		}
+	}
+
+	callTool(): CallToolResult {
+		return {
+			content: [
+				{
+					type: "text",
+					text: format(this.err),
+				},
+			],
+			isError: true,
+		}
+	}
+}
+
+export class ConfiguredServer {
 	server: McpServer
 	client: Client
 	resolver: Resolver

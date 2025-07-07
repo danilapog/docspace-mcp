@@ -19,7 +19,7 @@
 import * as z from "zod"
 import type {Result} from "../../util/result.ts"
 import {error, ok} from "../../util/result.ts"
-import type {Server} from "../server.ts"
+import type {ConfiguredServer} from "../server.ts"
 import type {CallToolRequest, Extra, SimplifiedToolInfo, ToolInputSchema} from "./internal/protocol.ts"
 
 export const ListToolsInputSchema = z.object({
@@ -36,9 +36,9 @@ export const CallToolInputSchema = z.object({
 })
 
 export class MetaToolset {
-	private s: Server
+	private s: ConfiguredServer
 
-	constructor(s: Server) {
+	constructor(s: ConfiguredServer) {
 		this.s = s
 	}
 

@@ -20,22 +20,25 @@
 
 import {Server as ProtocolServer} from "@modelcontextprotocol/sdk/server/index.js"
 import {StdioServerTransport} from "@modelcontextprotocol/sdk/server/stdio.js"
+import type {SafeParseReturnType} from "zod"
 import type {Config as ClientConfig} from "../lib/client.ts"
 import {Client} from "../lib/client.ts"
 import {Resolver} from "../lib/resolver.ts"
 import type {Config as ServerConfig} from "../lib/server.ts"
-import {Server} from "../lib/server.ts"
+import {ConfiguredServer, MisconfiguredServer} from "../lib/server.ts"
 import {Uploader} from "../lib/uploader.ts"
 import pack from "../package.json" with {type: "json"}
 import type {Config as AppConfig} from "./config.ts"
 import {ConfigSchema} from "./config.ts"
 
 async function main(): Promise<void> {
-	let ac = ConfigSchema.safeParse(process.env)
-	if (!ac.success) {
-		throw new Error("Parsing config.", {cause: ac.error})
-	}
+	let c = ConfigSchema.safeParse(process.env)
+	let s = createServer(c)
+	let t = new StdioServerTransport()
+	await s.connect(t)
+}
 
+function createServer(config: SafeParseReturnType<unknown, AppConfig>): ProtocolServer {
 	let ps = new ProtocolServer(
 		{
 			name: pack.name,
@@ -49,25 +52,27 @@ async function main(): Promise<void> {
 		},
 	)
 
-	let lc = createClient(ac.data)
+	if (config.success) {
+		let lc = createClient(config.data)
 
-	let lr = new Resolver(lc.files.getOperationStatuses.bind(lc.files))
-	let lu = new Uploader(lc)
+		let lr = new Resolver(lc.files.getOperationStatuses.bind(lc.files))
+		let lu = new Uploader(lc)
 
-	let sc: ServerConfig = {
-		server: ps,
-		client: lc,
-		resolver: lr,
-		uploader: lu,
-		dynamic: ac.data.dynamic,
-		toolsets: ac.data.toolsets,
+		let sc: ServerConfig = {
+			server: ps,
+			client: lc,
+			resolver: lr,
+			uploader: lu,
+			dynamic: config.data.dynamic,
+			toolsets: config.data.toolsets,
+		}
+
+		let _ = new ConfiguredServer(sc)
+	} else {
+		let _ = new MisconfiguredServer(ps, config.error)
 	}
 
-	let _ = new Server(sc)
-
-	let pt = new StdioServerTransport()
-
-	await ps.connect(pt)
+	return ps
 }
 
 function createClient(config: AppConfig): Client {
