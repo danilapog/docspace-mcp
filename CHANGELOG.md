@@ -4,7 +4,11 @@ This document records all notable changes to the project, following the [Keep a 
 
 ## [Unreleased]
 
-There are no noticeable changes in version [unreleased].
+<!-- There are no noticeable changes in version [unreleased]. -->
+
+### Fixed
+
+- Verify that at least one of the authentication methods is set ([0ea66c8]).
 
 ## [1.3.0] - 2025-07-01
 
@@ -116,6 +120,7 @@ There are no noticeable changes in version [unreleased].
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[0ea66c8]: https://github.com/onlyoffice/docspace-mcp/commit/0ea66c84ddb9ee6899b093e64881a201d4601a4b/
 [97e1454]: https://github.com/onlyoffice/docspace-mcp/commit/97e1454d28425b5549e4e0c7562d19e2136919c7/
 [7e9be5d]: https://github.com/onlyoffice/docspace-mcp/commit/7e9be5dd0fc59c9dca2964a9588db914d020472c/
 [6d36beb]: https://github.com/onlyoffice/docspace-mcp/commit/6d36beb94176e45acba35bd660e37294fc0fe22a/

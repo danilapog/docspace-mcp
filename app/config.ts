@@ -43,8 +43,18 @@ export const ConfigSchema = z.
 			return a && b || !a && !b
 		},
 		{
-			path: ["DOCSPACE_USERNAME", "DOCSPACE_PASSWORD"],
 			message: "Both DOCSPACE_USERNAME and DOCSPACE_PASSWORD must be set or both must be unset.",
+		},
+	).
+	refine(
+		(o) => {
+			let a = Boolean(o.DOCSPACE_API_KEY)
+			let b = Boolean(o.DOCSPACE_AUTH_TOKEN)
+			let c = Boolean(o.DOCSPACE_USERNAME) && Boolean(o.DOCSPACE_PASSWORD)
+			return a || b || c
+		},
+		{
+			message: "At least one of DOCSPACE_API_KEY, DOCSPACE_AUTH_TOKEN, or (DOCSPACE_USERNAME and DOCSPACE_PASSWORD) must be set.",
 		},
 	).
 	refine(
@@ -55,7 +65,6 @@ export const ConfigSchema = z.
 			return Number(a) + Number(b) + Number(c) <= 1
 		},
 		{
-			path: ["DOCSPACE_API_KEY", "DOCSPACE_AUTH_TOKEN", "DOCSPACE_USERNAME", "DOCSPACE_PASSWORD"],
 			message: "Only one of DOCSPACE_API_KEY, DOCSPACE_AUTH_TOKEN, or (DOCSPACE_USERNAME and DOCSPACE_PASSWORD) must be set.",
 		},
 	).
@@ -68,7 +77,6 @@ export const ConfigSchema = z.
 			return true
 		},
 		{
-			path: ["DOCSPACE_DYNAMIC"],
 			message: "Invalid value for DOCSPACE_DYNAMIC. Must be one of: yes, y, true, 1, no, n, false, 0.",
 		},
 	).
@@ -112,7 +120,6 @@ export const ConfigSchema = z.
 			return true
 		},
 		{
-			path: ["DOCSPACE_TOOLSETS"],
 			message: (() => {
 				let n = ""
 
