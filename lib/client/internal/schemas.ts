@@ -17,7 +17,7 @@
  */
 
 import * as z from "zod"
-import {wrapUnion} from "../../../util/zod.ts"
+import {numberUnionToEnum, stringUnionToEnum, wrapUnion} from "../../../util/zod.ts"
 
 /**
  * {@link https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/reference-types/#the-object-type | .NET Reference}
@@ -255,7 +255,7 @@ export const UpdateRoomRequestSchema = z.object({
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Core/ApiModels/RequestDto/CreateRoomRequestDto.cs/#L72 | DocSpace Reference}
  */
 export const CreateRoomRequestDtoSchema = UpdateRoomRequestSchema.extend({
-	roomType: RoomTypeSchema.optional(),
+	roomType: numberUnionToEnum(RoomTypeSchema, "").optional(),
 })
 
 /**
@@ -289,7 +289,7 @@ export const FileShareSchema = z.union([
  */
 export const RoomInvitationSchema = EmailInvitationDtoSchema.extend({
 	id: z.string().optional(),
-	access: FileShareSchema.optional(),
+	access: numberUnionToEnum(FileShareSchema, "").optional(),
 })
 
 /**
@@ -344,7 +344,7 @@ export const FileEntryDtoFieldSchema = z.union([
 	// z.literal("originTitle").describe("The origin title of the file entry."),
 	// z.literal("originRoomTitle").describe("The origin room title of the file entry."),
 	z.literal("canShare").describe("Specifies if the file entry can be shared or not."),
-	z.literal("security").describe("The actions that can be perforrmed with the file entry."),
+	z.literal("security").describe("The actions that can be performed with the file entry."),
 	// z.literal("requestToken").describe("The request token of the file entry."),
 	z.literal("title").describe("The file entry title."),
 	z.literal("access").describe("The access rights to the file entry."),
@@ -370,7 +370,7 @@ export const FileEntryDtoFieldSchema = z.union([
  */
 export const FileDtoSchema = z.
 	object({
-		fileType: FileTypeSchema.optional(),
+		fileType: numberUnionToEnum(FileTypeSchema, "").optional(),
 	}).
 	passthrough()
 
@@ -500,7 +500,7 @@ export const FileShareDtoFieldSchema = z.union([
  */
 export const FolderDtoSchema = z.
 	object({
-		roomType: RoomTypeSchema.optional(),
+		roomType: numberUnionToEnum(RoomTypeSchema, "").optional(),
 	}).
 	passthrough()
 
@@ -672,11 +672,11 @@ export const AuthenticationTokenDtoSchema = z.
 	passthrough()
 
 export const GetFileInfoFiltersSchema = z.object({
-	fields: z.array(FileDtoFieldSchema).describe("The fields to include in the response."),
+	fields: z.array(stringUnionToEnum(FileDtoFieldSchema, "The fields to include in the response.")),
 })
 
 export const CreateFolderFiltersSchema = z.object({
-	fields: z.array(FolderDtoFieldSchema).describe("The fields to include in the response."),
+	fields: z.array(stringUnionToEnum(FolderDtoFieldSchema, "The fields to include in the response.")),
 })
 
 /**
@@ -684,7 +684,7 @@ export const CreateFolderFiltersSchema = z.object({
  */
 export const GetFolderFiltersSchema = z.object({
 	userIdOrGroupId: z.string().uuid().optional().describe("The user or group ID."),
-	filterType: FilterTypeSchema.optional().describe("The filter type."),
+	filterType: numberUnionToEnum(FilterTypeSchema, "The filter type.").optional(),
 	roomId: z.number().optional().describe("The room ID."),
 	excludeSubject: z.boolean().optional().describe("Specifies whether to exclude search by user or group ID."),
 	applyFilterOption: ApplyFilterOptionSchema.optional().describe("Specifies whether to return only files, only folders or all elements from the specified folder."),
@@ -695,21 +695,21 @@ export const GetFolderFiltersSchema = z.object({
 	count: z.number().min(1).max(50).default(30).describe("The maximum number of items to retrieve in the request."),
 	startIndex: z.number().optional().describe("The zero-based index of the first item to retrieve in a paginated request."),
 	sortBy: z.string().optional().describe("Specifies the property used for sorting the folder request results."),
-	sortOrder: NumericSortOrderSchema.optional().describe("The order in which the results are sorted."),
+	sortOrder: numberUnionToEnum(NumericSortOrderSchema, "The order in which the results are sorted.").optional(),
 	filterValue: z.string().optional().describe("The text value used as a filter parameter for folder queries."),
-	fields: z.array(FolderContentDtoFieldSchema).describe("The fields to include in the response."),
+	fields: z.array(stringUnionToEnum(FolderContentDtoFieldSchema, "The fields to include in the response.")),
 })
 
 export const GetFolderInfoFiltersSchema = z.object({
-	fields: z.array(FolderDtoFieldSchema).describe("The fields to include in the response."),
+	fields: z.array(stringUnionToEnum(FolderDtoFieldSchema, "The fields to include in the response.")),
 })
 
 export const GetFoldersFiltersSchema = z.object({
-	fields: z.array(FileEntryDtoFieldSchema).describe("The fields to include in the response."),
+	fields: z.array(stringUnionToEnum(FileEntryDtoFieldSchema, "The fields to include in the response.")),
 })
 
 export const RenameFolderFiltersSchema = z.object({
-	fields: z.array(FolderDtoFieldSchema).describe("The fields to include in the response."),
+	fields: z.array(stringUnionToEnum(FolderDtoFieldSchema, "The fields to include in the response.")),
 })
 
 /**
@@ -717,48 +717,48 @@ export const RenameFolderFiltersSchema = z.object({
  */
 export const GetMyFolderFiltersSchema = z.object({
 	userIdOrGroupId: z.string().uuid().optional().describe("The user or group ID."),
-	filterType: FilterTypeSchema.optional().describe("The filter type."),
+	filterType: numberUnionToEnum(FilterTypeSchema, "The filter type.").optional(),
 	applyFilterOption: ApplyFilterOptionSchema.optional().describe("Specifies whether to return only files, only folders or all elements."),
 	count: z.number().min(1).max(50).default(30).describe("The maximum number of items to retrieve in the response."),
 	startIndex: z.number().optional().describe("The starting position of the items to be retrieved."),
 	sortBy: z.string().optional().describe("The property used to specify the sorting criteria for folder contents."),
-	sortOrder: NumericSortOrderSchema.optional().describe("The order in which the results are sorted."),
+	sortOrder: numberUnionToEnum(NumericSortOrderSchema, "The order in which the results are sorted.").optional(),
 	filterValue: z.string().optional().describe("The text used for filtering or searching folder contents."),
-	fields: z.array(FolderContentDtoFieldSchema).describe("The fields to include in the response."),
+	fields: z.array(stringUnionToEnum(FolderContentDtoFieldSchema, "The fields to include in the response.")),
 })
 
 export const CreateRoomFiltersSchema = z.object({
-	fields: z.array(FolderDtoFieldSchema).describe("The fields to include in the response."),
+	fields: z.array(stringUnionToEnum(FolderDtoFieldSchema, "The fields to include in the response.")),
 })
 
 export const GetRoomInfoFiltersSchema = z.object({
-	fields: z.array(FolderDtoFieldSchema).describe("The fields to include in the response."),
+	fields: z.array(stringUnionToEnum(FolderDtoFieldSchema, "The fields to include in the response.")),
 })
 
 export const UpdateRoomFiltersSchema = z.object({
-	fields: z.array(FolderDtoFieldSchema).describe("The fields to include in the response."),
+	fields: z.array(stringUnionToEnum(FolderDtoFieldSchema, "The fields to include in the response.")),
 })
 
 export const SetRoomSecurityFiltersSchema = z.object({
-	fields: z.array(RoomSecurityDtoFieldSchema).describe("The fields to include in the response."),
+	fields: z.array(stringUnionToEnum(RoomSecurityDtoFieldSchema, "The fields to include in the response.")),
 })
 
 /**
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.1-server/products/ASC.Files/Core/ApiModels/RequestDto/RoomSecurityInfoRequestDto.cs/#L32 | DocSpace Reference}
  */
 export const GetRoomSecurityFiltersSchema = z.object({
-	filterType: ShareFilterTypeSchema.optional().describe("The filter type of the access rights."),
+	filterType: numberUnionToEnum(ShareFilterTypeSchema, "The filter type of the access rights.").optional(),
 	count: z.number().min(1).max(50).default(30).describe("The number of items to be retrieved or processed."),
 	startIndex: z.number().optional().describe("The starting index of the items to retrieve in a paginated request."),
 	filterValue: z.string().optional().describe("The text filter value used for filtering room security information."),
-	fields: z.array(RoomSecurityDtoFieldSchema).describe("The fields to include in the response."),
+	fields: z.array(stringUnionToEnum(RoomSecurityDtoFieldSchema, "The fields to include in the response.")),
 })
 
 /**
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.1-server/products/ASC.Files/Core/ApiModels/RequestDto/RoomContentRequestDto.cs/#L32 | DocSpace Reference}
  */
 export const GetRoomsFolderFiltersSchema = z.object({
-	type: z.array(RoomTypeSchema).optional().describe("The filter by room type."),
+	type: z.array(numberUnionToEnum(RoomTypeSchema, "The filter by room type.")).optional(),
 	subjectId: z.string().optional().describe("The filter by user ID."),
 	searchArea: SearchAreaSchema.optional().describe("The room search area (Active, Archive, Any, Recent by links)."),
 	withoutTags: z.boolean().optional().describe("Specifies whether to search by tags or not."),
@@ -775,9 +775,9 @@ export const GetRoomsFolderFiltersSchema = z.object({
 	count: z.number().min(1).max(50).default(30).describe("Specifies the maximum number of items to retrieve."),
 	startIndex: z.number().optional().describe("The index from which to start retrieving the room content."),
 	sortBy: z.string().optional().describe("Specifies the field by which the room content should be sorted."),
-	sortOrder: NumericSortOrderSchema.optional().describe("The order in which the results are sorted."),
+	sortOrder: numberUnionToEnum(NumericSortOrderSchema, "The order in which the results are sorted.").optional(),
 	filterValue: z.string().optional().describe("The text used for filtering or searching folder contents."),
-	fields: z.array(FolderContentDtoFieldSchema).describe("The fields to include in the response."),
+	fields: z.array(stringUnionToEnum(FolderContentDtoFieldSchema, "The fields to include in the response.")),
 })
 
 export const GetAllFiltersSchema = z.object({
@@ -785,8 +785,8 @@ export const GetAllFiltersSchema = z.object({
 	startIndex: z.number().optional().describe("The zero-based index of the first item to be retrieved in a filtered result set."),
 	filterBy: z.string().optional().describe("Specifies the filter criteria for user-related queries."),
 	sortBy: z.string().optional().describe("Specifies the property or field name by which the results should be sorted."),
-	sortOrder: NumericSortOrderSchema.optional().describe("The order in which the results are sorted."),
+	sortOrder: numberUnionToEnum(NumericSortOrderSchema, "The order in which the results are sorted.").optional(),
 	filterSeparator: z.string().optional().describe("The character or string used to separate multiple filter values in a filtering query."),
 	filterValue: z.string().optional().describe("The text value used as an additional filter criterion for profiles retrieval."),
-	fields: z.array(EmployeeFullDtoFieldSchema).describe("The fields to include in the response."),
+	fields: z.array(stringUnionToEnum(EmployeeFullDtoFieldSchema, "The fields to include in the response.")),
 })

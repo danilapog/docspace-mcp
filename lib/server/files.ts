@@ -19,6 +19,7 @@
 import * as z from "zod"
 import type {Result} from "../../util/result.ts"
 import {error, ok} from "../../util/result.ts"
+import {numberUnionToEnum} from "../../util/zod.ts"
 import {
 	CreateFolderFiltersSchema,
 	CreateRoomFiltersSchema,
@@ -145,7 +146,7 @@ export const MoveBatchItemsInputSchema = z.object({
 
 export const CreateRoomInputSchema = z.object({
 	title: z.string().describe("The title of the room to create."),
-	roomType: RoomTypeSchema.optional().default(6).describe("The type of the room to create."),
+	roomType: numberUnionToEnum(RoomTypeSchema, "The type of the room to create.").optional().default(6),
 	filters: CreateRoomFiltersSchema.describe("The filters to apply to the room creation."),
 })
 
@@ -180,9 +181,8 @@ export const SetRoomSecurityInputSchema = z.object({
 						string().
 						optional().
 						describe("The email of the user to invite or remove. Mutually exclusive with User ID."),
-					access: RoomInvitationAccessSchema.
-						optional().
-						describe("The access level to grant to the user. May vary depending on the type of room."),
+					access: numberUnionToEnum(RoomInvitationAccessSchema, "The access level to grant to the user. May vary depending on the type of room.").
+						optional(),
 				}).
 				describe("The invitation or removal of a user. Must contain either User ID or User Email.").
 				refine(
