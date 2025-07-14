@@ -4,7 +4,11 @@ This document records all notable changes to the project, following the [Keep a 
 
 ## [Unreleased]
 
-There are no noticeable changes in version [unreleased].
+<!-- There are no noticeable changes in version [unreleased]. -->
+
+### Changed
+
+- Replace `anyOf` with `enum` in JSON schemas ([9d35a14]).
 
 ## [1.3.1] - 2025-07-08
 
@@ -127,6 +131,7 @@ There are no noticeable changes in version [unreleased].
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[9d35a14]: https://github.com/onlyoffice/docspace-mcp/commit/9d35a14cfd08181141b4c769f1ebaddd4754022d/
 [a6b4e85]: https://github.com/onlyoffice/docspace-mcp/commit/a6b4e852d39d9247fd71843dc0fe7d374d78dde3/
 [0ea66c8]: https://github.com/onlyoffice/docspace-mcp/commit/0ea66c84ddb9ee6899b093e64881a201d4601a4b/
 [97e1454]: https://github.com/onlyoffice/docspace-mcp/commit/97e1454d28425b5549e4e0c7562d19e2136919c7/
