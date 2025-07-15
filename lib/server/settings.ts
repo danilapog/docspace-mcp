@@ -23,12 +23,12 @@ import type {
 	Response,
 	SettingsService, // eslint-disable-line typescript/no-unused-vars
 } from "../client.ts"
-import type {ConfiguredServer} from "../server.ts"
+import type {ConfiguredStdioServer} from "../server.ts"
 
 export class SettingsToolset {
-	private s: ConfiguredServer
+	private s: ConfiguredStdioServer
 
-	constructor(s: ConfiguredServer) {
+	constructor(s: ConfiguredStdioServer) {
 		this.s = s
 	}
 

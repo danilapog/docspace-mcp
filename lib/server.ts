@@ -16,9 +16,11 @@
  * @license
  */
 
-import type {Server as McpServer} from "@modelcontextprotocol/sdk/server/index.js"
+import type {Server as ProtocolServer} from "@modelcontextprotocol/sdk/server/index.js"
+import type {StreamableHTTPServerTransport} from "@modelcontextprotocol/sdk/server/streamableHttp.js"
 import type {CallToolResult, ListToolsResult} from "@modelcontextprotocol/sdk/types.js"
-import {CallToolRequestSchema, ListToolsRequestSchema} from "@modelcontextprotocol/sdk/types.js"
+import {CallToolRequestSchema, ListToolsRequestSchema, isInitializeRequest} from "@modelcontextprotocol/sdk/types.js"
+import express from "express"
 import * as z from "zod"
 import {format} from "../util/format.ts"
 import type {Result} from "../util/result.ts"
@@ -260,8 +262,13 @@ export const tools: ToolInfo[] = [
 	},
 ]
 
-export interface Config {
-	server: McpServer
+export interface MisconfiguredStdioConfig {
+	server: ProtocolServer
+	err: Error
+}
+
+export interface ConfiguredStdioConfig {
+	server: ProtocolServer
 	client: Client
 	resolver: Resolver
 	uploader: Uploader
@@ -269,16 +276,22 @@ export interface Config {
 	toolsets: string[]
 }
 
-export class MisconfiguredServer {
-	server: McpServer
+export interface InternalStreamableConfig {
+	app: express.Express
+	createTransport(this: void, o: InternalStreamableCreateTransportOptions): Promise<Result<StreamableHTTPServerTransport, Error>>
+	retrieveTransport(this: void, id: string): StreamableHTTPServerTransport | undefined
+}
+
+export interface InternalStreamableCreateTransportOptions {
+	baseUrl: string
+	authToken: string
+}
+
+class MisconfiguredStdioServer {
 	err: Error
 
-	constructor(server: McpServer, err: Error) {
-		this.server = server
-		this.err = err
-
-		this.server.setRequestHandler(ListToolsRequestSchema, this.listTools.bind(this))
-		this.server.setRequestHandler(CallToolRequestSchema, this.callTool.bind(this))
+	constructor(config: MisconfiguredStdioConfig) {
+		this.err = config.err
 	}
 
 	listTools(): ListToolsResult {
@@ -300,8 +313,7 @@ export class MisconfiguredServer {
 	}
 }
 
-export class ConfiguredServer {
-	server: McpServer
+export class ConfiguredStdioServer {
 	client: Client
 	resolver: Resolver
 	uploader: Uploader
@@ -319,8 +331,7 @@ export class ConfiguredServer {
 
 	routeTool: (req: CallToolRequest, extra: Extra) => Promise<Result<string, Error>>
 
-	constructor(config: Config) {
-		this.server = config.server
+	constructor(config: ConfiguredStdioConfig) {
 		this.client = config.client
 		this.resolver = config.resolver
 		this.uploader = config.uploader
@@ -354,9 +365,6 @@ export class ConfiguredServer {
 			this.listableTools = [...this.activeTools]
 			this.routeTool = this.routeRegularTool.bind(this)
 		}
-
-		this.server.setRequestHandler(ListToolsRequestSchema, this.listTools.bind(this))
-		this.server.setRequestHandler(CallToolRequestSchema, this.callTool.bind(this))
 	}
 
 	listTools(): ListToolsResult {
@@ -599,4 +607,162 @@ export class ConfiguredServer {
 
 		return pr
 	}
+}
+
+class InternalStreamableServer {
+	createTransport: InternalStreamableConfig["createTransport"]
+	retrieveTransport: InternalStreamableConfig["retrieveTransport"]
+
+	constructor(config: InternalStreamableConfig) {
+		this.createTransport = config.createTransport
+		this.retrieveTransport = config.retrieveTransport
+	}
+
+	notFound(_: express.Request, res: express.Response): void {
+		let err = new Error("Not Found")
+		this.sendError(res, 404, -32001, err)
+	}
+
+	async post(req: express.Request, res: express.Response): Promise<void> {
+		try {
+			let a = req.headers.authorization
+			if (a === undefined || a === "") {
+				let err = new Error("Bad Request: Authorization header is required")
+				this.sendError(res, 400, -32000, err)
+				return
+			}
+
+			let r = req.headers.referer
+			if (r === undefined || r === "") {
+				let err = new Error("Bad Request: Referer header is required")
+				this.sendError(res, 400, -32000, err)
+				return
+			}
+
+			let id = req.headers["mcp-session-id"]
+			let t: StreamableHTTPServerTransport | undefined
+
+			if (id === undefined || id === "") {
+				if (isInitializeRequest(req.body)) {
+					let o: InternalStreamableCreateTransportOptions = {
+						baseUrl: r,
+						authToken: a,
+					}
+
+					let c = await this.createTransport(o)
+					if (c.err) {
+						let err = new Error("Creating transport", {cause: c.err})
+						this.sendError(res, 500, -32603, err)
+						return
+					}
+
+					t = c.v
+				} else {
+					// https://github.com/modelcontextprotocol/typescript-sdk/blob/1.15.1/src/server/streamableHttp.ts#L587
+					let err = new Error("Bad Request: Mcp-Session-Id header is required")
+					this.sendError(res, 400, -32000, err)
+					return
+				}
+			} else if (Array.isArray(id)) {
+				// https://github.com/modelcontextprotocol/typescript-sdk/blob/1.15.1/src/server/streamableHttp.ts#L597
+				let err = new Error("Bad Request: Mcp-Session-Id header must be a single value")
+				this.sendError(res, 400, -32000, err)
+				return
+			} else {
+				t = this.retrieveTransport(id)
+				if (!t) {
+					// https://github.com/modelcontextprotocol/typescript-sdk/blob/1.15.1/src/server/streamableHttp.ts#L609
+					let err = new Error("Session not found")
+					this.sendError(res, 404, -32001, err)
+					return
+				}
+			}
+
+			let h = await safeAsync(t.handleRequest.bind(t), req, res, req.body)
+			if (h.err) {
+				let err = new Error("Handling request", {cause: h.err})
+				this.sendError(res, 500, -32603, err)
+				return
+			}
+		} catch {
+			let err = new Error("Internal Server Error")
+			this.sendError(res, 500, -32603, err)
+		}
+	}
+
+	async get(req: express.Request, res: express.Response): Promise<void> {
+		await this.delete(req, res)
+	}
+
+	async delete(req: express.Request, res: express.Response): Promise<void> {
+		try {
+			let id = req.headers["mcp-session-id"]
+
+			if (id === undefined || id === "") {
+				// https://github.com/modelcontextprotocol/typescript-sdk/blob/1.15.1/src/server/streamableHttp.ts#L587
+				let err = new Error("Bad Request: Mcp-Session-Id header is required")
+				this.sendError(res, 400, -32000, err)
+				return
+			}
+
+			if (Array.isArray(id)) {
+				// https://github.com/modelcontextprotocol/typescript-sdk/blob/1.15.1/src/server/streamableHttp.ts#L597
+				let err = new Error("Bad Request: Mcp-Session-Id header must be a single value")
+				this.sendError(res, 400, -32000, err)
+				return
+			}
+
+			let t = this.retrieveTransport(id)
+			if (!t) {
+				// https://github.com/modelcontextprotocol/typescript-sdk/blob/1.15.1/src/server/streamableHttp.ts#L609
+				let err = new Error("Session not found")
+				this.sendError(res, 404, -32001, err)
+				return
+			}
+
+			let h = await safeAsync(t.handleRequest.bind(t), req, res)
+			if (h.err) {
+				let err = new Error("Handling request", {cause: h.err})
+				this.sendError(res, 500, -32603, err)
+				return
+			}
+		} catch {
+			let err = new Error("Internal Server Error")
+			this.sendError(res, 500, -32603, err)
+		}
+	}
+
+	sendError(res: express.Response, httpCode: number, jsonrpcCode: number, err: Error): void {
+		res.status(httpCode)
+		res.json({
+			jsonrpc: "2.0",
+			error: {
+				code: jsonrpcCode,
+				message: format(err),
+			},
+			id: null,
+		})
+	}
+}
+
+export function attachConfiguredStdio(config: ConfiguredStdioConfig): void {
+	let s = new ConfiguredStdioServer(config)
+	config.server.setRequestHandler(ListToolsRequestSchema, s.listTools.bind(s))
+	config.server.setRequestHandler(CallToolRequestSchema, s.callTool.bind(s))
+}
+
+export function attachMisconfiguredStdio(config: MisconfiguredStdioConfig): void {
+	let s = new MisconfiguredStdioServer(config)
+	config.server.setRequestHandler(ListToolsRequestSchema, s.listTools.bind(s))
+	config.server.setRequestHandler(CallToolRequestSchema, s.callTool.bind(s))
+}
+
+export function attachInternalStreamable(config: InternalStreamableConfig): void {
+	let s = new InternalStreamableServer(config)
+	config.app.disable("x-powered-by")
+	config.app.disable("etag")
+	config.app.post("/mcp", express.json(), s.post.bind(s))
+	config.app.get("/mcp", express.json(), s.get.bind(s))
+	config.app.delete("/mcp", express.json(), s.delete.bind(s))
+	config.app.use(s.notFound.bind(s))
 }

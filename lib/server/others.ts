@@ -22,7 +22,7 @@ import type {Result} from "../../util/result.ts"
 import {error, ok, safeAsync, safeSync} from "../../util/result.ts"
 import {RoomTypeSchema} from "../client/internal/schemas.ts"
 import type {BulkDownloadOptions, CreateUploadSessionOptions, Response} from "../client.ts"
-import type {ConfiguredServer} from "../server.ts"
+import type {ConfiguredStdioServer} from "../server.ts"
 import {
 	CollaborationRoomInvitationAccessSchema,
 	CustomRoomInvitationAccessSchema,
@@ -46,9 +46,9 @@ export const UploadFileInputSchema = z.object({
 })
 
 export class OthersToolset {
-	private s: ConfiguredServer
+	private s: ConfiguredStdioServer
 
-	constructor(s: ConfiguredServer) {
+	constructor(s: ConfiguredStdioServer) {
 		this.s = s
 	}
 

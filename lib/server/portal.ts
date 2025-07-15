@@ -23,12 +23,12 @@ import type {
 	PortalService, // eslint-disable-line typescript/no-unused-vars
 	Response,
 } from "../client.ts"
-import type {ConfiguredServer} from "../server.ts"
+import type {ConfiguredStdioServer} from "../server.ts"
 
 export class PortalToolset {
-	private s: ConfiguredServer
+	private s: ConfiguredStdioServer
 
-	constructor(s: ConfiguredServer) {
+	constructor(s: ConfiguredStdioServer) {
 		this.s = s
 	}
 

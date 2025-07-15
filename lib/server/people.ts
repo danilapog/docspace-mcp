@@ -25,16 +25,16 @@ import type {
 	PeopleService, // eslint-disable-line typescript/no-unused-vars
 	Response,
 } from "../client.ts"
-import type {ConfiguredServer} from "../server.ts"
+import type {ConfiguredStdioServer} from "../server.ts"
 
 export const GetAllInputSchema = z.object({
 	filters: GetAllFiltersSchema.describe("The filters to apply to the list of people. Use them to reduce the size of the response."),
 })
 
 export class PeopleToolset {
-	private s: ConfiguredServer
+	private s: ConfiguredStdioServer
 
-	constructor(s: ConfiguredServer) {
+	constructor(s: ConfiguredStdioServer) {
 		this.s = s
 	}
 
