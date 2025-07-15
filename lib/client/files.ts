@@ -21,7 +21,7 @@ import type {Result} from "../../util/result.ts"
 import {error, ok, safeNew} from "../../util/result.ts"
 import type {Client} from "../client.ts"
 import type {Response} from "./internal/response.ts"
-import {
+import type {
 	ArchiveRoomRequestSchema,
 	BatchRequestDtoSchema,
 	CreateFolderFiltersSchema,
@@ -31,9 +31,6 @@ import {
 	DeleteFolderSchema,
 	DeleteSchema,
 	DownloadRequestDtoSchema,
-	FileDtoSchema,
-	FileOperationDtoSchema,
-	FolderDtoSchema,
 	GetFileInfoFiltersSchema,
 	GetFolderFiltersSchema,
 	GetFolderInfoFiltersSchema,
@@ -49,6 +46,11 @@ import {
 	UpdateFileSchema,
 	UpdateRoomFiltersSchema,
 	UpdateRoomRequestSchema,
+} from "./internal/schemas.ts"
+import {
+	FileDtoSchema,
+	FileOperationDtoSchema,
+	FolderDtoSchema,
 	UploadSessionObjectDataSchema,
 } from "./internal/schemas.ts"
 
@@ -138,12 +140,7 @@ export class FilesService {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
 
-		let b = DeleteSchema.safeParse(o)
-		if (!b.success) {
-			return error(new Error("Parsing options.", {cause: b.error}))
-		}
-
-		let req = this.c.createRequest(s, "DELETE", u.v, b.data)
+		let req = this.c.createRequest(s, "DELETE", u.v, o)
 		if (req.err) {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
@@ -167,18 +164,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FilesController.cs/#L305 | DocSpace Reference}
 	 */
 	async getFileInfo(s: AbortSignal, id: number, filters?: GetFileInfoFilters): Promise<Result<[GetFileInfoResponse, Response], Error>> {
-		let q: object | undefined
-
-		if (filters) {
-			let f = GetFileInfoFiltersSchema.safeParse(filters)
-			if (!f.success) {
-				return error(new Error("Parsing filters.", {cause: f.error}))
-			}
-
-			q = f.data
-		}
-
-		let u = this.c.createUrl(`api/2.0/files/file/${id}`, q)
+		let u = this.c.createUrl(`api/2.0/files/file/${id}`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -212,12 +198,7 @@ export class FilesService {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
 
-		let b = UpdateFileSchema.safeParse(o)
-		if (!b.success) {
-			return error(new Error("Parsing options.", {cause: b.error}))
-		}
-
-		let req = this.c.createRequest(s, "PUT", u.v, b.data)
+		let req = this.c.createRequest(s, "PUT", u.v, o)
 		if (req.err) {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
@@ -245,28 +226,12 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FoldersController.cs/#L110 | DocSpace Reference}
 	 */
 	async createFolder(s: AbortSignal, id: number, o: CreateFolderOptions, filters?: CreateFolderFilters): Promise<Result<[unknown, Response], Error>> {
-		let q: object | undefined
-
-		if (filters) {
-			let f = CreateFolderFiltersSchema.safeParse(filters)
-			if (!f.success) {
-				return error(new Error("Parsing filters.", {cause: f.error}))
-			}
-
-			q = f.data
-		}
-
-		let u = this.c.createUrl(`api/2.0/files/folder/${id}`, q)
+		let u = this.c.createUrl(`api/2.0/files/folder/${id}`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
 
-		let b = CreateFolderSchema.safeParse(o)
-		if (!b.success) {
-			return error(new Error("Parsing options.", {cause: b.error}))
-		}
-
-		let req = this.c.createRequest(s, "POST", u.v, b.data)
+		let req = this.c.createRequest(s, "POST", u.v, o)
 		if (req.err) {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
@@ -288,12 +253,7 @@ export class FilesService {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
 
-		let b = DeleteFolderSchema.safeParse(o)
-		if (!b.success) {
-			return error(new Error("Parsing options.", {cause: b.error}))
-		}
-
-		let req = this.c.createRequest(s, "DELETE", u.v, b.data)
+		let req = this.c.createRequest(s, "DELETE", u.v, o)
 		if (req.err) {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
@@ -317,18 +277,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FoldersController.cs/#L161 | DocSpace Reference}
 	 */
 	async getFolder(s: AbortSignal, id: number, filters?: GetFolderFilters): Promise<Result<[unknown, Response], Error>> {
-		let q: object | undefined
-
-		if (filters) {
-			let f = GetFolderFiltersSchema.safeParse(filters)
-			if (!f.success) {
-				return error(new Error("Parsing filters.", {cause: f.error}))
-			}
-
-			q = f.data
-		}
-
-		let u = this.c.createUrl(`api/2.0/files/${id}`, q)
+		let u = this.c.createUrl(`api/2.0/files/${id}`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -350,18 +299,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FoldersController.cs/#L180 | DocSpace Reference}
 	 */
 	async getFolderInfo(s: AbortSignal, id: number, filters?: GetFolderInfoFilters): Promise<Result<[unknown, Response], Error>> {
-		let q: object | undefined
-
-		if (filters) {
-			let f = GetFolderInfoFiltersSchema.safeParse(filters)
-			if (!f.success) {
-				return error(new Error("Parsing filters.", {cause: f.error}))
-			}
-
-			q = f.data
-		}
-
-		let u = this.c.createUrl(`api/2.0/files/folder/${id}`, q)
+		let u = this.c.createUrl(`api/2.0/files/folder/${id}`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -383,18 +321,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FoldersController.cs/#L217 | DocSpace Reference}
 	 */
 	async getFolders(s: AbortSignal, id: number, filters?: GetFoldersFilters): Promise<Result<[unknown, Response], Error>> {
-		let q: object | undefined
-
-		if (filters) {
-			let f = GetFoldersFiltersSchema.safeParse(filters)
-			if (!f.success) {
-				return error(new Error("Parsing filters.", {cause: f.error}))
-			}
-
-			q = f.data
-		}
-
-		let u = this.c.createUrl(`api/2.0/files/${id}/subfolders`, q)
+		let u = this.c.createUrl(`api/2.0/files/${id}/subfolders`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -416,28 +343,12 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FoldersController.cs/#L255 | DocSpace Reference}
 	 */
 	async renameFolder(s: AbortSignal, id: number, o: RenameFolderOptions, filters?: RenameFolderFilters): Promise<Result<[unknown, Response], Error>> {
-		let q: object | undefined
-
-		if (filters) {
-			let f = RenameFolderFiltersSchema.safeParse(filters)
-			if (!f.success) {
-				return error(new Error("Parsing filters.", {cause: f.error}))
-			}
-
-			q = f.data
-		}
-
-		let u = this.c.createUrl(`api/2.0/files/folder/${id}`, q)
+		let u = this.c.createUrl(`api/2.0/files/folder/${id}`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
 
-		let b = CreateFolderSchema.safeParse(o)
-		if (!b.success) {
-			return error(new Error("Parsing options.", {cause: b.error}))
-		}
-
-		let req = this.c.createRequest(s, "PUT", u.v, b.data)
+		let req = this.c.createRequest(s, "PUT", u.v, o)
 		if (req.err) {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
@@ -454,18 +365,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FoldersController.cs/#L348 | DocSpace Reference}
 	 */
 	async getMyFolder(s: AbortSignal, filters?: GetMyFolderFilters): Promise<Result<[unknown, Response], Error>> {
-		let q: object | undefined
-
-		if (filters) {
-			let f = GetMyFolderFiltersSchema.safeParse(filters)
-			if (!f.success) {
-				return error(new Error("Parsing filters.", {cause: f.error}))
-			}
-
-			q = f.data
-		}
-
-		let u = this.c.createUrl("api/2.0/files/@my", q)
+		let u = this.c.createUrl("api/2.0/files/@my", filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -496,12 +396,7 @@ export class FilesService {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
 
-		let b = DownloadRequestDtoSchema.safeParse(o)
-		if (!b.success) {
-			return error(new Error("Parsing options.", {cause: b.error}))
-		}
-
-		let req = this.c.createRequest(s, "PUT", u.v, b.data)
+		let req = this.c.createRequest(s, "PUT", u.v, o)
 		if (req.err) {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
@@ -530,12 +425,7 @@ export class FilesService {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
 
-		let b = BatchRequestDtoSchema.safeParse(o)
-		if (!b.success) {
-			return error(new Error("Parsing options.", {cause: b.error}))
-		}
-
-		let req = this.c.createRequest(s, "PUT", u.v, b.data)
+		let req = this.c.createRequest(s, "PUT", u.v, o)
 		if (req.err) {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
@@ -593,12 +483,7 @@ export class FilesService {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
 
-		let b = BatchRequestDtoSchema.safeParse(o)
-		if (!b.success) {
-			return error(new Error("Parsing options.", {cause: b.error}))
-		}
-
-		let req = this.c.createRequest(s, "PUT", u.v, b.data)
+		let req = this.c.createRequest(s, "PUT", u.v, o)
 		if (req.err) {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
@@ -631,12 +516,7 @@ export class FilesService {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
 
-		let b = SessionRequestSchema.safeParse(o)
-		if (!b.success) {
-			return error(new Error("Parsing options.", {cause: b.error}))
-		}
-
-		let req = this.c.createRequest(s, "POST", u.v, b.data)
+		let req = this.c.createRequest(s, "POST", u.v, o)
 		if (req.err) {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
@@ -664,28 +544,12 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/VirtualRoomsController.cs/#L70 | DocSpace Reference}
 	 */
 	async createRoom(s: AbortSignal, o: CreateRoomOptions, filters?: CreateRoomFilters): Promise<Result<[unknown, Response], Error>> {
-		let q: object | undefined
-
-		if (filters) {
-			let f = CreateRoomFiltersSchema.safeParse(filters)
-			if (!f.success) {
-				return error(new Error("Parsing filters.", {cause: f.error}))
-			}
-
-			q = f.data
-		}
-
-		let u = this.c.createUrl("api/2.0/files/rooms", q)
+		let u = this.c.createUrl("api/2.0/files/rooms", filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
 
-		let b = CreateRoomRequestDtoSchema.safeParse(o)
-		if (!b.success) {
-			return error(new Error("Parsing options.", {cause: b.error}))
-		}
-
-		let req = this.c.createRequest(s, "POST", u.v, b.data)
+		let req = this.c.createRequest(s, "POST", u.v, o)
 		if (req.err) {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
@@ -702,18 +566,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/VirtualRoomsController.cs/#L165 | DocSpace Reference}
 	 */
 	async getRoomInfo(s: AbortSignal, id: number, filters?: GetRoomInfoFilters): Promise<Result<[GetRoomInfoResponse, Response], Error>> {
-		let q: object | undefined
-
-		if (filters) {
-			let f = GetRoomInfoFiltersSchema.safeParse(filters)
-			if (!f.success) {
-				return error(new Error("Parsing filters.", {cause: f.error}))
-			}
-
-			q = f.data
-		}
-
-		let u = this.c.createUrl(`api/2.0/files/rooms/${id}`, q)
+		let u = this.c.createUrl(`api/2.0/files/rooms/${id}`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -742,28 +595,12 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/VirtualRoomsController.cs/#L180 | DocSpace Reference}
 	 */
 	async updateRoom(s: AbortSignal, id: number, o: UpdateRoomOptions, filters?: UpdateRoomFilters): Promise<Result<[unknown, Response], Error>> {
-		let q: object | undefined
-
-		if (filters) {
-			let f = UpdateRoomFiltersSchema.safeParse(filters)
-			if (!f.success) {
-				return error(new Error("Parsing filters.", {cause: f.error}))
-			}
-
-			q = f.data
-		}
-
-		let u = this.c.createUrl(`api/2.0/files/rooms/${id}`, q)
+		let u = this.c.createUrl(`api/2.0/files/rooms/${id}`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
 
-		let b = UpdateRoomRequestSchema.safeParse(o)
-		if (!b.success) {
-			return error(new Error("Parsing options.", {cause: b.error}))
-		}
-
-		let req = this.c.createRequest(s, "PUT", u.v, b.data)
+		let req = this.c.createRequest(s, "PUT", u.v, o)
 		if (req.err) {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
@@ -785,12 +622,7 @@ export class FilesService {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
 
-		let b = ArchiveRoomRequestSchema.safeParse(o)
-		if (!b.success) {
-			return error(new Error("Parsing options.", {cause: b.error}))
-		}
-
-		let req = this.c.createRequest(s, "PUT", u.v, b.data)
+		let req = this.c.createRequest(s, "PUT", u.v, o)
 		if (req.err) {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
@@ -814,28 +646,12 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/VirtualRoomsController.cs/#L311 | DocSpace Reference}
 	 */
 	async setRoomSecurity(s: AbortSignal, id: number, o: SetRoomSecurityOptions, filters?: SetRoomSecurityFilters): Promise<Result<[unknown, Response], Error>> {
-		let q: object | undefined
-
-		if (filters) {
-			let f = SetRoomSecurityFiltersSchema.safeParse(filters)
-			if (!f.success) {
-				return error(new Error("Parsing filters.", {cause: f.error}))
-			}
-
-			q = f.data
-		}
-
-		let u = this.c.createUrl(`api/2.0/files/rooms/${id}/share`, q)
+		let u = this.c.createUrl(`api/2.0/files/rooms/${id}/share`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
 
-		let b = RoomInvitationRequestSchema.safeParse(o)
-		if (!b.success) {
-			return error(new Error("Parsing options.", {cause: b.error}))
-		}
-
-		let req = this.c.createRequest(s, "PUT", u.v, b.data)
+		let req = this.c.createRequest(s, "PUT", u.v, o)
 		if (req.err) {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
@@ -852,18 +668,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/VirtualRoomsController.cs/#L349 | DocSpace Reference}
 	 */
 	async getRoomSecurityInfo(s: AbortSignal, id: number, filters?: GetRoomSecurityFilters): Promise<Result<[unknown, Response], Error>> {
-		let q: object | undefined
-
-		if (filters) {
-			let f = GetRoomSecurityFiltersSchema.safeParse(filters)
-			if (!f.success) {
-				return error(new Error("Parsing filters.", {cause: f.error}))
-			}
-
-			q = f.data
-		}
-
-		let u = this.c.createUrl(`api/2.0/files/rooms/${id}/share`, q)
+		let u = this.c.createUrl(`api/2.0/files/rooms/${id}/share`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -885,18 +690,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/VirtualRoomsController.cs/#L649 | DocSpace Reference}
 	 */
 	async getRoomsFolder(s: AbortSignal, filters?: GetRoomsFolderFilters): Promise<Result<[unknown, Response], Error>> {
-		let q: object | undefined
-
-		if (filters) {
-			let f = GetRoomsFolderFiltersSchema.safeParse(filters)
-			if (!f.success) {
-				return error(new Error("Parsing filters.", {cause: f.error}))
-			}
-
-			q = f.data
-		}
-
-		let u = this.c.createUrl("api/2.0/files/rooms", q)
+		let u = this.c.createUrl("api/2.0/files/rooms", filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
