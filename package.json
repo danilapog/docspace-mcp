@@ -28,7 +28,7 @@
 	},
 	"files": ["bin"],
 	"scripts": {
-		"build": "esbuild --bundle --format=esm --log-level=error --outfile=bin/onlyoffice-docspace-mcp --platform=node --target=es2024 app/main.ts",
+		"build": "node scripts/build.ts",
 		"check": "tsc",
 		"dev": "node scripts/dev.ts",
 		"generate": "node scripts/generate.ts",
