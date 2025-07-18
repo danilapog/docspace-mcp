@@ -50,7 +50,7 @@ import type {
 	UpdateFileOptions,
 	UpdateRoomOptions,
 } from "../client.ts"
-import type {ConfiguredServer} from "../server.ts"
+import type {ConfiguredStdioServer} from "../server.ts"
 import {RoomInvitationAccessSchema} from "./internal/schemas.ts"
 
 export const DeleteFileInputSchema = z.object({
@@ -219,9 +219,9 @@ export const GetRoomsFolderInputSchema = z.object({
 })
 
 export class FilesToolset {
-	private s: ConfiguredServer
+	private s: ConfiguredStdioServer
 
-	constructor(s: ConfiguredServer) {
+	constructor(s: ConfiguredStdioServer) {
 		this.s = s
 	}
 
