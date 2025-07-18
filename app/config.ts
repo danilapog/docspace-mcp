@@ -31,6 +31,7 @@ export interface Config {
 	userAgent: string
 	dynamic: boolean
 	toolsets: string[]
+	tools: string[]
 
 	// stdio options
 	baseUrl: string
@@ -54,6 +55,8 @@ const ConfigSchema = z.object({
 	DOCSPACE_USER_AGENT: z.string().optional(),
 	DOCSPACE_DYNAMIC: z.string().optional(),
 	DOCSPACE_TOOLSETS: z.string().optional(),
+	DOCSPACE_ENABLED_TOOLS: z.string().optional(),
+	DOCSPACE_DISABLED_TOOLS: z.string().optional(),
 
 	// stdio options
 	DOCSPACE_BASE_URL: z.string().optional(),
@@ -108,8 +111,26 @@ export function loadConfig(): Result<Config, Error> {
 	let toolsets = validateToolsets(o.data.DOCSPACE_TOOLSETS)
 	if (toolsets.err) {
 		errs.push(new Error("Validating DOCSPACE_TOOLSETS", {cause: toolsets.err}))
-	} else {
-		c.toolsets = toolsets.v
+	}
+
+	let enabledTools = validateTools(o.data.DOCSPACE_ENABLED_TOOLS)
+	if (enabledTools.err) {
+		errs.push(new Error("Validating DOCSPACE_ENABLED_TOOLS", {cause: enabledTools.err}))
+	}
+
+	let disabledTools = validateTools(o.data.DOCSPACE_DISABLED_TOOLS)
+	if (disabledTools.err) {
+		errs.push(new Error("Validating DOCSPACE_DISABLED_TOOLS", {cause: disabledTools.err}))
+	}
+
+	if (!toolsets.err && !enabledTools.err && !disabledTools.err) {
+		let r = resolveToolsetsAndTools(toolsets.v, enabledTools.v, disabledTools.v)
+		if (r.err) {
+			errs.push(new Error("Resolving toolsets and tools", {cause: r.err}))
+		} else {
+			c.toolsets = r.v[0]
+			c.tools = r.v[1]
+		}
 	}
 
 	if (!transport.err && transport.v === "stdio") {
@@ -194,63 +215,125 @@ function validateUserAgent(v: string | undefined): Result<string, Error> {
 }
 
 function validateToolsets(v: string | undefined): Result<string[], Error> {
-	let all: string[] = []
-
-	for (let t of server.toolsets) {
-		all.push(t.name)
+	let a: string[] = []
+	for (let s of server.toolsets) {
+		a.push(s.name)
 	}
 
-	if (v === undefined) {
-		return ok(all)
+	a.push("all")
+
+	let r = validateList(a, v, a)
+	if (r.err) {
+		return error(r.err)
 	}
 
-	let s: string[] = []
+	a.pop()
 
-	for (let n of v.split(",")) {
-		n.trim().toLocaleLowerCase()
+	if (r.v.includes("all")) {
+		return ok(a)
+	}
 
-		if (n === "") {
-			continue
+	return ok(r.v)
+}
+
+function validateTools(v: string | undefined): Result<string[], Error> {
+	let a: string[] = []
+	for (let s of server.toolsets) {
+		for (let t of s.tools) {
+			a.push(t.name)
 		}
+	}
 
-		if (n === "all") {
-			s = ["all"]
-			continue
+	let r = validateList(a, v, [])
+	if (r.err) {
+		return error(r.err)
+	}
+
+	return ok(r.v)
+}
+
+function resolveToolsetsAndTools(toolsets: string[], enabledTools: string[], disabledTools: string[]): Result<[string[], string[]], Error> {
+	let x: string[] = []
+	let y: string[] = []
+
+	for (let n of toolsets) {
+		x.push(n)
+
+		for (let s of server.toolsets) {
+			if (s.name === n) {
+				for (let t of s.tools) {
+					y.push(t.name)
+				}
+				break
+			}
 		}
+	}
 
-		let has = false
+	for (let n of enabledTools) {
+		for (let s of server.toolsets) {
+			let h = false
+			for (let t of s.tools) {
+				if (t.name === n) {
+					h = true
+					break
+				}
+			}
 
-		for (let t of server.toolsets) {
-			if (t.name === n) {
-				has = true
+			if (h) {
+				if (!x.includes(s.name)) {
+					x.push(s.name)
+				}
 				break
 			}
 		}
 
-		if (!has) {
-			let e = ""
-
-			for (let t of server.toolsets) {
-				e += `${t.name}, `
-			}
-
-			if (e.length !== 0) {
-				e = e.slice(0, -2)
-			}
-
-			return error(new Error(`Expected one of: ${e}, or all, but got ${v}`))
-		}
-
-		if (s[0] !== "all") {
-			s.push(n)
+		if (!y.includes(n)) {
+			y.push(n)
 		}
 	}
 
-	if (s.length === 0 || s.length === 1 && s[0] === "all") {
-		return ok(all)
+	for (let n of disabledTools) {
+		let i = y.indexOf(n)
+		if (i !== -1) {
+			y.splice(i, 1)
+		}
 	}
 
-	return ok(s)
+	for (let sn of x) {
+		for (let s of server.toolsets) {
+			if (s.name === sn) {
+				let h = false
+
+				for (let tn of y) {
+					for (let t of s.tools) {
+						if (t.name === tn) {
+							h = true
+							break
+						}
+					}
+
+					if (h) {
+						break
+					}
+				}
+
+				if (!h) {
+					let i = x.indexOf(sn)
+					if (i !== -1) {
+						x.splice(i, 1)
+					}
+				}
+
+				break
+			}
+		}
+	}
+
+	if (x.length === 0 || y.length === 0) {
+		return error(new Error("No tools left"))
+	}
+
+	return ok([x, y])
 }
 
 function validateBaseUrl(v: string | undefined): Result<string, Error> {
@@ -361,6 +444,47 @@ function validateBoolean(v: string | undefined, d: boolean): Result<boolean, Err
 	}
 
 	return error(new Error(`Expected one of: yes, y, true, 1, no, n, false, 0, but got ${v}`))
+}
+
+function validateList(a: string[], v: string | undefined, d: string[]): Result<string[], Error> {
+	if (v === undefined) {
+		return ok(d)
+	}
+
+	let x: string[] = []
+	let y: string[] = []
+
+	for (let u of v.split(",")) {
+		u.trim().toLocaleLowerCase()
+		if (u === "") {
+			continue
+		}
+
+		let h = false
+		for (let n of a) {
+			if (n === u) {
+				h = true
+				break
+			}
+		}
+
+		if (!h && !y.includes(u)) {
+			y.push(u)
+		}
+		if (h && !x.includes(u)) {
+			x.push(u)
+		}
+	}
+
+	if (y.length !== 0) {
+		let errs: Error[] = []
+		for (let u of y) {
+			errs.push(new Error(`Unknown value: ${u}`))
+		}
+		return error(new Error("Multiple errors", {cause: errs}))
+	}
+
+	return ok(x)
 }
 
 export function mask(c: Config): Config {
