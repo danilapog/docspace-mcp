@@ -6,9 +6,14 @@ This document records all notable changes to the project, following the [Keep a 
 
 <!-- There are no noticeable changes in version [unreleased]. -->
 
+### Added
+
+- Add an internal implementation of streamable HTTP transport ([ca3a432]).
+
 ### Changed
 
-- Replace `anyOf` with `enum` in JSON schemas ([9d35a14]).
+- Replace `anyOf` with `enum` in JSON schemas ([9d35a14]);
+- Gracefully handle SIGTERM and SIGINT signals ([ca3a432]).
 
 ## [1.3.1] - 2025-07-08
 
@@ -131,6 +136,7 @@ This document records all notable changes to the project, following the [Keep a 
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[ca3a432]: https://github.com/onlyoffice/docspace-mcp/commit/ca3a432764932abb7e5ff8e40667bff3a94b907f/
 [9d35a14]: https://github.com/onlyoffice/docspace-mcp/commit/9d35a14cfd08181141b4c769f1ebaddd4754022d/
 [a6b4e85]: https://github.com/onlyoffice/docspace-mcp/commit/a6b4e852d39d9247fd71843dc0fe7d374d78dde3/
 [0ea66c8]: https://github.com/onlyoffice/docspace-mcp/commit/0ea66c84ddb9ee6899b093e64881a201d4601a4b/
