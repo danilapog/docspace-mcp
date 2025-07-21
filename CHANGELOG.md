@@ -15,7 +15,8 @@ This document records all notable changes to the project, following the [Keep a 
 
 - Replace `anyOf` with `enum` in JSON schemas ([9d35a14]);
 - Gracefully handle SIGTERM and SIGINT signals ([ca3a432]);
-- Use native basic authentication ([fcd203a]).
+- Use native basic authentication ([fcd203a]);
+- Update `@modelcontextprotocol/sdk` to 1.16.0 ([2c0f50f]).
 
 ### Fixed
 
@@ -142,6 +143,7 @@ This document records all notable changes to the project, following the [Keep a 
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[2c0f50f]: https://github.com/onlyoffice/docspace-mcp/commit/2c0f50f354cda822537759756d7eef35e621d9e8/
 [fcd203a]: https://github.com/onlyoffice/docspace-mcp/commit/fcd203ada86b2cd1a43ab7ad04602c60bd00b881/
 [0d657d9]: https://github.com/onlyoffice/docspace-mcp/commit/0d657d9d35c819aeddf80ec58f8f6a18081b5f23/
 [74ac987]: https://github.com/onlyoffice/docspace-mcp/commit/74ac987ea8e790058f3ca5dcf2da4087ba5671a3/
