@@ -50,6 +50,7 @@ import type {
 import {
 	FileDtoSchema,
 	FileOperationDtoSchema,
+	FilesSettingsDtoSchema,
 	FolderDtoSchema,
 	UploadSessionObjectDataSchema,
 } from "./internal/schemas.ts"
@@ -92,6 +93,9 @@ export type BulkDownloadResponseItem = z.output<typeof FileOperationDtoSchema>
 export type CopyBatchItemsResponseItem = z.output<typeof FileOperationDtoSchema>
 export type GetOperationStatusesResponseItem = z.output<typeof FileOperationDtoSchema>
 export type MoveBatchItemsResponseItem = z.output<typeof FileOperationDtoSchema>
+
+// SettingsController: Responses
+export type GetFilesSettingsResponse = z.output<typeof FilesSettingsDtoSchema>
 
 // UploadController: Options
 export type CreateUploadSessionOptions = z.output<typeof SessionRequestSchema>
@@ -496,6 +500,39 @@ export class FilesService {
 		let [p, res] = f.v
 
 		let e = z.array(FileOperationDtoSchema).safeParse(p)
+		if (!e.success) {
+			return error(new Error("Parsing response.", {cause: e.error}))
+		}
+
+		return ok([e.data, res])
+	}
+
+	//
+	// SettingsController
+	//
+
+	/**
+	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.1-server/products/ASC.Files/Server/Api/SettingsController.cs/#L199 | DocSpace Reference}
+	 */
+	async getFilesSettings(s: AbortSignal): Promise<Result<[GetFilesSettingsResponse, Response], Error>> {
+		let u = this.c.createUrl("api/2.0/files/settings")
+		if (u.err) {
+			return error(new Error("Creating URL.", {cause: u.err}))
+		}
+
+		let req = this.c.createRequest(s, "GET", u.v)
+		if (req.err) {
+			return error(new Error("Creating request.", {cause: req.err}))
+		}
+
+		let f = await this.c.fetch(req.v)
+		if (f.err) {
+			return error(new Error("Fetching request.", {cause: f.err}))
+		}
+
+		let [p, res] = f.v
+
+		let e = FilesSettingsDtoSchema.safeParse(p)
 		if (!e.success) {
 			return error(new Error("Parsing response.", {cause: e.error}))
 		}

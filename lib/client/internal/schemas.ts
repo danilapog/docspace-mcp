@@ -371,6 +371,7 @@ export const FileEntryDtoFieldSchema = z.union([
 export const FileDtoSchema = z.
 	object({
 		fileType: numberUnionToEnum(FileTypeSchema, "").optional(),
+		fileExst: z.string().optional(),
 	}).
 	passthrough()
 
@@ -448,6 +449,15 @@ export const FileShareDtoFieldSchema = z.union([
 	z.literal("canEditAccess").describe("Specifies if the user can edit the access to the specified file or not."),
 	z.literal("subjectType").describe("The subject type."),
 ])
+
+/**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.1-server/products/ASC.Files/Core/ApiModels/ResponseDto/FilesSettingsDto.cs/#L32 | DocSpace Reference}
+ */
+export const FilesSettingsDtoSchema = z.
+	object({
+		extsConvertible: z.record(z.string(), z.array(z.string()).optional()).optional(),
+	}).
+	passthrough()
 
 // /**
 //  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.1-server/products/ASC.Files/Core/Core/VirtualRooms/Logo.cs/#L73 | DocSpace Reference}
