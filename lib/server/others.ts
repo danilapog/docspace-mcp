@@ -102,30 +102,49 @@ export class OthersToolset {
 			return error(new Error("Parsing input.", {cause: pr.error}))
 		}
 
-		let gr = await this.s.client.files.getFileInfo(signal, pr.data.fileId)
-		if (gr.err) {
-			return error(new Error("Getting file info.", {cause: gr.err}))
+		let ir = await this.s.client.files.getFileInfo(signal, pr.data.fileId)
+		if (ir.err) {
+			return error(new Error("Getting file info.", {cause: ir.err}))
 		}
 
-		let [gd] = gr.v
+		let [id] = ir.v
 
-		if (!gd.fileType) {
-			return error(new Error("File type is not defined."))
+		if (!id.fileExst) {
+			return error(new Error("File extension is not defined."))
 		}
 
-		let ex: string
+		let ex: string | undefined
 
-		switch (gd.fileType) {
-		case 5: // Spreadsheet
-			ex = ".csv"
-			break
-		case 6: // Presentation
-		case 7: // Document
-		case 10: // Pdf
-			ex = ".txt"
-			break
-		default:
-			return error(new Error(`File type ${gd.fileType} is not supported.`))
+		if (id.fileExst === ".csv" || id.fileExst === ".txt") {
+			ex = id.fileExst
+		} else {
+			let sr = await this.s.client.files.getFilesSettings(signal)
+			if (sr.err) {
+				return error(new Error("Getting files settings.", {cause: sr.err}))
+			}
+
+			let [sd] = sr.v
+
+			if (!sd.extsConvertible) {
+				return error(new Error("Convertible file extensions are not defined."))
+			}
+
+			let fr = sd.extsConvertible[id.fileExst]
+
+			if (!fr) {
+				return error(new Error(`File extension ${id.fileExst} is not convertible.`))
+			}
+
+			for (let e of fr) {
+				if (e === ".csv" || e === ".txt") {
+					ex = e
+					break
+				}
+			}
+		}
+
+		if (!ex) {
+			return error(new Error(`No convertible extension found for ${id.fileExst}.`))
 		}
 
 		let bo: BulkDownloadOptions = {
