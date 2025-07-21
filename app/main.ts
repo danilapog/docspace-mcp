@@ -143,7 +143,7 @@ async function startConfiguredStdioServer(config: result.Ok<config.Config, unkno
 	let sc: ConfiguredStdioConfig = {
 		server: ps,
 		client: cl,
-		resolver: new Resolver(cl.files.getOperationStatuses.bind(cl.files)),
+		resolver: new Resolver(cl),
 		uploader: new Uploader(cl),
 		dynamic: config.v.dynamic,
 		toolsets: config.v.toolsets,
@@ -208,7 +208,7 @@ async function startInternalStreamableServer(config: result.Ok<config.Config, un
 			let sf: ConfiguredStdioConfig = {
 				server: ps,
 				client: cc,
-				resolver: new Resolver(cc.files.getOperationStatuses.bind(cc.files)),
+				resolver: new Resolver(cc),
 				uploader: new Uploader(cc),
 				dynamic: config.v.dynamic,
 				toolsets: config.v.toolsets,
