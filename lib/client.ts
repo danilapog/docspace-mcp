@@ -18,11 +18,9 @@
 
 import type {Result} from "../util/result.ts"
 import {error, ok, safeAsync, safeNew, safeSync} from "../util/result.ts"
-import type {AuthenticateMeOptions} from "./client/auth.ts"
 import {AuthService} from "./client/auth.ts"
 import {FilesService} from "./client/files.ts"
-import type {BasicAuthState} from "./client/internal/auth.ts"
-import {checkBasicAuth, injectAuthKey, injectAuthToken} from "./client/internal/auth.ts"
+import {injectAuthKey, injectAuthToken, injectBasicAuth} from "./client/internal/auth.ts"
 import type {Response} from "./client/internal/response.ts"
 import {checkResponse, parseResponse} from "./client/internal/response.ts"
 import {PeopleService} from "./client/people.ts"
@@ -113,38 +111,20 @@ export class Client {
 	}
 
 	withBasicAuth(u: string, p: string): Client {
-		// eslint-disable-next-line typescript/no-this-alias, unicorn/no-this-assignment
-		let self = this
-
 		let c = this.copy()
 
 		let f = c.baseFetch
-
-		let s: BasicAuthState = {
-			token: "",
-			expires: 0,
-		}
-
-		let o: AuthenticateMeOptions = {
-			userName: u,
-			password: p,
-		}
 
 		c.baseFetch = async function baseFetch(input, init) {
 			if (!(input instanceof Request)) {
 				throw new Error("Unsupported input type.")
 			}
 
-			let err = await checkBasicAuth(self, s, o, input)
-			if (err) {
-				throw new Error("Checking authentication.", {cause: err})
-			}
-
 			input = input.clone()
 
-			err = injectAuthToken(input, s.token)
+			let err = injectBasicAuth(input, u, p)
 			if (err) {
-				throw new Error("Injecting authentication token.", {cause: err})
+				throw new Error("Injecting basic authentication.", {cause: err})
 			}
 
 			return await f(input, init)
