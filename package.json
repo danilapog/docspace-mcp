@@ -10,7 +10,8 @@
 	],
 	"homepage": "https://github.com/onlyoffice/docspace-mcp/",
 	"bugs": {
-		"url": "https://github.com/onlyoffice/docspace-mcp/issues/"
+		"url": "https://github.com/onlyoffice/docspace-mcp/issues/",
+		"email": "support@onlyoffice.com"
 	},
 	"repository": {
 		"type": "git",
