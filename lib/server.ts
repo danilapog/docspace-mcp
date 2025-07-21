@@ -710,8 +710,8 @@ class InternalStreamableServer {
 				this.sendError(res, 500, -32603, err)
 				return
 			}
-		} catch {
-			let err = new Error("Internal Server Error")
+		} catch (err_) {
+			let err = new Error("Internal Server Error", {cause: err_})
 			this.sendError(res, 500, -32603, err)
 		}
 	}
@@ -752,8 +752,8 @@ class InternalStreamableServer {
 				this.sendError(res, 500, -32603, err)
 				return
 			}
-		} catch {
-			let err = new Error("Internal Server Error")
+		} catch (err_) {
+			let err = new Error("Internal Server Error", {cause: err_})
 			this.sendError(res, 500, -32603, err)
 		}
 	}
