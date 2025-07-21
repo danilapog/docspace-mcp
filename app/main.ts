@@ -123,7 +123,7 @@ async function startConfiguredStdioServer(config: result.Ok<config.Config, unkno
 	}
 
 	if (config.v.origin) {
-		cc.fetch = withOrigin(cc.fetch, config.v.origin)
+		cc.fetch = morefetch.withOrigin(cc.fetch, config.v.origin)
 	}
 
 	let cl = new Client(cc)
@@ -344,19 +344,6 @@ function createProtocolServer(): ProtocolServer {
 			},
 		},
 	)
-}
-
-function withOrigin(f: typeof fetch, o: string): typeof fetch {
-	return async function fetch(input, init) {
-		if (!(input instanceof Request)) {
-			throw new Error("Unsupported input type.")
-		}
-
-		input = input.clone()
-		input.headers.set("Origin", o)
-
-		return await f(input, init)
-	}
 }
 
 await main()
