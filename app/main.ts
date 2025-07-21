@@ -213,6 +213,7 @@ async function startInternalStreamableServer(config: result.Ok<config.Config, un
 				uploader: new Uploader(cc),
 				dynamic: config.v.dynamic,
 				toolsets: config.v.toolsets,
+				tools: config.v.tools,
 			}
 
 			attachConfiguredStdio(sf)
