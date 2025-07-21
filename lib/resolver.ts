@@ -25,23 +25,28 @@ import type {Response as ClientResponse} from "./client.ts"
 
 export type Operation = z.output<typeof FileOperationDtoSchema>
 
-export type OperationStatusesCallback =
-	(s: AbortSignal) => Promise<Result<[Operation[], ClientResponse], Error>>
-
 class State {
 	id: string | undefined
 	error: string | undefined
 	done = false
 }
 
+export interface Client {
+	files: FilesService
+}
+
+export interface FilesService {
+	getOperationStatuses(s: AbortSignal): Promise<Result<[Operation[], ClientResponse], Error>>
+}
+
 export class Resolver {
 	limit = 20
 	delay = 100
 
-	private cb: OperationStatusesCallback
+	private client: Client
 
-	constructor(cb: OperationStatusesCallback) {
-		this.cb = cb
+	constructor(client: Client) {
+		this.client = client
 	}
 
 	async resolve(signal: AbortSignal, ...ops: Operation[]): Promise<Result<Response, Error>> {
@@ -69,7 +74,7 @@ export class Resolver {
 		let err: Error | undefined
 
 		while (limit > 0) {
-			let r = await this.cb(signal)
+			let r = await this.client.files.getOperationStatuses(signal)
 			if (r.err) {
 				err = new Error("Calling operation statuses callback.", {cause: r.err})
 				break
