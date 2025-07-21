@@ -50,7 +50,14 @@ import {
 	UpdateFileInputSchema,
 	UpdateRoomInputSchema,
 } from "./server/files.ts"
-import type {CallToolRequest, Extra, SimplifiedToolInfo, ToolInfo, ToolInputSchema} from "./server/internal/protocol.ts"
+import type {
+	CallToolRequest,
+	Extra,
+	SimplifiedToolInfo,
+	ToolInfo,
+	ToolInputSchema,
+	Toolset,
+} from "./server/internal/protocol.ts"
 import {toInputSchema} from "./server/internal/protocol.ts"
 import {CallToolInputSchema, GetToolInputSchemaInputSchema, ListToolsInputSchema, MetaToolset} from "./server/meta.ts"
 import {
@@ -87,178 +94,181 @@ export const metaTools: ToolInfo[] = [
 	},
 ]
 
-export const toolsets: SimplifiedToolInfo[] = [
+export const toolsets: Toolset[] = [
 	{
 		name: "files",
 		description: "Operations for working with files, folders, and rooms.",
+		tools: [
+			{
+				name: "files_delete_file",
+				description: "Delete a file.",
+				inputSchema: toInputSchema(DeleteFileInputSchema),
+			},
+			{
+				name: "files_get_file_info",
+				description: "Get file information.",
+				inputSchema: toInputSchema(GetFileInfoInputSchema),
+			},
+			{
+				name: "files_update_file",
+				description: "Update a file.",
+				inputSchema: toInputSchema(UpdateFileInputSchema),
+			},
+			{
+				name: "files_create_folder",
+				description: "Create a folder.",
+				inputSchema: toInputSchema(CreateFolderInputSchema),
+			},
+			{
+				name: "files_delete_folder",
+				description: "Delete a folder.",
+				inputSchema: toInputSchema(DeleteFolderInputSchema),
+			},
+			{
+				name: "files_get_folder",
+				description: "Get content of a folder.",
+				inputSchema: toInputSchema(GetFolderInputSchema),
+			},
+			{
+				name: "files_get_folder_info",
+				description: "Get folder information.",
+				inputSchema: toInputSchema(GetFolderInfoInputSchema),
+			},
+			{
+				name: "files_get_folders",
+				description: "Get subfolders of a folder.",
+				inputSchema: toInputSchema(GetFoldersInputSchema),
+			},
+			{
+				name: "files_rename_folder",
+				description: "Rename a folder.",
+				inputSchema: toInputSchema(RenameFolderInputSchema),
+			},
+			{
+				name: "files_get_my_folder",
+				description: "Get the 'My Documents' folder.",
+				inputSchema: toInputSchema(GetMyFolderInputSchema),
+			},
+			{
+				name: "files_copy_batch_items",
+				description: "Copy to a folder.",
+				inputSchema: toInputSchema(CopyBatchItemsInputSchema),
+			},
+			{
+				name: "files_get_operation_statuses",
+				description: "Get active file operations.",
+				inputSchema: toInputSchema(z.object({})),
+			},
+			{
+				name: "files_move_batch_items",
+				description: "Move to a folder.",
+				inputSchema: toInputSchema(MoveBatchItemsInputSchema),
+			},
+			{
+				name: "files_create_room",
+				description: "Create a room.",
+				inputSchema: toInputSchema(CreateRoomInputSchema),
+			},
+			{
+				name: "files_get_room_info",
+				description: "Get room information.",
+				inputSchema: toInputSchema(GetRoomInfoInputSchema),
+			},
+			{
+				name: "files_update_room",
+				description: "Update a room.",
+				inputSchema: toInputSchema(UpdateRoomInputSchema),
+			},
+			{
+				name: "files_archive_room",
+				description: "Archive a room.",
+				inputSchema: toInputSchema(ArchiveRoomInputSchema),
+			},
+			{
+				name: "files_set_room_security",
+				description: "Invite or remove users from a room.",
+				inputSchema: toInputSchema(SetRoomSecurityInputSchema),
+			},
+			{
+				name: "files_get_room_security_info",
+				description: "Get a list of users with their access levels to a room.",
+				inputSchema: toInputSchema(GetRoomSecurityInfoInputSchema),
+			},
+			{
+				name: "files_get_rooms_folder",
+				description: "Get the 'Rooms' folder.",
+				inputSchema: toInputSchema(GetRoomsFolderInputSchema),
+			},
+		],
 	},
 	{
 		name: "others",
 		description: "Operations for listing additional enumeration values. Operations for downloading and uploading files.",
+		tools: [
+			{
+				name: "others_get_available_room_types",
+				description: "Get a list of available room types.",
+				inputSchema: toInputSchema(z.object({})),
+			},
+			{
+				name: "others_get_available_room_access",
+				description: "Get a list of available room invitation access levels.",
+				inputSchema: toInputSchema(GetAvailableRoomAccessSchema),
+			},
+			{
+				name: "others_download_as_text",
+				description: "Download a file as text.",
+				inputSchema: toInputSchema(DownloadAsTextInputSchema),
+			},
+			{
+				name: "others_upload_file",
+				description: "Upload a file.",
+				inputSchema: toInputSchema(UploadFileInputSchema),
+			},
+		],
 	},
 	{
 		name: "people",
 		description: "Operations for working with users.",
+		tools: [
+			{
+				name: "people_get_all",
+				description: "Get all people.",
+				inputSchema: toInputSchema(GetAllInputSchema),
+			},
+		],
 	},
 	{
 		name: "portal",
 		description: "Operations for working with the portal.",
+		tools: [
+			{
+				name: "portal_get_tariff",
+				description: "Get the current tariff.",
+				inputSchema: toInputSchema(z.object({})),
+			},
+			{
+				name: "portal_get_quota",
+				description: "Get the current quota.",
+				inputSchema: toInputSchema(z.object({})),
+			},
+		],
 	},
 	{
 		name: "settings",
 		description: "Operations for working with settings.",
-	},
-]
-
-export const tools: ToolInfo[] = [
-	{
-		name: "files_delete_file",
-		description: "Delete a file.",
-		inputSchema: toInputSchema(DeleteFileInputSchema),
-	},
-	{
-		name: "files_get_file_info",
-		description: "Get file information.",
-		inputSchema: toInputSchema(GetFileInfoInputSchema),
-	},
-	{
-		name: "files_update_file",
-		description: "Update a file.",
-		inputSchema: toInputSchema(UpdateFileInputSchema),
-	},
-	{
-		name: "files_create_folder",
-		description: "Create a folder.",
-		inputSchema: toInputSchema(CreateFolderInputSchema),
-	},
-	{
-		name: "files_delete_folder",
-		description: "Delete a folder.",
-		inputSchema: toInputSchema(DeleteFolderInputSchema),
-	},
-	{
-		name: "files_get_folder",
-		description: "Get content of a folder.",
-		inputSchema: toInputSchema(GetFolderInputSchema),
-	},
-	{
-		name: "files_get_folder_info",
-		description: "Get folder information.",
-		inputSchema: toInputSchema(GetFolderInfoInputSchema),
-	},
-	{
-		name: "files_get_folders",
-		description: "Get subfolders of a folder.",
-		inputSchema: toInputSchema(GetFoldersInputSchema),
-	},
-	{
-		name: "files_rename_folder",
-		description: "Rename a folder.",
-		inputSchema: toInputSchema(RenameFolderInputSchema),
-	},
-	{
-		name: "files_get_my_folder",
-		description: "Get the 'My Documents' folder.",
-		inputSchema: toInputSchema(GetMyFolderInputSchema),
-	},
-	{
-		name: "files_copy_batch_items",
-		description: "Copy to a folder.",
-		inputSchema: toInputSchema(CopyBatchItemsInputSchema),
-	},
-	{
-		name: "files_get_operation_statuses",
-		description: "Get active file operations.",
-		inputSchema: toInputSchema(z.object({})),
-	},
-	{
-		name: "files_move_batch_items",
-		description: "Move to a folder.",
-		inputSchema: toInputSchema(MoveBatchItemsInputSchema),
-	},
-	{
-		name: "files_create_room",
-		description: "Create a room.",
-		inputSchema: toInputSchema(CreateRoomInputSchema),
-	},
-	{
-		name: "files_get_room_info",
-		description: "Get room information.",
-		inputSchema: toInputSchema(GetRoomInfoInputSchema),
-	},
-	{
-		name: "files_update_room",
-		description: "Update a room.",
-		inputSchema: toInputSchema(UpdateRoomInputSchema),
-	},
-	{
-		name: "files_archive_room",
-		description: "Archive a room.",
-		inputSchema: toInputSchema(ArchiveRoomInputSchema),
-	},
-	{
-		name: "files_set_room_security",
-		description: "Invite or remove users from a room.",
-		inputSchema: toInputSchema(SetRoomSecurityInputSchema),
-	},
-	{
-		name: "files_get_room_security_info",
-		description: "Get a list of users with their access levels to a room.",
-		inputSchema: toInputSchema(GetRoomSecurityInfoInputSchema),
-	},
-	{
-		name: "files_get_rooms_folder",
-		description: "Get the 'Rooms' folder.",
-		inputSchema: toInputSchema(GetRoomsFolderInputSchema),
-	},
-
-	{
-		name: "others_get_available_room_types",
-		description: "Get a list of available room types.",
-		inputSchema: toInputSchema(z.object({})),
-	},
-	{
-		name: "others_get_available_room_access",
-		description: "Get a list of available room invitation access levels.",
-		inputSchema: toInputSchema(GetAvailableRoomAccessSchema),
-	},
-	{
-		name: "others_download_as_text",
-		description: "Download a file as text.",
-		inputSchema: toInputSchema(DownloadAsTextInputSchema),
-	},
-	{
-		name: "others_upload_file",
-		description: "Upload a file.",
-		inputSchema: toInputSchema(UploadFileInputSchema),
-	},
-
-	{
-		name: "people_get_all",
-		description: "Get all people.",
-		inputSchema: toInputSchema(GetAllInputSchema),
-	},
-
-	{
-		name: "portal_get_tariff",
-		description: "Get the current tariff.",
-		inputSchema: toInputSchema(z.object({})),
-	},
-	{
-		name: "portal_get_quota",
-		description: "Get the current quota.",
-		inputSchema: toInputSchema(z.object({})),
-	},
-
-	{
-		name: "settings_get_supported_cultures",
-		description: "Get a list of the supported cultures, languages.",
-		inputSchema: toInputSchema(z.object({})),
-	},
-	{
-		name: "settings_get_time_zones",
-		description: "Get a list of the available time zones.",
-		inputSchema: toInputSchema(z.object({})),
+		tools: [
+			{
+				name: "settings_get_supported_cultures",
+				description: "Get a list of the supported cultures, languages.",
+				inputSchema: toInputSchema(z.object({})),
+			},
+			{
+				name: "settings_get_time_zones",
+				description: "Get a list of the available time zones.",
+				inputSchema: toInputSchema(z.object({})),
+			},
+		],
 	},
 ]
 
@@ -274,6 +284,7 @@ export interface ConfiguredStdioConfig {
 	uploader: Uploader
 	dynamic: boolean
 	toolsets: string[]
+	tools: string[]
 }
 
 export interface InternalStreamableConfig {
@@ -289,14 +300,20 @@ export interface InternalStreamableCreateTransportOptions {
 
 class MisconfiguredStdioServer {
 	err: Error
+	tools: ToolInfo[]
 
 	constructor(config: MisconfiguredStdioConfig) {
 		this.err = config.err
+		this.tools = []
+
+		for (let s of toolsets) {
+			this.tools.push(...s.tools)
+		}
 	}
 
 	listTools(): ListToolsResult {
 		return {
-			tools,
+			tools: this.tools,
 		}
 	}
 
@@ -344,16 +361,25 @@ export class ConfiguredStdioServer {
 		this.settings = new SettingsToolset(this)
 
 		for (let n of config.toolsets) {
-			for (let t of toolsets) {
-				if (t.name === n) {
+			for (let s of toolsets) {
+				if (s.name === n) {
+					let t: SimplifiedToolInfo = {
+						name: s.name,
+						description: s.description,
+					}
 					this.activeToolsets.push(t)
 					break
 				}
 			}
+		}
 
-			for (let t of tools) {
-				if (t.name.startsWith(`${n}_`)) {
-					this.activeTools.push(t)
+		for (let n of config.tools) {
+			for (let s of toolsets) {
+				for (let t of s.tools) {
+					if (t.name === n) {
+						this.activeTools.push(t)
+						break
+					}
 				}
 			}
 		}

@@ -10,6 +10,12 @@ import {zodToJsonSchema} from "zod-to-json-schema"
 
 export type Extra = RequestHandlerExtra<ServerRequest, ServerNotification>
 
+export interface Toolset {
+	name: string
+	description: string
+	tools: ToolInfo[]
+}
+
 export type ToolInfo = ListToolsResult["tools"][0]
 
 export interface SimplifiedToolInfo {

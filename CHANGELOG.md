@@ -8,7 +8,8 @@ This document records all notable changes to the project, following the [Keep a 
 
 ### Added
 
-- Add an internal implementation of streamable HTTP transport ([ca3a432]).
+- Add an internal implementation of streamable HTTP transport ([ca3a432]);
+- Add the ability to enable and disable tools ([74ac987]).
 
 ### Changed
 
@@ -136,6 +137,7 @@ This document records all notable changes to the project, following the [Keep a 
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[74ac987]: https://github.com/onlyoffice/docspace-mcp/commit/74ac987ea8e790058f3ca5dcf2da4087ba5671a3/
 [ca3a432]: https://github.com/onlyoffice/docspace-mcp/commit/ca3a432764932abb7e5ff8e40667bff3a94b907f/
 [9d35a14]: https://github.com/onlyoffice/docspace-mcp/commit/9d35a14cfd08181141b4c769f1ebaddd4754022d/
 [a6b4e85]: https://github.com/onlyoffice/docspace-mcp/commit/a6b4e852d39d9247fd71843dc0fe7d374d78dde3/

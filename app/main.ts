@@ -147,6 +147,7 @@ async function startConfiguredStdioServer(config: result.Ok<config.Config, unkno
 		uploader: new Uploader(cl),
 		dynamic: config.v.dynamic,
 		toolsets: config.v.toolsets,
+		tools: config.v.tools,
 	}
 
 	attachConfiguredStdio(sc)
