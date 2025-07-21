@@ -240,6 +240,7 @@ async function startInternalStreamableServer(config: result.Ok<config.Config, un
 					return
 				}
 
+				logger.info("Streamable transport session closed", {sessionId: pt.sessionId})
 				/* eslint-disable typescript/no-dynamic-delete */
 				delete transports[pt.sessionId]
 				delete servers[pt.sessionId]
