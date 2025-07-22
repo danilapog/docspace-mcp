@@ -44,6 +44,8 @@ export interface Config {
 	// HTTP options
 	host: string
 	port: number
+	sessionTtl: number
+	sessionInterval: number
 }
 
 const ConfigSchema = z.object({
@@ -69,6 +71,8 @@ const ConfigSchema = z.object({
 	// HTTP options
 	DOCSPACE_HOST: z.string().optional(),
 	DOCSPACE_PORT: z.string().optional(),
+	DOCSPACE_SESSION_TTL: z.string().optional(),
+	DOCSPACE_SESSION_INTERVAL: z.string().optional(),
 })
 
 export function loadConfig(): Result<Config, Error> {
@@ -176,6 +180,20 @@ export function loadConfig(): Result<Config, Error> {
 			errs.push(new Error("Validating DOCSPACE_PORT", {cause: port.err}))
 		} else {
 			c.port = port.v
+		}
+
+		let sessionTtl = validateSessionTtl(o.data.DOCSPACE_SESSION_TTL)
+		if (sessionTtl.err) {
+			errs.push(new Error("Validating DOCSPACE_SESSION_TTL", {cause: sessionTtl.err}))
+		} else {
+			c.sessionTtl = sessionTtl.v
+		}
+
+		let sessionInterval = validateSessionInterval(o.data.DOCSPACE_SESSION_INTERVAL)
+		if (sessionInterval.err) {
+			errs.push(new Error("Validating DOCSPACE_SESSION_INTERVAL", {cause: sessionInterval.err}))
+		} else {
+			c.sessionInterval = sessionInterval.v
 		}
 	}
 
@@ -423,6 +441,46 @@ function validatePort(v: string | undefined): Result<number, Error> {
 
 	if (n < 1 || n > 65535) {
 		return error(new Error(`Expected a number between 1 and 65535, but got ${n}`))
+	}
+
+	return ok(n)
+}
+
+function validateSessionTtl(v: string | undefined): Result<number, Error> {
+	if (v === undefined) {
+		return ok(8 * 1000 * 60 * 60) // 8 hours
+	}
+
+	v = v.trim()
+
+	let n = Number.parseInt(v, 10)
+
+	if (Number.isNaN(n)) {
+		return error(new Error(`Expected a number, but got ${v}`))
+	}
+
+	if (n < 0) {
+		return error(new Error(`Expected a positive number, but got ${n}`))
+	}
+
+	return ok(n)
+}
+
+function validateSessionInterval(v: string | undefined): Result<number, Error> {
+	if (v === undefined) {
+		return ok(4 * 1000 * 60) // 4 minutes
+	}
+
+	v = v.trim()
+
+	let n = Number.parseInt(v, 10)
+
+	if (Number.isNaN(n)) {
+		return error(new Error(`Expected a number, but got ${v}`))
+	}
+
+	if (n < 0) {
+		return error(new Error(`Expected a positive number, but got ${n}`))
 	}
 
 	return ok(n)

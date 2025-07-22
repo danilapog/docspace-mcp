@@ -27,8 +27,10 @@ import {Client} from "../lib/client.ts"
 import {Resolver} from "../lib/resolver.ts"
 import type {ConfiguredStdioConfig, InternalStreamableConfig, MisconfiguredStdioConfig} from "../lib/server.ts"
 import {attachConfiguredStdio, attachInternalStreamable, attachMisconfiguredStdio} from "../lib/server.ts"
+import * as sessions from "../lib/sessions.ts"
 import {Uploader} from "../lib/uploader.ts"
 import pack from "../package.json" with {type: "json"}
+import * as errors from "../util/errors.ts"
 import * as logger from "../util/logger.ts"
 import * as moreexpress from "../util/moreexpress.ts"
 import * as morefetch from "../util/morefetch.ts"
@@ -187,8 +189,7 @@ async function startInternalStreamableServer(config: result.Ok<config.Config, un
 	app.use(moreexpress.contextMiddleware)
 	app.use(moreexpress.loggerMiddleware)
 
-	let servers: Record<string, ProtocolServer> = {}
-	let transports: Record<string, StreamableHTTPServerTransport> = {}
+	let se = new sessions.Sessions()
 
 	let sf: InternalStreamableConfig = {
 		app,
@@ -224,9 +225,20 @@ async function startInternalStreamableServer(config: result.Ok<config.Config, un
 					return crypto.randomUUID()
 				},
 				onsessioninitialized: (sessionId) => {
-					logger.info("Streamable transport session initialized", {sessionId})
-					servers[sessionId] = ps
-					transports[sessionId] = pt
+					let o: sessions.CreateOptions = {
+						id: sessionId,
+						server: ps,
+						transport: pt,
+						ttl: config.v.sessionTtl,
+					}
+
+					let r = se.create(o)
+					if (r.err) {
+						logger.error("Creating session for streamable transport", {sessionId, err: r.err})
+						return
+					}
+
+					logger.info("Streamable transport session created", {sessionId: r.v.id})
 				},
 			})
 
@@ -237,16 +249,13 @@ async function startInternalStreamableServer(config: result.Ok<config.Config, un
 					return
 				}
 
-				if (!transports[pt.sessionId]) {
-					logger.warn("Streamable transport closed with an unknown sessionId", {sessionId: pt.sessionId})
+				let err = se.delete(pt.sessionId)
+				if (err) {
+					logger.error("Deleting session for streamable transport", {sessionId: pt.sessionId, err})
 					return
 				}
 
-				logger.info("Streamable transport session closed", {sessionId: pt.sessionId})
-				/* eslint-disable typescript/no-dynamic-delete */
-				delete transports[pt.sessionId]
-				delete servers[pt.sessionId]
-				/* eslint-enable typescript/no-dynamic-delete */
+				logger.info("Streamable transport session deleted", {sessionId: pt.sessionId})
 			}
 
 			let pc = await result.safeAsync(ps.connect.bind(ps), pt)
@@ -257,11 +266,18 @@ async function startInternalStreamableServer(config: result.Ok<config.Config, un
 			return result.ok(pt)
 		},
 		retrieveTransport(id) {
-			return transports[id]
+			let s = se.get(id)
+			if (s.err) {
+				return result.error(new Error("Getting session for internal streamable server", {cause: s.err}))
+			}
+			return result.ok(s.v.transport)
 		},
 	}
 
 	attachInternalStreamable(sf)
+
+	let sa = new AbortController()
+	let sw = se.watch(sa.signal, config.v.sessionInterval)
 
 	let hs = app.listen(config.v.port, config.v.host)
 
@@ -272,24 +288,16 @@ async function startInternalStreamableServer(config: result.Ok<config.Config, un
 
 				let errs: Error[] = []
 
-				let promises: Promise<result.Result<void, Error>>[] = []
-
-				for (let [k, v] of Object.entries(servers)) {
-					promises.push((async() => {
-						let r = await result.safeAsync(v.close.bind(v))
-						if (r.err) {
-							return result.error(new Error(`Closing internal streamable server for session ${k}`, {cause: r.err}))
-						}
-						return result.ok()
-					})())
+				let err = await se.clear()
+				if (err) {
+					errs.push(new Error("Clearing sessions for internal streamable server", {cause: err}))
 				}
 
-				let results = await Promise.allSettled(promises)
+				sa.abort("Shutting down internal streamable server")
 
-				for (let r of results) {
-					if (r.status === "fulfilled" && r.value.err) {
-						errs.push(r.value.err)
-					}
+				err = await sw
+				if (err && !errors.isAborted(err)) {
+					errs.push(new Error("Stopping session watcher for internal streamable server", {cause: err}))
 				}
 
 				let hr = await new Promise<result.Result<void, Error>>((res) => {
@@ -331,6 +339,23 @@ async function startInternalStreamableServer(config: result.Ok<config.Config, un
 	})
 
 	if (hc.err) {
+		let errs: Error[] = [hc.err]
+
+		let err = await se.clear()
+		if (err) {
+			errs.push(new Error("Clearing sessions for internal streamable server", {cause: err}))
+		}
+
+		sa.abort("Internal streamable server failed to start")
+
+		err = await sw
+		if (err && !errors.isAborted(err)) {
+			errs.push(new Error("Stopping session watcher for internal streamable server", {cause: err}))
+		}
+
+		err = new Error("Multiple errors during internal streamable server startup", {cause: errs})
+		logger.error("Internal streamable server failed to start", {err})
+
 		process.exit(1)
 	}
 }

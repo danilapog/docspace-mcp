@@ -290,7 +290,7 @@ export interface ConfiguredStdioConfig {
 export interface InternalStreamableConfig {
 	app: express.Express
 	createTransport(this: void, o: InternalStreamableCreateTransportOptions): Promise<Result<StreamableHTTPServerTransport, Error>>
-	retrieveTransport(this: void, id: string): StreamableHTTPServerTransport | undefined
+	retrieveTransport(this: void, id: string): Result<StreamableHTTPServerTransport, Error>
 }
 
 export interface InternalStreamableCreateTransportOptions {
@@ -695,13 +695,14 @@ class InternalStreamableServer {
 				this.sendError(res, 400, -32000, err)
 				return
 			} else {
-				t = this.retrieveTransport(id)
-				if (!t) {
-					// https://github.com/modelcontextprotocol/typescript-sdk/blob/1.15.1/src/server/streamableHttp.ts#L609
-					let err = new Error("Session not found")
+				let r = this.retrieveTransport(id)
+				if (r.err) {
+					let err = new Error("Retrieving transport", {cause: r.err})
 					this.sendError(res, 404, -32001, err)
 					return
 				}
+
+				t = r.v
 			}
 
 			let h = await safeAsync(t.handleRequest.bind(t), req, res, req.body)
@@ -738,15 +739,14 @@ class InternalStreamableServer {
 				return
 			}
 
-			let t = this.retrieveTransport(id)
-			if (!t) {
-				// https://github.com/modelcontextprotocol/typescript-sdk/blob/1.15.1/src/server/streamableHttp.ts#L609
-				let err = new Error("Session not found")
+			let r = this.retrieveTransport(id)
+			if (r.err) {
+				let err = new Error("Retrieving transport", {cause: r.err})
 				this.sendError(res, 404, -32001, err)
 				return
 			}
 
-			let h = await safeAsync(t.handleRequest.bind(t), req, res)
+			let h = await safeAsync(r.v.handleRequest.bind(r.v), req, res)
 			if (h.err) {
 				let err = new Error("Handling request", {cause: h.err})
 				this.sendError(res, 500, -32603, err)
