@@ -34,7 +34,6 @@ import type {
 	GetFileInfoFiltersSchema,
 	GetFolderFiltersSchema,
 	GetFolderInfoFiltersSchema,
-	GetFoldersFiltersSchema,
 	GetMyFolderFiltersSchema,
 	GetRoomInfoFiltersSchema,
 	GetRoomSecurityFiltersSchema,
@@ -76,7 +75,6 @@ export type RenameFolderOptions = z.input<typeof CreateFolderSchema>
 export type CreateFolderFilters = z.input<typeof CreateFolderFiltersSchema>
 export type GetFolderFilters = z.input<typeof GetFolderFiltersSchema>
 export type GetFolderInfoFilters = z.input<typeof GetFolderInfoFiltersSchema>
-export type GetFoldersFilters = z.input<typeof GetFoldersFiltersSchema>
 export type RenameFolderFilters = z.input<typeof RenameFolderFiltersSchema>
 export type GetMyFolderFilters = z.input<typeof GetMyFolderFiltersSchema>
 
@@ -304,28 +302,6 @@ export class FilesService {
 	 */
 	async getFolderInfo(s: AbortSignal, id: number, filters?: GetFolderInfoFilters): Promise<Result<[unknown, Response], Error>> {
 		let u = this.c.createUrl(`api/2.0/files/folder/${id}`, filters)
-		if (u.err) {
-			return error(new Error("Creating URL.", {cause: u.err}))
-		}
-
-		let req = this.c.createRequest(s, "GET", u.v)
-		if (req.err) {
-			return error(new Error("Creating request.", {cause: req.err}))
-		}
-
-		let f = await this.c.fetch(req.v)
-		if (f.err) {
-			return error(new Error("Fetching request.", {cause: f.err}))
-		}
-
-		return ok(f.v)
-	}
-
-	/**
-	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FoldersController.cs/#L217 | DocSpace Reference}
-	 */
-	async getFolders(s: AbortSignal, id: number, filters?: GetFoldersFilters): Promise<Result<[unknown, Response], Error>> {
-		let u = this.c.createUrl(`api/2.0/files/${id}/subfolders`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
