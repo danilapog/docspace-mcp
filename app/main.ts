@@ -184,6 +184,7 @@ async function startInternalStreamableServer(config: result.Ok<config.Config, un
 
 	let app = express()
 
+	app.use(moreexpress.contextMiddleware)
 	app.use(moreexpress.loggerMiddleware)
 
 	let servers: Record<string, ProtocolServer> = {}
