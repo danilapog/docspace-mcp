@@ -1,3 +1,4 @@
+import * as context from "./context.ts"
 import * as logger from "./logger.ts"
 
 const OUTGOING = "<--"
@@ -5,6 +6,7 @@ const INCOMING = "-->"
 const ERROR = "xxx"
 
 interface Payload {
+	sessionId?: string
 	method?: string
 	url?: string
 	status?: number
@@ -15,6 +17,11 @@ interface Payload {
 export function withLogger(f: typeof fetch): typeof fetch {
 	return async function fetch(input, init) {
 		let p: Payload = {}
+
+		let ctx = context.get()
+		if (ctx && ctx.sessionId) {
+			p.sessionId = ctx.sessionId
+		}
 
 		if (input instanceof Request) {
 			p.method = input.method
