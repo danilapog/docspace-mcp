@@ -39,96 +39,248 @@ For a more detailed example of the MCP server installation process, see how it c
 The only way to configure ONLYOFFICE DocSpace MCP server is through environment variables. Below is an example of the `.env` file with possible configuration options:
 
 ```ini
+#
+# Internal configuration options
+# These options are intended exclusively for use by company employees when
+# integrating the DocSpace MCP server into other company products.
+#
+
+# Whether to run the DocSpace MCP server in internal mode.
+# @type boolean
+# @presence optional
+# @default false
+DOCSPACE_INTERNAL=
+
+#
+# General configuration options
+# These options are available for all transport protocols.
+#
+
+# The transport protocol to use for communication with the DocSpace MCP server.
+# The HTTP transport only available in the internal mode for now.
+# @type enumeration
+# @enum stdio, http
+# @presence optional
+# @default stdio
+DOCSPACE_TRANSPORT=
+
+# The user agent to include in the User-Agent header for DocSpace API requests
+# @type string
+# @presence optional
+# @default @onlyoffice/docspace-mcp v1.3.1
+DOCSPACE_USER_AGENT=
+
+# Whether to enable dynamic tools. See the README.md file for more details about
+# how dynamic tools work.
+# @type boolean
+# @presence optional
+# @default false
+DOCSPACE_DYNAMIC=
+
+# The list of toolsets to use or 'all' to use all available toolsets. See the
+# README.md file for more details about how toolsets work.
+# @type enumeration (comma-separated)
+# @enum See the README.md file for available toolsets
+# @presence optional
+# @default all
+DOCSPACE_TOOLSETS=
+
+# The list of tools to enable. See the README.md file for more details about how
+# enabled tools work.
+# @type enumeration (comma-separated)
+# @enum See the README.md file for available tools
+# @presence optional
+# @default none
+DOCSPACE_ENABLED_TOOLS=
+
+# The list of tools to disable. See the README.md file for more details about
+# how disabled tools work.
+# @type enumeration (comma-separated)
+# @enum See the README.md file for available tools
+# @presence optional
+# @default none
+DOCSPACE_DISABLED_TOOLS=
+
+#
+# stdio configuration options
+# These options are available only for the stdio transport protocol.
+#
+
 # The base URL of the DocSpace instance for API requests.
-# Type: URL
-# Presence: Required
-# Example: https://your-instance.onlyoffice.com
+# @type url
+# @presence required
+# @example https://your-instance.onlyoffice.com
 DOCSPACE_BASE_URL=
 
 # The origin URL to include in the Origin header for DocSpace API requests.
-# Type: URL
-# Presence: Optional
-# Example: https://your-instance.onlyoffice.com
+# @type url
+# @presence optional
+# @example https://your-instance.onlyoffice.com
 DOCSPACE_ORIGIN=
 
-# The user agent to include in the User-Agent header for DocSpace API requests.
-# Type: String
-# Presence: Optional
-# Default: @onlyoffice/docspace-mcp v1.3.1
-DOCSPACE_USER_AGENT=
-
 # The API key for accessing the DocSpace API.
-# Type: String
-# Presence:
+# @type
+#   string
+# @presence
 #   Required if nether DOCSPACE_AUTH_TOKEN nor DOCSPACE_USERNAME and
 #   DOCSPACE_PASSWORD are provided.
-# Example: sk-a499e...
+# @example
+#   sk-a499e...
 DOCSPACE_API_KEY=
 
 # The Personal Access Token (PAT) for accessing the DocSpace API.
-# Type: String
-# Presence:
+# @type
+#   string
+# @presence
 #   Required if neither DOCSPACE_API_KEY nor DOCSPACE_USERNAME and
 #   DOCSPACE_PASSWORD are provided.
-# Example: Fe4Hrgl6...
+# @example
+#   Fe4Hrgl6...
 DOCSPACE_AUTH_TOKEN=
 
 # The username for accessing the DocSpace API using basic authentication.
-# Type: String
-# Presence:
+# @type
+#   string
+# @presence
 #   Required if neither DOCSPACE_API_KEY nor DOCSPACE_AUTH_TOKEN are provided.
 #   This configuration is used in conjunction with DOCSPACE_PASSWORD.
-# Example: henry.milton@onlyoffice.com
+# @example
+#   henry.milton@onlyoffice.com
 DOCSPACE_USERNAME=
 
 # The password for accessing the DocSpace API using basic authentication.
-# Type: String
-# Presence:
+# @type
+#   string
+# @presence
 #   Required if neither DOCSPACE_API_KEY nor DOCSPACE_AUTH_TOKEN are provided.
 #   This configuration is used in conjunction with DOCSPACE_USERNAME.
-# Example: ditgor-p...
+# @example
+#   ditgor-p...
 DOCSPACE_PASSWORD=
 
-# Whether to enable dynamic tools.
-# Type: Boolean
-# Presence: Optional
-# Default: false
-DOCSPACE_DYNAMIC=
+#
+# HTTP configuration options
+# These options are available only for the http transport protocol.
+#
 
-# The list of toolsets to use or 'all' to use all available toolsets.
-# Type: Comma-separated list of strings
-# Presence: Optional
-# Default: all
-DOCSPACE_TOOLSETS=
+# The host to listen on for incoming HTTP requests.
+# @type string
+# @presence optional
+# @default 127.0.0.1
+DOCSPACE_HOST=
+
+# The port to listen on for incoming HTTP requests.
+# @type number
+# @presence optional
+# @default 8080
+DOCSPACE_PORT=
+
+# The time-to-live (TTL) for HTTP sessions in milliseconds.
+# @type number
+# @presence optional
+# @default 28800000 (8 hours)
+DOCSPACE_SESSION_TTL=
+
+# The interval for checking HTTP sessions for expiration in milliseconds.
+# @type number
+# @presence optional
+# @default 240000 (4 minutes)
+DOCSPACE_SESSION_INTERVAL=
 ```
 
 ## Usage
 
 Model Context Protocol describes several different concepts, however ONLYOFFICE DocSpace MCP server implements [Tools] only.
 
-### Toolsets
+### Tools
 
-In addition to the existing concept of Tools, ONLYOFFICE DocSpace MCP server introduces a new one, Toolsets. A Toolset is a set of related tools. Using the `DOCSPACE_TOOLSETS` configuration option, you can specify the tools from selected toolsets that will be available in ONLYOFFICE DocSpace MCP server. Below is a table with the names of available toolsets and their descriptions:
+> [!NOTE]
+>
+> In addition to the existing concept of Tools, ONLYOFFICE DocSpace MCP server introduces a new one, Toolsets. A Toolset is a set of related tools.
+
+In ONLYOFFICE DocSpace MCP server, all toolsets and their tools are available by default. However, you can manage this using the following configuration options: `DOCSPACE_TOOLSETS`, `DOCSPACE_ENABLED_TOOLS`, and `DOCSPACE_DISABLED_TOOLS`. See the [Examples](#examples) section for more details on how to configure these options.
+
+Below is a table of available toolsets:
 
 <!--generate toolsets-start-->
 
-| #   | Name       | Description                                                                                           |
-| --- | ---------- | ----------------------------------------------------------------------------------------------------- |
-| 1   | `files`    | Operations for working with files, folders, and rooms.                                                |
-| 2   | `others`   | Operations for listing additional enumeration values. Operations for downloading and uploading files. |
-| 3   | `people`   | Operations for working with users.                                                                    |
-| 4   | `portal`   | Operations for working with the portal.                                                               |
-| 5   | `settings` | Operations for working with settings.                                                                 |
+| #   | Toolset Name | Toolset Description                  |
+| --- | ------------ | ------------------------------------ |
+| 1   | `files`      | Operations for working with files.   |
+| 2   | `folders`    | Operations for working with folders. |
+| 3   | `people`     | Operations for working with users.   |
+| 4   | `rooms`      | Operations for working with rooms.   |
 
 <!--generate toolsets-end-->
 
+Below are tables of available tools:
+
+<!--generate tools-start-->
+
+<details>
+  <summary><code>files</code></summary>
+
+| #   | Tool Name               | Tool Description         |
+| --- | ----------------------- | ------------------------ |
+| 1   | `copy_batch_items`      | Copy to a folder.        |
+| 2   | `delete_file`           | Delete a file.           |
+| 3   | `download_file_as_text` | Download a file as text. |
+| 4   | `get_file_info`         | Get file information.    |
+| 5   | `move_batch_items`      | Move to a folder.        |
+| 6   | `update_file`           | Update a file.           |
+| 7   | `upload_file`           | Upload a file.           |
+
+</details>
+
+<details>
+  <summary><code>folders</code></summary>
+
+| #   | Tool Name            | Tool Description               |
+| --- | -------------------- | ------------------------------ |
+| 8   | `create_folder`      | Create a folder.               |
+| 9   | `delete_folder`      | Delete a folder.               |
+| 10  | `get_folder_content` | Get content of a folder.       |
+| 11  | `get_folder_info`    | Get folder information.        |
+| 12  | `get_my_folder`      | Get the 'My Documents' folder. |
+| 13  | `rename_folder`      | Rename a folder.               |
+
+</details>
+
+<details>
+  <summary><code>people</code></summary>
+
+| #   | Tool Name        | Tool Description |
+| --- | ---------------- | ---------------- |
+| 14  | `get_all_people` | Get all people.  |
+
+</details>
+
+<details>
+  <summary><code>rooms</code></summary>
+
+| #   | Tool Name                | Tool Description                                        |
+| --- | ------------------------ | ------------------------------------------------------- |
+| 15  | `archive_room`           | Archive a room.                                         |
+| 16  | `create_room`            | Create a room.                                          |
+| 17  | `get_room_access_levels` | Get a list of available room invitation access levels.  |
+| 18  | `get_room_info`          | Get room information.                                   |
+| 19  | `get_room_security_info` | Get a list of users with their access levels to a room. |
+| 20  | `get_room_types`         | Get a list of available room types.                     |
+| 21  | `get_rooms_folder`       | Get the 'Rooms' folder.                                 |
+| 22  | `set_room_security`      | Invite or remove users from a room.                     |
+| 23  | `update_room`            | Update a room.                                          |
+
+</details>
+
+<!--generate tools-end-->
+
 ### Meta Tools
 
-In some cases, directly connecting all available tools can be problematic. Using the `DOCSPACE_DYNAMIC` configuration option, you can wrap all available tools into meta-tools. Meta-tools are tools that allow an AI model to interact with other tools dynamically without loading them all simultaneously. Below is a table with the names of available meta-tools and their descriptions:
+In some cases, directly connecting all available tools can be problematic. Using the `DOCSPACE_DYNAMIC` configuration option, you can wrap all available tools into meta-tools. Meta-tools are tools that allow an AI model to interact with other tools dynamically without loading them all simultaneously. Below is a table of available meta-tools:
 
 <!--generate dynamic-start-->
 
-| #   | Name                    | Description                                                                                                                                                                                     |
+| #   | Meta Tool Name          | Meta Tool Description                                                                                                                                                                           |
 | --- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1   | `call_tool`             | This is a meta-tool for calling a tool. The list of available tools can be obtained using the list_tools meta-tool. The input schema can be obtained using the get_tool_input_schema meta-tool. |
 | 2   | `get_tool_input_schema` | This is a meta-tool for getting an input schema for a specific tool. The list of available tools can be obtained using the list_tools meta-tool.                                                |
@@ -137,45 +289,66 @@ In some cases, directly connecting all available tools can be problematic. Using
 
 <!--generate dynamic-end-->
 
-### Tools
+The `DOCSPACE_DYNAMIC` configuration option is complementary to `DOCSPACE_TOOLSETS`, `DOCSPACE_ENABLED_TOOLS`, and `DOCSPACE_DISABLED_TOOLS` configuration options.
 
-Below is a table with the names of available tools and their descriptions:
+## Examples
 
-<!--generate tools-start-->
+In this section you can find examples of how to configure ONLYOFFICE DocSpace MCP server. For simplicity, let us come up with a small list of available toolsets and tools. The real server provides more of them, but for these examples, just a few are enough:
 
-| #   | Name                               | Description                                             |
-| --- | ---------------------------------- | ------------------------------------------------------- |
-| 1   | `files_archive_room`               | Archive a room.                                         |
-| 2   | `files_copy_batch_items`           | Copy to a folder.                                       |
-| 3   | `files_create_folder`              | Create a folder.                                        |
-| 4   | `files_create_room`                | Create a room.                                          |
-| 5   | `files_delete_file`                | Delete a file.                                          |
-| 6   | `files_delete_folder`              | Delete a folder.                                        |
-| 7   | `files_get_file_info`              | Get file information.                                   |
-| 8   | `files_get_folder`                 | Get content of a folder.                                |
-| 9   | `files_get_folder_info`            | Get folder information.                                 |
-| 10  | `files_get_folders`                | Get subfolders of a folder.                             |
-| 11  | `files_get_my_folder`              | Get the 'My Documents' folder.                          |
-| 12  | `files_get_operation_statuses`     | Get active file operations.                             |
-| 13  | `files_get_room_info`              | Get room information.                                   |
-| 14  | `files_get_room_security_info`     | Get a list of users with their access levels to a room. |
-| 15  | `files_get_rooms_folder`           | Get the 'Rooms' folder.                                 |
-| 16  | `files_move_batch_items`           | Move to a folder.                                       |
-| 17  | `files_rename_folder`              | Rename a folder.                                        |
-| 18  | `files_set_room_security`          | Invite or remove users from a room.                     |
-| 19  | `files_update_file`                | Update a file.                                          |
-| 20  | `files_update_room`                | Update a room.                                          |
-| 21  | `others_download_as_text`          | Download a file as text.                                |
-| 22  | `others_get_available_room_access` | Get a list of available room invitation access levels.  |
-| 23  | `others_get_available_room_types`  | Get a list of available room types.                     |
-| 24  | `others_upload_file`               | Upload a file.                                          |
-| 25  | `people_get_all`                   | Get all people.                                         |
-| 26  | `portal_get_quota`                 | Get the current quota.                                  |
-| 27  | `portal_get_tariff`                | Get the current tariff.                                 |
-| 28  | `settings_get_supported_cultures`  | Get a list of the supported cultures, languages.        |
-| 29  | `settings_get_time_zones`          | Get a list of the available time zones.                 |
+| Toolset   | Tools                                          |
+| --------- | ---------------------------------------------- |
+| `files`   | `create_file`, `get_file`, `delete_file`       |
+| `folders` | `create_folder`, `get_folder`, `delete_folder` |
 
-<!--generate tools-end-->
+### Enable a tool from not specified toolset
+
+Configuration:
+
+```ini
+DOCSPACE_TOOLSETS=files
+DOCSPACE_ENABLED_TOOLS=create_folder
+```
+
+Result:
+
+| Toolset   | Tools                                    |
+| --------- | ---------------------------------------- |
+| `files`   | `create_file`, `get_file`, `delete_file` |
+| `folders` | `create_folder`                          |
+
+### Disable a tool from specified toolset
+
+Configuration:
+
+```ini
+DOCSPACE_TOOLSETS=files
+DOCSPACE_ENABLED_TOOLS=create_folder
+DOCSPACE_DISABLED_TOOLS=get_file
+```
+
+Result:
+
+| Toolset   | Tools                        |
+| --------- | ---------------------------- |
+| `files`   | `create_file`, `delete_file` |
+| `folders` | `create_folder`              |
+
+### Manually specify tools to be available
+
+Configuration:
+
+```ini
+DOCSPACE_TOOLSETS= # Keep this empty to disable all tools
+DOCSPACE_ENABLED_TOOLS=create_file,get_file,create_folder
+DOCSPACE_DISABLED_TOOLS=get_file,delete_folder
+```
+
+Result:
+
+| Toolset   | Tools           |
+| --------- | --------------- |
+| `files`   | `create_file`   |
+| `folders` | `create_folder` |
 
 ## License
 

@@ -19,7 +19,7 @@
 import {existsSync} from "node:fs"
 import {readFile, writeFile} from "node:fs/promises"
 import * as server from "../lib/server.ts"
-import type {SimplifiedToolInfo} from "../util/moremcp.ts"
+import type {SimplifiedToolInfo, Toolset} from "../util/moremcp.ts"
 
 /**
  * {@link https://code.visualstudio.com/docs/reference/variables-reference/#_input-variables | VS Code Reference}
@@ -55,9 +55,9 @@ async function main(): Promise<void> {
 	let input = await readFile("README.md", "utf8")
 
 	let badges = createBadges()
-	let toolsets = formatTools(server.toolsets)
-	let dynamic = formatTools(server.metaTools)
-	let tools = formatTools(server.tools)
+	let toolsets = formatToolsets(server.toolsets)
+	let dynamic = formatMetaTools(server.metaTools)
+	let tools = formatTools(server.toolsets)
 
 	let output = input
 	output = insert("badges", output, badges)
@@ -119,12 +119,69 @@ function createBadges(): string {
 	return c
 }
 
-function formatTools(tools: SimplifiedToolInfo[]): string {
+function formatToolsets(toolsets: Toolset[]): string {
+	toolsets = toolsets.sort((a, b) => {
+		return a.name.localeCompare(b.name)
+	})
+
+	let c = "| # | Toolset Name | Toolset Description |\n|-|-|-|\n"
+
+	for (let [i, t] of toolsets.entries()) {
+		c += `| ${i + 1} | \`${t.name}\` | ${t.description} |\n`
+	}
+
+	if (c.length !== 0) {
+		c = c.slice(0, -1)
+	}
+
+	return c
+}
+
+function formatTools(toolsets: Toolset[]): string {
+	toolsets = toolsets.sort((a, b) => {
+		return a.name.localeCompare(b.name)
+	})
+
+	let c = ""
+
+	let i = 0
+
+	for (let s of toolsets) {
+		let tools = s.tools.sort((a, b) => {
+			return a.name.localeCompare(b.name)
+		})
+
+		// eslint-disable-next-line github/unescaped-html-literal
+		c += `<details>\n  <summary><code>${s.name}</code></summary>\n\n`
+
+		c += "| # | Tool Name | Tool Description |\n|-|-|-|\n"
+
+		for (let [j, t] of tools.entries()) {
+			c += `| ${j + 1 + i} | \`${t.name}\` | ${t.description} |\n`
+		}
+
+		if (c.length !== 0) {
+			c = c.slice(0, -1)
+		}
+
+		c += "\n\n</details>\n\n"
+
+		i += tools.length
+	}
+
+	if (c.length !== 0) {
+		c = c.slice(0, -2)
+	}
+
+	return c
+}
+
+function formatMetaTools(tools: SimplifiedToolInfo[]): string {
 	tools = tools.sort((a, b) => {
 		return a.name.localeCompare(b.name)
 	})
 
-	let c = "| # | Name | Description |\n|-|-|-|\n"
+	let c = "| # | Meta Tool Name | Meta Tool Description |\n|-|-|-|\n"
 
 	for (let [i, t] of tools.entries()) {
 		c += `| ${i + 1} | \`${t.name}\` | ${t.description} |\n`
