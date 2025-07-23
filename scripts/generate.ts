@@ -18,8 +18,8 @@
 
 import {existsSync} from "node:fs"
 import {readFile, writeFile} from "node:fs/promises"
-import type {SimplifiedToolInfo} from "../lib/server/internal/protocol.ts"
 import * as server from "../lib/server.ts"
+import type {SimplifiedToolInfo} from "../util/moremcp.ts"
 
 /**
  * {@link https://code.visualstudio.com/docs/reference/variables-reference/#_input-variables | VS Code Reference}
