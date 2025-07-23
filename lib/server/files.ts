@@ -26,7 +26,6 @@ import {
 	GetFileInfoFiltersSchema,
 	GetFolderFiltersSchema,
 	GetFolderInfoFiltersSchema,
-	GetFoldersFiltersSchema,
 	GetMyFolderFiltersSchema,
 	GetRoomInfoFiltersSchema,
 	GetRoomSecurityFiltersSchema,
@@ -85,11 +84,6 @@ export const GetFolderInputSchema = z.object({
 export const GetFolderInfoInputSchema = z.object({
 	folderId: z.number().describe("The ID of the folder to get info for."),
 	filters: GetFolderInfoFiltersSchema.describe("The filters to apply to the folder info. Use them to reduce the size of the response."),
-})
-
-export const GetFoldersInputSchema = z.object({
-	folderId: z.number().describe("The ID of the folder to get subfolders for."),
-	filters: GetFoldersFiltersSchema.describe("The filters to apply to the subfolders. Use them to reduce the size of the response."),
 })
 
 export const RenameFolderInputSchema = z.object({
@@ -379,25 +373,6 @@ export class FilesToolset {
 		let gr = await this.s.client.files.getFolderInfo(signal, pr.data.folderId, pr.data.filters)
 		if (gr.err) {
 			return error(new Error("Getting folder info.", {cause: gr.err}))
-		}
-
-		let [, res] = gr.v
-
-		return ok(res)
-	}
-
-	/**
-	 * {@link FilesService.getFolders}
-	 */
-	async getFolders(signal: AbortSignal, p: unknown): Promise<Result<Response, Error>> {
-		let pr = GetFoldersInputSchema.safeParse(p)
-		if (!pr.success) {
-			return error(new Error("Parsing input.", {cause: pr.error}))
-		}
-
-		let gr = await this.s.client.files.getFolders(signal, pr.data.folderId)
-		if (gr.err) {
-			return error(new Error("Getting folders.", {cause: gr.err}))
 		}
 
 		let [, res] = gr.v

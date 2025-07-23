@@ -39,7 +39,6 @@ import {
 	GetFileInfoInputSchema,
 	GetFolderInfoInputSchema,
 	GetFolderInputSchema,
-	GetFoldersInputSchema,
 	GetMyFolderInputSchema,
 	GetRoomInfoInputSchema,
 	GetRoomSecurityInfoInputSchema,
@@ -67,8 +66,6 @@ import {
 	UploadFileInputSchema,
 } from "./server/others.ts"
 import {GetAllInputSchema, PeopleToolset} from "./server/people.ts"
-import {PortalToolset} from "./server/portal.ts"
-import {SettingsToolset} from "./server/settings.ts"
 import type {Uploader} from "./uploader.ts"
 
 export const metaTools: ToolInfo[] = [
@@ -135,11 +132,6 @@ export const toolsets: Toolset[] = [
 				inputSchema: toInputSchema(GetFolderInfoInputSchema),
 			},
 			{
-				name: "files_get_folders",
-				description: "Get subfolders of a folder.",
-				inputSchema: toInputSchema(GetFoldersInputSchema),
-			},
-			{
 				name: "files_rename_folder",
 				description: "Rename a folder.",
 				inputSchema: toInputSchema(RenameFolderInputSchema),
@@ -153,11 +145,6 @@ export const toolsets: Toolset[] = [
 				name: "files_copy_batch_items",
 				description: "Copy to a folder.",
 				inputSchema: toInputSchema(CopyBatchItemsInputSchema),
-			},
-			{
-				name: "files_get_operation_statuses",
-				description: "Get active file operations.",
-				inputSchema: toInputSchema(z.object({})),
 			},
 			{
 				name: "files_move_batch_items",
@@ -238,38 +225,6 @@ export const toolsets: Toolset[] = [
 			},
 		],
 	},
-	{
-		name: "portal",
-		description: "Operations for working with the portal.",
-		tools: [
-			{
-				name: "portal_get_tariff",
-				description: "Get the current tariff.",
-				inputSchema: toInputSchema(z.object({})),
-			},
-			{
-				name: "portal_get_quota",
-				description: "Get the current quota.",
-				inputSchema: toInputSchema(z.object({})),
-			},
-		],
-	},
-	{
-		name: "settings",
-		description: "Operations for working with settings.",
-		tools: [
-			{
-				name: "settings_get_supported_cultures",
-				description: "Get a list of the supported cultures, languages.",
-				inputSchema: toInputSchema(z.object({})),
-			},
-			{
-				name: "settings_get_time_zones",
-				description: "Get a list of the available time zones.",
-				inputSchema: toInputSchema(z.object({})),
-			},
-		],
-	},
 ]
 
 export interface MisconfiguredStdioConfig {
@@ -339,8 +294,6 @@ export class ConfiguredStdioServer {
 	meta: MetaToolset
 	others: OthersToolset
 	people: PeopleToolset
-	portal: PortalToolset
-	settings: SettingsToolset
 
 	activeToolsets: SimplifiedToolInfo[] = []
 	activeTools: ToolInfo[] = []
@@ -357,8 +310,6 @@ export class ConfiguredStdioServer {
 		this.meta = new MetaToolset(this)
 		this.others = new OthersToolset(this)
 		this.people = new PeopleToolset(this)
-		this.portal = new PortalToolset(this)
-		this.settings = new SettingsToolset(this)
 
 		for (let n of config.toolsets) {
 			for (let s of toolsets) {
@@ -495,9 +446,6 @@ export class ConfiguredStdioServer {
 			case "files_get_folder_info":
 				cr = await this.files.getFolderInfo(extra.signal, req.params.arguments)
 				break
-			case "files_get_folders":
-				cr = await this.files.getFolders(extra.signal, req.params.arguments)
-				break
 			case "files_rename_folder":
 				cr = await this.files.renameFolder(extra.signal, req.params.arguments)
 				break
@@ -506,9 +454,6 @@ export class ConfiguredStdioServer {
 				break
 			case "files_copy_batch_items":
 				cr = await this.files.copyBatchItems(extra.signal, req.params.arguments)
-				break
-			case "files_get_operation_statuses":
-				cr = await this.files.getOperationStatuses(extra.signal)
 				break
 			case "files_move_batch_items":
 				cr = await this.files.moveBatchItems(extra.signal, req.params.arguments)
@@ -550,20 +495,6 @@ export class ConfiguredStdioServer {
 
 			case "people_get_all":
 				cr = await this.people.getAll(extra.signal, req.params.arguments)
-				break
-
-			case "portal_get_tariff":
-				cr = await this.portal.getTariff(extra.signal)
-				break
-			case "portal_get_quota":
-				cr = await this.portal.getQuota(extra.signal)
-				break
-
-			case "settings_get_supported_cultures":
-				cr = await this.settings.getSupportedCultures(extra.signal)
-				break
-			case "settings_get_time_zones":
-				cr = await this.settings.getTimeZones(extra.signal)
 				break
 
 			default:

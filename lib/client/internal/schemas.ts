@@ -714,10 +714,6 @@ export const GetFolderInfoFiltersSchema = z.object({
 	fields: z.array(stringUnionToEnum(FolderDtoFieldSchema, "The fields to include in the response.")),
 })
 
-export const GetFoldersFiltersSchema = z.object({
-	fields: z.array(stringUnionToEnum(FileEntryDtoFieldSchema, "The fields to include in the response.")),
-})
-
 export const RenameFolderFiltersSchema = z.object({
 	fields: z.array(stringUnionToEnum(FolderDtoFieldSchema, "The fields to include in the response.")),
 })
