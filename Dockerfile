@@ -2,6 +2,7 @@ FROM node:24.1.0-alpine3.22 AS build
 WORKDIR /srv/onlyoffice-docspace-mcp
 COPY app app
 COPY lib lib
+COPY scripts scripts
 COPY util util
 COPY package.json package.json
 COPY pnpm-lock.yaml pnpm-lock.yaml

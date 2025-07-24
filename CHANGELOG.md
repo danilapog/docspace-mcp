@@ -6,6 +6,26 @@ This document records all notable changes to the project, following the [Keep a 
 
 There are no noticeable changes in version [unreleased].
 
+## [2.0.0] - 2025-07-23
+
+### Added
+
+- Add an internal implementation of streamable HTTP transport ([ca3a432]);
+- Add the ability to enable and disable tools ([74ac987]).
+
+### Changed
+
+- Replace `anyOf` with `enum` in JSON schemas ([9d35a14]);
+- Gracefully handle SIGTERM and SIGINT signals ([ca3a432]);
+- Use native basic authentication ([fcd203a]);
+- Update `@modelcontextprotocol/sdk` to 1.16.0 ([2c0f50f]);
+- **Breaking** Remove unclaimed tools: `files_get_folders`, `files_get_operation_statuses`, `portal_get_quota`, `portal_get_tariff`, `settings_get_supported_cultures`, `settings_get_time_zones` ([1eb7792]);
+- **Breaking** Rename all tools and reorganize all toolsets ([90c2b72]).
+
+### Fixed
+
+- Remove hardcoded extensions from the `others_download_as_text` tool ([0d657d9]).
+
 ## [1.3.1] - 2025-07-08
 
 ### Changed
@@ -115,7 +135,8 @@ There are no noticeable changes in version [unreleased].
 [Keep a Changelog]: https://keepachangelog.com/en/1.1.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
-[Unreleased]: https://github.com/onlyoffice/docspace-mcp/compare/v1.3.1...HEAD/
+[Unreleased]: https://github.com/onlyoffice/docspace-mcp/compare/v2.0.0...HEAD/
+[2.0.0]: https://github.com/onlyoffice/docspace-mcp/compare/v1.3.1...v2.0.0/
 [1.3.1]: https://github.com/onlyoffice/docspace-mcp/compare/v1.3.0...v1.3.1/
 [1.3.0]: https://github.com/onlyoffice/docspace-mcp/compare/v1.2.0...v1.3.0/
 [1.2.0]: https://github.com/onlyoffice/docspace-mcp/compare/v1.1.0...v1.2.0/
@@ -127,6 +148,14 @@ There are no noticeable changes in version [unreleased].
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[90c2b72]: https://github.com/onlyoffice/docspace-mcp/commit/90c2b72b7205173eabc81270f52778f6c6f16d7e/
+[1eb7792]: https://github.com/onlyoffice/docspace-mcp/commit/1eb7792071515aba0706f8e0374c836c118b9a3f/
+[2c0f50f]: https://github.com/onlyoffice/docspace-mcp/commit/2c0f50f354cda822537759756d7eef35e621d9e8/
+[fcd203a]: https://github.com/onlyoffice/docspace-mcp/commit/fcd203ada86b2cd1a43ab7ad04602c60bd00b881/
+[0d657d9]: https://github.com/onlyoffice/docspace-mcp/commit/0d657d9d35c819aeddf80ec58f8f6a18081b5f23/
+[74ac987]: https://github.com/onlyoffice/docspace-mcp/commit/74ac987ea8e790058f3ca5dcf2da4087ba5671a3/
+[ca3a432]: https://github.com/onlyoffice/docspace-mcp/commit/ca3a432764932abb7e5ff8e40667bff3a94b907f/
+[9d35a14]: https://github.com/onlyoffice/docspace-mcp/commit/9d35a14cfd08181141b4c769f1ebaddd4754022d/
 [a6b4e85]: https://github.com/onlyoffice/docspace-mcp/commit/a6b4e852d39d9247fd71843dc0fe7d374d78dde3/
 [0ea66c8]: https://github.com/onlyoffice/docspace-mcp/commit/0ea66c84ddb9ee6899b093e64881a201d4601a4b/
 [97e1454]: https://github.com/onlyoffice/docspace-mcp/commit/97e1454d28425b5549e4e0c7562d19e2136919c7/

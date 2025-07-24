@@ -17,10 +17,10 @@
  */
 
 import * as z from "zod"
+import type {CallToolRequest, Extra, SimplifiedToolInfo, ToolInputSchema} from "../../util/moremcp.ts"
 import type {Result} from "../../util/result.ts"
 import {error, ok} from "../../util/result.ts"
-import type {ConfiguredServer} from "../server.ts"
-import type {CallToolRequest, Extra, SimplifiedToolInfo, ToolInputSchema} from "./internal/protocol.ts"
+import type {ConfiguredStdioServer} from "../server.ts"
 
 export const ListToolsInputSchema = z.object({
 	toolset: z.string().describe("The name of the toolset to list tools from."),
@@ -36,9 +36,9 @@ export const CallToolInputSchema = z.object({
 })
 
 export class MetaToolset {
-	private s: ConfiguredServer
+	private s: ConfiguredStdioServer
 
-	constructor(s: ConfiguredServer) {
+	constructor(s: ConfiguredStdioServer) {
 		this.s = s
 	}
 

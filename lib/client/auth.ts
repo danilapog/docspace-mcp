@@ -21,7 +21,8 @@ import type {Result} from "../../util/result.ts"
 import {error, ok} from "../../util/result.ts"
 import type {Client} from "../client.ts"
 import type {Response} from "./internal/response.ts"
-import {AuthRequestsDtoSchema, AuthenticationTokenDtoSchema} from "./internal/schemas.ts"
+import type {AuthRequestsDtoSchema} from "./internal/schemas.ts"
+import {AuthenticationTokenDtoSchema} from "./internal/schemas.ts"
 
 export type AuthenticateMeOptions = z.input<typeof AuthRequestsDtoSchema>
 
@@ -75,12 +76,7 @@ export class AuthService {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
 
-		let b = AuthRequestsDtoSchema.safeParse(o)
-		if (!b.success) {
-			return error(new Error("Parsing options.", {cause: b.error}))
-		}
-
-		let req = this.c.createRequest(s, "POST", u.v, b.data)
+		let req = this.c.createRequest(s, "POST", u.v, o)
 		if (req.err) {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
