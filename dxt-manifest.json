@@ -1,0 +1,191 @@
+{
+	"$schema": "node_modules/@anthropic-ai/dxt/dist/dxt-manifest.schema.json",
+	"dxt_version": "0.1",
+	"name": "onlyoffice-docspace",
+	"display_name": "ONLYOFFICE DocSpace",
+	"version": "2.0.0",
+	"description": "A room-based collaborative platform",
+	"long_description": "ONLYOFFICE DocSpace is a room-based collaborative platform which allows organizing a clear file structure depending on users' needs or project goals.",
+	"author": {
+		"name": "Ascensio System SIA",
+		"email": "integration@onlyoffice.com",
+		"url": "https://onlyoffice.com/"
+	},
+	"homepage": "https://github.com/onlyoffice/docspace-mcp/",
+	"documentation": "https://github.com/onlyoffice/docspace-mcp/",
+	"support": "https://github.com/onlyoffice/docspace-mcp/issues/",
+	"icon": "docs/icon.png",
+	"server": {
+		"type": "node",
+		"entry_point": "bin/onlyoffice-docspace-mcp",
+		"mcp_config": {
+			"command": "node",
+			"args": ["${__dirname}/bin/onlyoffice-docspace-mcp"],
+			"env": {
+				"DOCSPACE_INTERNAL": "${user_config.internal}",
+				"DOCSPACE_TRANSPORT": "${user_config.transport}",
+				"DOCSPACE_USER_AGENT": "${user_config.user_agent}",
+				"DOCSPACE_DYNAMIC": "${user_config.dynamic}",
+				"DOCSPACE_TOOLSETS": "${user_config.toolsets}",
+				"DOCSPACE_ENABLED_TOOLS": "${user_config.enabled_tools}",
+				"DOCSPACE_DISABLED_TOOLS": "${user_config.disabled_tools}",
+				"DOCSPACE_BASE_URL": "${user_config.base_url}",
+				"DOCSPACE_ORIGIN": "${user_config.origin}",
+				"DOCSPACE_API_KEY": "${user_config.api_key}",
+				"DOCSPACE_AUTH_TOKEN": "${user_config.auth_token}",
+				"DOCSPACE_USERNAME": "${user_config.username}",
+				"DOCSPACE_PASSWORD": "${user_config.password}",
+				"DOCSPACE_HOST": "${user_config.host}",
+				"DOCSPACE_PORT": "${user_config.port}",
+				"DOCSPACE_SESSION_TTL": "${user_config.session_ttl}",
+				"DOCSPACE_SESSION_INTERVAL": "${user_config.session_interval}"
+			}
+		}
+	},
+	"compatibility": {
+		"platforms": [
+			"darwin",
+			"win32",
+			"linux"
+		],
+		"runtimes": {
+			"node": ">=22.0.0"
+		}
+	},
+	"user_config": {
+		"internal": {
+			"type": "boolean",
+			"title": "Internal Mode",
+			"description": "Whether to run the DocSpace MCP server in internal mode.",
+			"required": false,
+			"default": false
+		},
+		"transport": {
+			"type": "string",
+			"title": "Transport Protocol",
+			"description": "The transport protocol to use for communication with the DocSpace MCP server. The HTTP transport is only available in internal mode for now.",
+			"required": false,
+			"default": "stdio"
+		},
+		"user_agent": {
+			"type": "string",
+			"title": "User Agent",
+			"description": "The user agent to include in the User-Agent header for DocSpace API requests.",
+			"required": false,
+			"default": "@onlyoffice/docspace-mcp v2.0.0"
+		},
+		"dynamic": {
+			"type": "boolean",
+			"title": "Dynamic Tools",
+			"description": "Whether to enable dynamic tools. Navigate to the documentation for more details about how dynamic tools work.",
+			"required": false,
+			"default": false
+		},
+		"toolsets": {
+			"type": "string",
+			"title": "Toolsets",
+			"description": "The comma-separated list of toolsets to use or 'all' to use all available toolsets. Navigate to the documentation for more details about how toolsets work.",
+			"required": false,
+			"default": "all"
+		},
+		"enabled_tools": {
+			"type": "string",
+			"title": "Enabled Tools",
+			"description": "The comma-separated list of tools to enable. Navigate to the documentation for more details about how enabled tools work.",
+			"required": false,
+			"default": ""
+		},
+		"disabled_tools": {
+			"type": "string",
+			"title": "Disabled Tools",
+			"description": "The comma-separated list of tools to disable. Navigate to the documentation for more details about how disabled tools work.",
+			"required": false,
+			"default": ""
+		},
+		"base_url": {
+			"type": "string",
+			"title": "Base URL",
+			"description": "The base URL of the DocSpace instance for API requests.",
+			"required": false,
+			"default": ""
+		},
+		"origin": {
+			"type": "string",
+			"title": "Origin URL",
+			"description": "The origin URL to include in the Origin header for DocSpace API requests.",
+			"required": false,
+			"default": ""
+		},
+		"api_key": {
+			"type": "string",
+			"title": "API Key",
+			"description": "The API key for accessing the DocSpace API.",
+			"required": false,
+			"sensitive": true,
+			"default": ""
+		},
+		"auth_token": {
+			"type": "string",
+			"title": "Auth Token",
+			"description": "The Personal Access Token (PAT) for accessing the DocSpace API.",
+			"required": false,
+			"sensitive": true,
+			"default": ""
+		},
+		"username": {
+			"type": "string",
+			"title": "Username",
+			"description": "The username for accessing the DocSpace API using basic authentication.",
+			"required": false,
+			"sensitive": true,
+			"default": ""
+		},
+		"password": {
+			"type": "string",
+			"title": "Password",
+			"description": "The password for accessing the DocSpace API using basic authentication.",
+			"required": false,
+			"sensitive": true,
+			"default": ""
+		},
+		"host": {
+			"type": "string",
+			"title": "Host",
+			"description": "The host to listen on for incoming HTTP requests.",
+			"required": false,
+			"default": "127.0.0.1"
+		},
+		"port": {
+			"type": "number",
+			"title": "Port",
+			"description": "The port to listen on for incoming HTTP requests.",
+			"required": false,
+			"default": 8080
+		},
+		"session_ttl": {
+			"type": "number",
+			"title": "Session TTL",
+			"description": "The time-to-live (TTL) for HTTP sessions in milliseconds.",
+			"required": false,
+			"default": 28800000
+		},
+		"session_interval": {
+			"type": "number",
+			"title": "Session Interval",
+			"description": "The interval for checking HTTP sessions for expiration in milliseconds.",
+			"required": false,
+			"default": 240000
+		}
+	},
+	"keywords": [
+		"onlyoffice",
+		"docspace",
+		"modelcontextprotocol",
+		"mcp"
+	],
+	"license": "Apache-2.0",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/onlyoffice/docspace-mcp.git"
+	}
+}

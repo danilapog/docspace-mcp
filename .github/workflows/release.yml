@@ -37,6 +37,9 @@ jobs:
     - name: Create Tarball
       run: pnpm pack
 
+    - name: Create Desktop Extension
+      run: pnpm dxt
+
     - name: Store Package Version
       run: echo "PACKAGE_VERSION=$(jq -r ".version" package.json)" >> "$GITHUB_ENV"
 
@@ -52,3 +55,8 @@ jobs:
       env:
         GH_TOKEN: ${{github.token}}
       run: gh release upload "v${{env.PACKAGE_VERSION}}" *.tgz
+
+    - name: Upload Desktop Extension
+      env:
+        GH_TOKEN: ${{github.token}}
+      run: gh release upload "v${{env.PACKAGE_VERSION}}" *.dxt
