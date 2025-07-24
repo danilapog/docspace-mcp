@@ -67,7 +67,7 @@ DOCSPACE_TRANSPORT=
 # The user agent to include in the User-Agent header for DocSpace API requests
 # @type string
 # @presence optional
-# @default @onlyoffice/docspace-mcp v1.3.1
+# @default @onlyoffice/docspace-mcp v2.0.0
 DOCSPACE_USER_AGENT=
 
 # Whether to enable dynamic tools. See the README.md file for more details about
