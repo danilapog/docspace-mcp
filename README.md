@@ -34,6 +34,55 @@ Most clients that implement the MCP protocol have a common configuration file in
 
 For a more detailed example of the MCP server installation process, see how it can be done [using Claude Desktop.]
 
+### Build from source
+
+ONLYOFFICE DocSpace MCP server can be built from source. To do this, you need to have the following tools installed on your system:
+
+- [Node.js] version 24 or higher;
+- [pnpm] version 10 or higher.
+
+This project uses [mise], a polyglot tool version manager, which you can use to install these tools. If you already have experience with tools like [asdf], [nvm], [nodenv], or similar ones, you will find it very familiar.
+
+Once you have everything installed, clone the Git repository from the company's Git server:
+
+```sh
+git clone git@git.onlyoffice.com:ONLYOFFICE/docspace-mcp.git
+```
+
+... or from the GitHub mirror:
+
+```sh
+git clone git@github.com:ONLYOFFICE/docspace-mcp.git
+```
+
+... install dependencies:
+
+```sh
+pnpm install
+```
+
+... build ONLYOFFICE DocSpace MCP server:
+
+```sh
+pnpm build
+```
+
+Now, you can use local build of ONLYOFFICE DocSpace MCP server in your MCP client:
+
+```json
+{
+	"mcpServers": {
+		"onlyoffice-docspace": {
+			"env": {
+				"DOCSPACE_BASE_URL": "https://your-instance.onlyoffice.com",
+				"DOCSPACE_API_KEY": "your-api-key"
+			},
+			"command": "<repo-dir>/bin/onlyoffice-docspace-mcp"
+		}
+	}
+}
+```
+
 ## Configuration
 
 The only way to configure ONLYOFFICE DocSpace MCP server is through environment variables. Below is an example of the `.env` file with possible configuration options:
@@ -355,6 +404,13 @@ Result:
 ONLYOFFICE DocSpace MCP server is distributed under the Apache-2.0 license found in the [LICENSE] file.
 
 <!-- Footnotes -->
+
+[asdf]: https://asdf-vm.com/
+[mise]: https://mise.jdx.dev/
+[Node.js]: https://nodejs.org/
+[nodenv]: https://github.com/nodenv/nodenv/
+[nvm]: https://github.com/nvm-sh/nvm/
+[pnpm]: https://pnpm.io/
 
 [LICENSE]: https://github.com/onlyoffice/docspace-mcp/blob/master/LICENSE/
 [Model Context Protocol]: https://modelcontextprotocol.io/
