@@ -1,0 +1,44 @@
+name: Stage
+
+permissions:
+  actions: write
+  contents: read
+
+on:
+  workflow_dispatch:
+
+jobs:
+  stage:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup mise
+      uses: jdx/mise-action@v2
+
+    - name: Install Dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Build Package
+      run: pnpm build
+
+    - name: Create Tarball
+      run: pnpm pack
+
+    - name: Create Desktop Extension
+      run: pnpm dxt
+
+    - name: Upload Tarball
+      uses: actions/upload-artifact@v4
+      with:
+        name: tarball
+        path: "*.tgz"
+        if-no-files-found: error
+
+    - name: Upload Desktop Extension
+      uses: actions/upload-artifact@v4
+      with:
+        name: desktop-extension
+        path: "*.dxt"
+        if-no-files-found: error
