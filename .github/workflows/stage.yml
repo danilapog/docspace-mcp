@@ -33,12 +33,12 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: tarball
-        path: *.tgz
+        path: "*.tgz"
         if-no-files-found: error
 
     - name: Upload Desktop Extension
       uses: actions/upload-artifact@v4
       with:
         name: desktop-extension
-        path: *.dxt
+        path: "*.dxt"
         if-no-files-found: error
