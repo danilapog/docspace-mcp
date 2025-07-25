@@ -2,4 +2,6 @@
 bin
 coverage
 node_modules
+tmp
 .env
+onlyoffice-docspace-mcp-*.dxt

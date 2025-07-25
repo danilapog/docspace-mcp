@@ -32,6 +32,7 @@
 		"build": "node scripts/build.ts",
 		"check": "tsc",
 		"dev": "node scripts/dev.ts",
+		"dxt": "node scripts/dxt.ts",
 		"generate": "node scripts/generate.ts",
 		"inspect": "node scripts/inspect.ts",
 		"lint": "eslint .github app lib scripts util c8.config.json CHANGELOG.md eslint.config.js mise.toml package.json README.md tsconfig.json",
@@ -39,6 +40,7 @@
 		"test": "c8 --config c8.config.json node --test"
 	},
 	"devDependencies": {
+		"@anthropic-ai/dxt": "0.2.6",
 		"@modelcontextprotocol/inspector": "0.16.1",
 		"@modelcontextprotocol/sdk": "1.16.0",
 		"@types/express": "5.0.3",
