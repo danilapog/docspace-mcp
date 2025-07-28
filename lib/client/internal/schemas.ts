@@ -42,7 +42,16 @@ export const NumericSortOrderSchema = z.union([
 ])
 
 /**
- * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.1-server/common/ASC.Api.Core/Core/ApiDateTime.cs/#L36 | DocSpace Reference}
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.2.1-server/common/ASC.Api.Core/Core/ApiDateTime.cs/#L36 | DocSpace Reference}
+ */
+export const ApiDateTimeSchema = z.
+	object({
+		utcTime: z.string().optional().describe("The time in UTC format."),
+	}).
+	passthrough()
+
+/**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.2.1-server/common/ASC.Api.Core/Core/ApiDateTime.cs/#L36 | DocSpace Reference}
  */
 // @ts-ignore
 export const ApiDateTimeFieldSchema = z.union([
@@ -54,8 +63,8 @@ export const ApiDateTimeFieldSchema = z.union([
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/common/ASC.Api.Core/Middleware/CommonApiResponse.cs/#L31 | DocSpace Reference}
  */
 export const CommonApiResponseSchema = z.object({
-	status: z.number(),
-	statusCode: z.number(),
+	status: z.number().describe("The status of the API response."),
+	statusCode: z.number().describe("The HTTP status code of the API response."),
 })
 
 /**
@@ -87,10 +96,10 @@ export const LinkSchema = z.object({
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/common/ASC.Api.Core/Middleware/CommonApiResponse.cs/#L57 | DocSpace Reference}
  */
 export const SuccessApiResponseSchema = CommonApiResponseSchema.extend({
-	response: TypeObjectSchema,
-	count: z.number().optional(),
-	total: z.number().optional(),
-	links: z.array(LinkSchema),
+	response: TypeObjectSchema.describe("The response data of the API request."),
+	count: z.number().optional().describe("The number of items in the response."),
+	total: z.number().optional().describe("The total number of items available."),
+	links: z.array(LinkSchema).describe("The links related to the response."),
 })
 
 // /**
@@ -118,7 +127,18 @@ export const EmailInvitationDtoSchema = z.object({
 })
 
 /**
- * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.1-server/common/ASC.Api.Core/Model/EmployeeDto.cs/#L34 | DocSpace Reference}
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.2.1-server/common/ASC.Api.Core/Model/EmployeeDto.cs/#L34 | DocSpace Reference}
+ */
+export const EmployeeDtoSchema = z.
+	object({
+		id: z.string().optional().describe("The user ID."),
+		displayName: z.string().optional().describe("The user display name."),
+		isAnonim: z.boolean().optional().describe("Specifies if the user is anonymous or not."),
+	}).
+	passthrough()
+
+/**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.2.1-server/common/ASC.Api.Core/Model/EmployeeDto.cs/#L34 | DocSpace Reference}
  */
 export const EmployeeDtoFieldSchema = z.union([
 	z.literal("id").describe("The user ID."),
@@ -267,6 +287,44 @@ export const DeleteFolderSchema = z.object({
 })
 
 /**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.2.1-server/products/ASC.Files/Core/Core/Entries/FileEntryTypeEnum.cs/#L33 | DocSpace Reference}
+ */
+export const FileEntityTypeSchema = z.union([
+	z.literal(1).describe("Folder"),
+	z.literal(2).describe("File"),
+])
+
+/**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.2.1-server/products/ASC.Files/Core/Core/Entries/Folder.cs/#L32 | DocSpace Reference}
+ */
+export const FolderType = z.union([
+	z.literal(0).describe("Default"),
+	z.literal(1).describe("Coomon"),
+	z.literal(2).describe("Bunch"),
+	z.literal(3).describe("Trash"),
+	z.literal(5).describe("User"),
+	z.literal(6).describe("Share"),
+	z.literal(8).describe("Projects"),
+	z.literal(10).describe("Favourites"),
+	z.literal(11).describe("Recent"),
+	z.literal(12).describe("Templates"),
+	z.literal(13).describe("Privacy"),
+	z.literal(14).describe("Virtual rooms"),
+	z.literal(15).describe("Filling forms room"),
+	z.literal(16).describe("Editing room"),
+	z.literal(19).describe("Custom room"),
+	z.literal(20).describe("Archive"),
+	z.literal(21).describe("Thirdparty backup"),
+	z.literal(22).describe("Public room"),
+	z.literal(25).describe("Ready form folder"),
+	z.literal(26).describe("In process form folder"),
+	z.literal(27).describe("Form filling folder done"),
+	z.literal(28).describe("Form filling folder in progress"),
+	z.literal(29).describe("Virtual Data Room"),
+	z.literal(30).describe("Room templates folder"),
+])
+
+/**
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Core/Core/Security/FileShare.cs/#L31 | DocSpace Reference}
  */
 export const FileShareSchema = z.union([
@@ -334,7 +392,25 @@ export const FileTypeSchema = z.union([
 ])
 
 /**
- * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.1-server/products/ASC.Files/Core/ApiModels/ResponseDto/FileEntryDto.cs/#L45 | DocSpace Reference}
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.2.1-server/products/ASC.Files/Core/ApiModels/ResponseDto/FileEntryDto.cs/#L45 | DocSpace Reference}
+ */
+export const FileEntryDtoSchema = z.
+	object({
+		id: z.unknown().optional().describe("The file entry ID."),
+		rootFolderId: z.unknown().optional().describe("The root folder ID of the file entry."),
+		canShare: z.boolean().optional().describe("Specifies if the file entry can be shared or not."),
+		security: z.unknown().optional().describe("The actions that can be performed with the file entry."),
+		title: z.string().optional().describe("The file entry title."),
+		access: z.unknown().optional().describe("The access rights to the file entry."),
+		shared: z.boolean().optional().describe("Specifies if the file entry is shared or not."),
+		created: ApiDateTimeSchema.optional().describe("The date and time when the file entry was created."),
+		createdBy: EmployeeDtoSchema.optional().describe("The user who created the file entry."),
+		fileEntityType: numberUnionToEnum(FileEntityTypeSchema, "The file entry type.").optional(),
+	}).
+	passthrough()
+
+/**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.2.1-server/products/ASC.Files/Core/ApiModels/ResponseDto/FileEntryDto.cs/#L45 | DocSpace Reference}
  */
 export const FileEntryDtoFieldSchema = z.union([
 	z.literal("id").describe("The file entry ID."),
@@ -366,12 +442,16 @@ export const FileEntryDtoFieldSchema = z.union([
 ])
 
 /**
- * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Core/ApiModels/ResponseDto/FileDto.cs/#L29 | DocSpace Reference}
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.2.1-server/products/ASC.Files/Core/ApiModels/ResponseDto/FileDto.cs/#L32 | DocSpace Reference}
  */
-export const FileDtoSchema = z.
-	object({
-		fileType: numberUnionToEnum(FileTypeSchema, "").optional(),
-		fileExst: z.string().optional(),
+export const FileDtoSchema = FileEntryDtoSchema.
+	extend({
+		folderId: z.string().optional().describe("The folder ID where the file is located."),
+		fileType: numberUnionToEnum(FileTypeSchema, "The file type.").optional(),
+		fileExst: z.string().optional().describe("The file extension."),
+		comment: z.string().optional().describe("The comment to the file."),
+		encrypted: z.boolean().optional().describe("Specifies if the file is encrypted or not."),
+		locked: z.boolean().optional().describe("Specifies if the file is locked or not."),
 	}).
 	passthrough()
 
@@ -386,7 +466,7 @@ export const FileDtoSchema = z.
 // ])
 
 /**
- * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Core/ApiModels/ResponseDto/FileDto.cs/#L29 | DocSpace Reference}
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.2.1-server/products/ASC.Files/Core/ApiModels/ResponseDto/FileDto.cs/#L32 | DocSpace Reference}
  */
 export const FileDtoFieldSchema = z.union([
 	...FileEntryDtoFieldSchema.options,
@@ -439,7 +519,32 @@ export const FileOperationDtoSchema = z.
 	passthrough()
 
 /**
- * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.1-server/products/ASC.Files/Core/ApiModels/ResponseDto/FileShareDto.cs/#L32 | DocSpace Reference}
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.2.1-server/products/ASC.Files/Core/Core/Security/SubjectType.cs/#L61 | DocSpace Reference}
+ */
+export const SubjectTypeSchema = z.union([
+	z.literal(0).describe("User"),
+	z.literal(1).describe("External link"),
+	z.literal(2).describe("Group"),
+	z.literal(3).describe("Invitation link"),
+	z.literal(4).describe("Primary external link"),
+])
+
+/**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.2.1-server/products/ASC.Files/Core/ApiModels/ResponseDto/FileShareDto.cs/#L32 | DocSpace Reference}
+ */
+export const FileShareDtoSchema = z.
+	object({
+		access: numberUnionToEnum(FileShareSchema, "The access rights type.").optional(),
+		sharedTo: z.unknown().optional().describe("The user who has the access to the specified file."),
+		isLocked: z.boolean().optional().describe("Specifies if the access right is locked or not."),
+		isOwner: z.boolean().optional().describe("Specifies if the user is an owner of the specified file or not."),
+		canEditAccess: z.boolean().optional().describe("Specifies if the user can edit the access to the specified file or not."),
+		subjectType: numberUnionToEnum(SubjectTypeSchema, "The subject type.").optional(),
+	}).
+	passthrough()
+
+/**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.2.1-server/products/ASC.Files/Core/ApiModels/ResponseDto/FileShareDto.cs/#L32 | DocSpace Reference}
  */
 export const FileShareDtoFieldSchema = z.union([
 	z.literal("access").describe("The access rights type."),
@@ -506,16 +611,25 @@ export const FilesSettingsDtoSchema = z.
 // ])
 
 /**
- * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.0-server/products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs/#L32 | DocSpace Reference}
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.2.1-server/products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs/#L32 | DocSpace Reference}
  */
 export const FolderDtoSchema = z.
 	object({
-		roomType: numberUnionToEnum(RoomTypeSchema, "").optional(),
+		parentId: z.unknown().optional().describe("The parent folder ID of the folder."),
+		filesCount: z.number().optional().describe("The number of files that the folder contains."),
+		foldersCount: z.number().optional().describe("The number of folders that the folder contains."),
+		isShareable: z.boolean().optional().describe("Specifies if the folder can be shared or not."),
+		isFavorite: z.boolean().optional().describe("Specifies if the folder is favorite or not."),
+		tags: z.array(z.string()).optional().describe("The list of tags of the folder."),
+		roomType: numberUnionToEnum(RoomTypeSchema, "The room type of the folder.").optional(),
+		private: z.boolean().optional().describe("Specifies if the folder is private or not."),
+		type: numberUnionToEnum(FolderType, "The folder type.").optional(),
+		inRoom: z.boolean().optional().describe("Specifies if the folder is placed in the room or not."),
 	}).
 	passthrough()
 
 /**
- * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.1-server/products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs/#L32 | DocSpace Reference}
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.2.1-server/products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs/#L32 | DocSpace Reference}
  */
 export const FolderDtoFieldSchema = z.union([
 	...FileEntryDtoFieldSchema.options,
@@ -549,7 +663,21 @@ export const FolderDtoFieldSchema = z.union([
 ])
 
 /**
- * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.1-server/products/ASC.Files/Core/ApiModels/ResponseDto/FolderContentDto.cs/#L32 | DocSpace Reference}
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.2.1-server/products/ASC.Files/Core/ApiModels/ResponseDto/FolderContentDto.cs/#L32 | DocSpace Reference}
+ */
+export const FolderContentDtoSchema = z.
+	object({
+		files: z.array(FileEntryDtoSchema).optional().describe("The list of files in the folder."),
+		folders: z.array(FileEntryDtoSchema).optional().describe("The list of folders in the folder."),
+		current: FolderDtoSchema.optional().describe("The current folder information."),
+		startIndex: z.number().optional().describe("The folder start index."),
+		count: z.number().optional().describe("The number of folder elements."),
+		total: z.number().optional().describe("The total number of elements in the folder."),
+	}).
+	passthrough()
+
+/**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.2.1-server/products/ASC.Files/Core/ApiModels/ResponseDto/FolderContentDto.cs/#L32 | DocSpace Reference}
  */
 export const FolderContentDtoFieldSchema = z.union([
 	...wrapUnion(FileDtoFieldSchema, "files").options,
@@ -563,7 +691,18 @@ export const FolderContentDtoFieldSchema = z.union([
 ])
 
 /**
- * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.1-server/products/ASC.Files/Core/ApiModels/ResponseDto/RoomAccessDto.cs/#L32 | DocSpace Reference}
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.2.1-server/products/ASC.Files/Core/ApiModels/ResponseDto/RoomAccessDto.cs/#L32 | DocSpace Reference}
+ */
+export const RoomSecurityDtoSchema = z.
+	object({
+		members: z.array(FileShareDtoSchema).optional().describe("The list of room members."),
+		warning: z.string().optional().describe("The warning message."),
+		error: z.unknown().optional().describe("The error type."),
+	}).
+	passthrough()
+
+/**
+ * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.2.1-server/products/ASC.Files/Core/ApiModels/ResponseDto/RoomAccessDto.cs/#L32 | DocSpace Reference}
  */
 export const RoomSecurityDtoFieldSchema = z.union([
 	...wrapUnion(FileShareDtoFieldSchema, "members").options,

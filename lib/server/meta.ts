@@ -17,10 +17,17 @@
  */
 
 import * as z from "zod"
-import type {CallToolRequest, Extra, SimplifiedToolInfo, ToolInputSchema, Toolset} from "../../util/moremcp.ts"
+import type {
+	CallToolRequest,
+	Extra,
+	SimplifiedToolInfo,
+	ToolInputSchema,
+	ToolOutputSchema,
+	Toolset,
+} from "../../util/moremcp.ts"
 import type {Result} from "../../util/result.ts"
 import {error, ok} from "../../util/result.ts"
-import type {ConfiguredStdioServer} from "../server.ts"
+import type {ConfiguredStdioServer, RouteToolResult} from "../server.ts"
 
 export const ListToolsInputSchema = z.object({
 	toolset: z.string().describe("The name of the toolset to list tools from."),
@@ -28,6 +35,10 @@ export const ListToolsInputSchema = z.object({
 
 export const GetToolInputSchemaInputSchema = z.object({
 	tool: z.string().describe("The name of the tool to get input schema for."),
+})
+
+export const GetToolOutputSchemaInputSchema = z.object({
+	tool: z.string().describe("The name of the tool to get output schema for."),
 })
 
 export const CallToolInputSchema = z.object({
@@ -124,7 +135,35 @@ export class MetaToolset {
 		return ok(i)
 	}
 
-	async callTool(req: CallToolRequest, extra: Extra): Promise<Result<string, Error>> {
+	getToolOutputSchema(p: unknown): Result<ToolOutputSchema, Error> {
+		let pr = GetToolInputSchemaInputSchema.safeParse(p)
+		if (!pr.success) {
+			return error(new Error("Parsing input.", {cause: pr.error}))
+		}
+
+		let o: ToolOutputSchema | undefined
+
+		for (let s of this.s.toolsets) {
+			for (let t of s.tools) {
+				if (t.name === pr.data.tool) {
+					o = t.outputSchema
+					break
+				}
+			}
+
+			if (o) {
+				break
+			}
+		}
+
+		if (!o) {
+			return error(new Error(`Tool '${pr.data.tool}' not found.`))
+		}
+
+		return ok(o)
+	}
+
+	async callTool(req: CallToolRequest, extra: Extra): Promise<Result<RouteToolResult, Error>> {
 		let pr = CallToolInputSchema.safeParse(req.params.arguments)
 		if (!pr.success) {
 			return error(new Error("Parsing input.", {cause: pr.error}))
