@@ -148,7 +148,6 @@ async function startConfiguredStdioServer(config: result.Ok<config.Config, unkno
 		resolver: new Resolver(cl),
 		uploader: new Uploader(cl),
 		dynamic: config.v.dynamic,
-		toolsets: config.v.toolsets,
 		tools: config.v.tools,
 	}
 
@@ -214,7 +213,6 @@ async function startInternalStreamableServer(config: result.Ok<config.Config, un
 				resolver: new Resolver(cc),
 				uploader: new Uploader(cc),
 				dynamic: config.v.dynamic,
-				toolsets: config.v.toolsets,
 				tools: config.v.tools,
 			}
 
