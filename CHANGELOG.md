@@ -4,7 +4,12 @@ This document records all notable changes to the project, following the [Keep a 
 
 ## [Unreleased]
 
-There are no noticeable changes in version [unreleased].
+<!-- There are no noticeable changes in version [unreleased]. -->
+
+### Fixed
+
+- Restore access to regular tools when using meta-tools ([eb84c1f]);
+- Prevent a disabled tool from being called when a regular tool is called ([eb84c1f]).
 
 ## [2.0.0] - 2025-07-23
 
@@ -148,6 +153,7 @@ There are no noticeable changes in version [unreleased].
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[eb84c1f]: https://github.com/onlyoffice/docspace-mcp/commit/eb84c1f7ebc16e5af646008b8fffacc51eb4e332/
 [90c2b72]: https://github.com/onlyoffice/docspace-mcp/commit/90c2b72b7205173eabc81270f52778f6c6f16d7e/
 [1eb7792]: https://github.com/onlyoffice/docspace-mcp/commit/1eb7792071515aba0706f8e0374c836c118b9a3f/
 [2c0f50f]: https://github.com/onlyoffice/docspace-mcp/commit/2c0f50f354cda822537759756d7eef35e621d9e8/

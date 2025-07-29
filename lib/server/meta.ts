@@ -17,7 +17,7 @@
  */
 
 import * as z from "zod"
-import type {CallToolRequest, Extra, SimplifiedToolInfo, ToolInputSchema} from "../../util/moremcp.ts"
+import type {CallToolRequest, Extra, SimplifiedToolInfo, ToolInputSchema, Toolset} from "../../util/moremcp.ts"
 import type {Result} from "../../util/result.ts"
 import {error, ok} from "../../util/result.ts"
 import type {ConfiguredStdioServer} from "../server.ts"
@@ -43,7 +43,21 @@ export class MetaToolset {
 	}
 
 	listToolsets(): Result<SimplifiedToolInfo[], Error> {
-		return ok(this.s.activeToolsets)
+		let toolsets: SimplifiedToolInfo[] = []
+
+		for (let t of this.s.toolsets) {
+			let s: SimplifiedToolInfo = {
+				name: t.name,
+				description: t.description,
+			}
+			toolsets.push(s)
+		}
+
+		if (toolsets.length === 0) {
+			return error(new Error("No toolsets found."))
+		}
+
+		return ok(toolsets)
 	}
 
 	listTools(p: unknown): Result<SimplifiedToolInfo[], Error> {
@@ -52,16 +66,27 @@ export class MetaToolset {
 			return error(new Error("Parsing input.", {cause: pr.error}))
 		}
 
+		let s: Toolset | undefined
+
+		for (let t of this.s.toolsets) {
+			if (t.name === pr.data.toolset) {
+				s = t
+				break
+			}
+		}
+
+		if (!s) {
+			return error(new Error(`Toolset '${pr.data.toolset}' not found.`))
+		}
+
 		let tools: SimplifiedToolInfo[] = []
 
-		for (let t of this.s.activeTools) {
-			if (t.name.startsWith(`${pr.data.toolset}_`)) {
-				let s: SimplifiedToolInfo = {
-					name: t.name,
-					description: t.description,
-				}
-				tools.push(s)
+		for (let t of s.tools) {
+			let s: SimplifiedToolInfo = {
+				name: t.name,
+				description: t.description,
 			}
+			tools.push(s)
 		}
 
 		if (tools.length === 0) {
@@ -77,39 +102,32 @@ export class MetaToolset {
 			return error(new Error("Parsing input.", {cause: pr.error}))
 		}
 
-		let s: ToolInputSchema | undefined
+		let i: ToolInputSchema | undefined
 
-		for (let t of this.s.activeTools) {
-			if (t.name === pr.data.tool) {
-				s = t.inputSchema
+		for (let s of this.s.toolsets) {
+			for (let t of s.tools) {
+				if (t.name === pr.data.tool) {
+					i = t.inputSchema
+					break
+				}
+			}
+
+			if (i) {
 				break
 			}
 		}
 
-		if (!s) {
+		if (!i) {
 			return error(new Error(`Tool '${pr.data.tool}' not found.`))
 		}
 
-		return ok(s)
+		return ok(i)
 	}
 
 	async callTool(req: CallToolRequest, extra: Extra): Promise<Result<string, Error>> {
 		let pr = CallToolInputSchema.safeParse(req.params.arguments)
 		if (!pr.success) {
 			return error(new Error("Parsing input.", {cause: pr.error}))
-		}
-
-		let has = false
-
-		for (let t of this.s.activeTools) {
-			if (t.name === pr.data.tool) {
-				has = true
-				break
-			}
-		}
-
-		if (!has) {
-			return error(new Error(`Tool '${pr.data.tool}' not found.`))
 		}
 
 		req = {

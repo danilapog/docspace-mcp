@@ -234,7 +234,6 @@ export interface ConfiguredStdioConfig {
 	resolver: Resolver
 	uploader: Uploader
 	dynamic: boolean
-	toolsets: string[]
 	tools: string[]
 }
 
@@ -289,9 +288,8 @@ export class ConfiguredStdioServer {
 	meta: MetaToolset
 	regular: RegularToolset
 
-	activeToolsets: SimplifiedToolInfo[] = []
-	activeTools: ToolInfo[] = []
-	listableTools: ToolInfo[] = []
+	toolsets: Toolset[] = []
+	tools: ToolInfo[] = []
 
 	routeTool: (req: CallToolRequest, extra: Extra) => Promise<Result<string, Error>>
 
@@ -303,42 +301,41 @@ export class ConfiguredStdioServer {
 		this.meta = new MetaToolset(this)
 		this.regular = new RegularToolset(this)
 
-		for (let n of config.toolsets) {
-			for (let s of toolsets) {
-				if (s.name === n) {
-					let t: SimplifiedToolInfo = {
-						name: s.name,
-						description: s.description,
-					}
-					this.activeToolsets.push(t)
-					break
-				}
+		for (let s of toolsets) {
+			let o: Toolset = {
+				name: s.name,
+				description: s.description,
+				tools: [],
 			}
-		}
 
-		for (let n of config.tools) {
-			for (let s of toolsets) {
+			for (let n of config.tools) {
 				for (let t of s.tools) {
 					if (t.name === n) {
-						this.activeTools.push(t)
+						o.tools.push(t)
 						break
 					}
 				}
 			}
+
+			if (o.tools.length !== 0) {
+				this.toolsets.push(o)
+			}
 		}
 
 		if (config.dynamic) {
-			this.listableTools = [...metaTools]
+			this.tools = [...metaTools]
 			this.routeTool = this.routeMetaTool.bind(this)
 		} else {
-			this.listableTools = [...this.activeTools]
+			for (let s of this.toolsets) {
+				this.tools.push(...s.tools)
+			}
 			this.routeTool = this.routeRegularTool.bind(this)
 		}
 	}
 
 	listTools(): ListToolsResult {
 		return {
-			tools: this.listableTools,
+			tools: this.tools,
 		}
 	}
 
@@ -413,6 +410,25 @@ export class ConfiguredStdioServer {
 	}
 
 	async routeRegularTool(req: CallToolRequest, extra: Extra): Promise<Result<string, Error>> {
+		let f = false
+
+		for (let s of this.toolsets) {
+			for (let t of s.tools) {
+				if (t.name === req.params.name) {
+					f = true
+					break
+				}
+			}
+
+			if (f) {
+				break
+			}
+		}
+
+		if (!f) {
+			return error(new Error(`Tool ${req.params.name} not found`))
+		}
+
 		let cr: Result<Response | string | object, Error>
 
 		try {
