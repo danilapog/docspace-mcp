@@ -9,8 +9,10 @@ on:
     - "v*"
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{steps.version.outputs.version}}
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
@@ -18,21 +20,15 @@ jobs:
     - name: Setup mise
       uses: jdx/mise-action@v2
 
+    - name: Store Version
+      id: version
+      run: echo "version=$(jq --raw-output ".version" package.json)" >> "$GITHUB_OUTPUT"
+
     - name: Install Dependencies
       run: pnpm install --frozen-lockfile
 
     - name: Build Package
       run: pnpm build
-
-    - name: Configure Registry
-      run: |
-        pnpm config set //registry.npmjs.org/:_authToken "\${NODE_AUTH_TOKEN}"
-        pnpm config set registry https://registry.npmjs.org
-
-    - name: Publish Package
-      env:
-        NODE_AUTH_TOKEN: ${{secrets.NPM_PUBLISH_TOKEN}}
-      run: pnpm publish --access public --no-git-checks
 
     - name: Create Tarball
       run: pnpm pack
@@ -40,23 +36,65 @@ jobs:
     - name: Create Desktop Extension
       run: pnpm dxt
 
-    - name: Store Package Version
-      run: echo "PACKAGE_VERSION=$(jq -r ".version" package.json)" >> "$GITHUB_ENV"
+    - name: Upload Tarball
+      uses: actions/upload-artifact@v4
+      with:
+        name: tarball
+        path: "*.tgz"
+        if-no-files-found: error
+
+    - name: Upload Desktop Extension
+      uses: actions/upload-artifact@v4
+      with:
+        name: desktop-extension
+        path: "*.dxt"
+        if-no-files-found: error
+
+  npm:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{secrets.NPM_PUBLISH_TOKEN}}
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup mise
+      uses: jdx/mise-action@v2
+
+    - name: Download Tarball
+      uses: actions/download-artifact@v4
+      with:
+        name: tarball
+
+    - name: Configure Registry
+      run: |
+        pnpm config set //registry.npmjs.org/:_authToken "\${NODE_AUTH_TOKEN}"
+        pnpm config set registry https://registry.npmjs.org
+
+    - name: Publish Package
+      run: pnpm publish *.tgz --access public --no-git-checks
+
+  gh:
+    needs: [build, npm]
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{github.token}}
+    steps:
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        pattern: "*"
+        merge-multiple: true
 
     - name: Create Release
-      env:
-        GH_TOKEN: ${{github.token}}
       run: |
-        gh release create "v${{env.PACKAGE_VERSION}}" \
-          --title "v${{env.PACKAGE_VERSION}}" \
+        gh release create "v${{needs.build.outputs.version}}" \
+          --title "v${{needs.build.outputs.version}}" \
           --notes "See ${{github.server_url}}/${{github.repository}}/blob/main/CHANGELOG.md/"
 
     - name: Upload Tarball
-      env:
-        GH_TOKEN: ${{github.token}}
-      run: gh release upload "v${{env.PACKAGE_VERSION}}" *.tgz
+      run: gh release upload "v${{needs.build.outputs.version}}" *.tgz
 
     - name: Upload Desktop Extension
-      env:
-        GH_TOKEN: ${{github.token}}
-      run: gh release upload "v${{env.PACKAGE_VERSION}}" *.dxt
+      run: gh release upload "v${{needs.build.outputs.version}}" *.dxt
