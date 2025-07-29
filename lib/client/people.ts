@@ -16,14 +16,16 @@
  * @license
  */
 
-import type * as z from "zod"
+import * as z from "zod"
 import type {Result} from "../../util/result.ts"
 import {error, ok} from "../../util/result.ts"
 import type {Client} from "../client.ts"
 import type {Response} from "./internal/response.ts"
 import type {GetAllFiltersSchema} from "./internal/schemas.ts"
+import {EmployeeDtoSchema} from "./internal/schemas.ts"
 
 export type GetAllFilters = z.input<typeof GetAllFiltersSchema>
+export type GetAllResponseItem = z.output<typeof EmployeeDtoSchema>
 
 /**
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/tree/v3.0.4-server/products/ASC.People/ | DocSpace Reference}
@@ -38,7 +40,7 @@ export class PeopleService {
 	/**
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.People/Server/Api/UserController.cs/#L681 | DocSpace Reference}
 	 */
-	async getAll(s: AbortSignal, filters?: GetAllFilters): Promise<Result<[unknown, Response], Error>> {
+	async getAll(s: AbortSignal, filters?: GetAllFilters): Promise<Result<[GetAllResponseItem[], Response], Error>> {
 		let u = this.c.createUrl("api/2.0/people", filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
@@ -54,6 +56,13 @@ export class PeopleService {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
 
-		return ok(f.v)
+		let [p, res] = f.v
+
+		let e = z.array(EmployeeDtoSchema).safeParse(p)
+		if (!e.success) {
+			return error(new Error("Parsing response.", {cause: e.error}))
+		}
+
+		return ok([e.data, res])
 	}
 }

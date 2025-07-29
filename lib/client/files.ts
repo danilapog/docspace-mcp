@@ -49,8 +49,11 @@ import type {
 import {
 	FileDtoSchema,
 	FileOperationDtoSchema,
+	FileShareDtoSchema,
 	FilesSettingsDtoSchema,
+	FolderContentDtoSchema,
 	FolderDtoSchema,
+	RoomSecurityDtoSchema,
 	UploadSessionObjectDataSchema,
 } from "./internal/schemas.ts"
 
@@ -79,7 +82,12 @@ export type RenameFolderFilters = z.input<typeof RenameFolderFiltersSchema>
 export type GetMyFolderFilters = z.input<typeof GetMyFolderFiltersSchema>
 
 // FoldersController: Responses
+export type CreateFolderResponse = z.output<typeof FolderDtoSchema>
 export type DeleteFolderResponseItem = z.output<typeof FileOperationDtoSchema>
+export type GetFolderResponse = z.output<typeof FolderContentDtoSchema>
+export type GetFolderInfoResponse = z.output<typeof FolderDtoSchema>
+export type RenameFolderResponse = z.output<typeof FolderDtoSchema>
+export type GetMyFolderResponse = z.output<typeof FolderContentDtoSchema>
 
 // OperationController: Options
 export type BulkDownloadOptions = z.output<typeof DownloadRequestDtoSchema>
@@ -116,8 +124,13 @@ export type GetRoomSecurityFilters = z.input<typeof GetRoomSecurityFiltersSchema
 export type GetRoomsFolderFilters = z.input<typeof GetRoomsFolderFiltersSchema>
 
 // VirtualRoomsController: Responses
+export type CreateRoomResponse = z.output<typeof FolderContentDtoSchema>
 export type GetRoomInfoResponse = z.output<typeof FolderDtoSchema>
+export type UpdateRoomResponse = z.output<typeof FolderDtoSchema>
 export type ArchiveRoomResponse = z.output<typeof FileOperationDtoSchema>
+export type SetRoomSecurityResponse = z.output<typeof RoomSecurityDtoSchema>
+export type GetRoomSecurityInfoResponse = z.output<typeof FileShareDtoSchema>
+export type GetRoomFolderResponse = z.output<typeof FolderContentDtoSchema>
 
 /**
  * {@link https://github.com/ONLYOFFICE/DocSpace-server/tree/v3.0.4-server/products/ASC.Files/ | DocSpace Reference}
@@ -227,7 +240,7 @@ export class FilesService {
 	/**
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FoldersController.cs/#L110 | DocSpace Reference}
 	 */
-	async createFolder(s: AbortSignal, id: number, o: CreateFolderOptions, filters?: CreateFolderFilters): Promise<Result<[unknown, Response], Error>> {
+	async createFolder(s: AbortSignal, id: number, o: CreateFolderOptions, filters?: CreateFolderFilters): Promise<Result<[CreateFolderResponse, Response], Error>> {
 		let u = this.c.createUrl(`api/2.0/files/folder/${id}`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
@@ -243,7 +256,14 @@ export class FilesService {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
 
-		return ok(f.v)
+		let [p, res] = f.v
+
+		let e = FolderDtoSchema.safeParse(p)
+		if (!e.success) {
+			return error(new Error("Parsing response.", {cause: e.error}))
+		}
+
+		return ok([e.data, res])
 	}
 
 	/**
@@ -278,7 +298,7 @@ export class FilesService {
 	/**
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FoldersController.cs/#L161 | DocSpace Reference}
 	 */
-	async getFolder(s: AbortSignal, id: number, filters?: GetFolderFilters): Promise<Result<[unknown, Response], Error>> {
+	async getFolder(s: AbortSignal, id: number, filters?: GetFolderFilters): Promise<Result<[GetFolderResponse, Response], Error>> {
 		let u = this.c.createUrl(`api/2.0/files/${id}`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
@@ -294,13 +314,20 @@ export class FilesService {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
 
-		return ok(f.v)
+		let [p, res] = f.v
+
+		let e = FolderContentDtoSchema.safeParse(p)
+		if (!e.success) {
+			return error(new Error("Parsing response.", {cause: e.error}))
+		}
+
+		return ok([e.data, res])
 	}
 
 	/**
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FoldersController.cs/#L180 | DocSpace Reference}
 	 */
-	async getFolderInfo(s: AbortSignal, id: number, filters?: GetFolderInfoFilters): Promise<Result<[unknown, Response], Error>> {
+	async getFolderInfo(s: AbortSignal, id: number, filters?: GetFolderInfoFilters): Promise<Result<[GetFolderInfoResponse, Response], Error>> {
 		let u = this.c.createUrl(`api/2.0/files/folder/${id}`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
@@ -316,13 +343,20 @@ export class FilesService {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
 
-		return ok(f.v)
+		let [p, res] = f.v
+
+		let e = FolderDtoSchema.safeParse(p)
+		if (!e.success) {
+			return error(new Error("Parsing response.", {cause: e.error}))
+		}
+
+		return ok([e.data, res])
 	}
 
 	/**
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FoldersController.cs/#L255 | DocSpace Reference}
 	 */
-	async renameFolder(s: AbortSignal, id: number, o: RenameFolderOptions, filters?: RenameFolderFilters): Promise<Result<[unknown, Response], Error>> {
+	async renameFolder(s: AbortSignal, id: number, o: RenameFolderOptions, filters?: RenameFolderFilters): Promise<Result<[RenameFolderResponse, Response], Error>> {
 		let u = this.c.createUrl(`api/2.0/files/folder/${id}`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
@@ -338,13 +372,20 @@ export class FilesService {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
 
-		return ok(f.v)
+		let [p, res] = f.v
+
+		let e = FolderDtoSchema.safeParse(p)
+		if (!e.success) {
+			return error(new Error("Parsing response.", {cause: e.error}))
+		}
+
+		return ok([e.data, res])
 	}
 
 	/**
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FoldersController.cs/#L348 | DocSpace Reference}
 	 */
-	async getMyFolder(s: AbortSignal, filters?: GetMyFolderFilters): Promise<Result<[unknown, Response], Error>> {
+	async getMyFolder(s: AbortSignal, filters?: GetMyFolderFilters): Promise<Result<[GetMyFolderResponse, Response], Error>> {
 		let u = this.c.createUrl("api/2.0/files/@my", filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
@@ -360,7 +401,14 @@ export class FilesService {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
 
-		return ok(f.v)
+		let [p, res] = f.v
+
+		let e = FolderContentDtoSchema.safeParse(p)
+		if (!e.success) {
+			return error(new Error("Parsing response.", {cause: e.error}))
+		}
+
+		return ok([e.data, res])
 	}
 
 	//
@@ -556,7 +604,7 @@ export class FilesService {
 	/**
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/VirtualRoomsController.cs/#L70 | DocSpace Reference}
 	 */
-	async createRoom(s: AbortSignal, o: CreateRoomOptions, filters?: CreateRoomFilters): Promise<Result<[unknown, Response], Error>> {
+	async createRoom(s: AbortSignal, o: CreateRoomOptions, filters?: CreateRoomFilters): Promise<Result<[CreateRoomResponse, Response], Error>> {
 		let u = this.c.createUrl("api/2.0/files/rooms", filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
@@ -572,7 +620,14 @@ export class FilesService {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
 
-		return ok(f.v)
+		let [p, res] = f.v
+
+		let e = FolderContentDtoSchema.safeParse(p)
+		if (!e.success) {
+			return error(new Error("Parsing response.", {cause: e.error}))
+		}
+
+		return ok([e.data, res])
 	}
 
 	/**
@@ -607,7 +662,7 @@ export class FilesService {
 	/**
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/VirtualRoomsController.cs/#L180 | DocSpace Reference}
 	 */
-	async updateRoom(s: AbortSignal, id: number, o: UpdateRoomOptions, filters?: UpdateRoomFilters): Promise<Result<[unknown, Response], Error>> {
+	async updateRoom(s: AbortSignal, id: number, o: UpdateRoomOptions, filters?: UpdateRoomFilters): Promise<Result<[UpdateRoomResponse, Response], Error>> {
 		let u = this.c.createUrl(`api/2.0/files/rooms/${id}`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
@@ -623,7 +678,14 @@ export class FilesService {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
 
-		return ok(f.v)
+		let [p, res] = f.v
+
+		let e = FolderDtoSchema.safeParse(p)
+		if (!e.success) {
+			return error(new Error("Parsing response.", {cause: e.error}))
+		}
+
+		return ok([e.data, res])
 	}
 
 	/**
@@ -658,7 +720,7 @@ export class FilesService {
 	/**
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/VirtualRoomsController.cs/#L311 | DocSpace Reference}
 	 */
-	async setRoomSecurity(s: AbortSignal, id: number, o: SetRoomSecurityOptions, filters?: SetRoomSecurityFilters): Promise<Result<[unknown, Response], Error>> {
+	async setRoomSecurity(s: AbortSignal, id: number, o: SetRoomSecurityOptions, filters?: SetRoomSecurityFilters): Promise<Result<[SetRoomSecurityResponse, Response], Error>> {
 		let u = this.c.createUrl(`api/2.0/files/rooms/${id}/share`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
@@ -674,13 +736,20 @@ export class FilesService {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
 
-		return ok(f.v)
+		let [p, res] = f.v
+
+		let e = RoomSecurityDtoSchema.safeParse(p)
+		if (!e.success) {
+			return error(new Error("Parsing response.", {cause: e.error}))
+		}
+
+		return ok([e.data, res])
 	}
 
 	/**
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/VirtualRoomsController.cs/#L349 | DocSpace Reference}
 	 */
-	async getRoomSecurityInfo(s: AbortSignal, id: number, filters?: GetRoomSecurityFilters): Promise<Result<[unknown, Response], Error>> {
+	async getRoomSecurityInfo(s: AbortSignal, id: number, filters?: GetRoomSecurityFilters): Promise<Result<[GetRoomSecurityInfoResponse, Response], Error>> {
 		let u = this.c.createUrl(`api/2.0/files/rooms/${id}/share`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
@@ -696,13 +765,20 @@ export class FilesService {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
 
-		return ok(f.v)
+		let [p, res] = f.v
+
+		let e = FileShareDtoSchema.safeParse(p)
+		if (!e.success) {
+			return error(new Error("Parsing response.", {cause: e.error}))
+		}
+
+		return ok([e.data, res])
 	}
 
 	/**
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/VirtualRoomsController.cs/#L649 | DocSpace Reference}
 	 */
-	async getRoomsFolder(s: AbortSignal, filters?: GetRoomsFolderFilters): Promise<Result<[unknown, Response], Error>> {
+	async getRoomsFolder(s: AbortSignal, filters?: GetRoomsFolderFilters): Promise<Result<[GetRoomFolderResponse, Response], Error>> {
 		let u = this.c.createUrl("api/2.0/files/rooms", filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
@@ -718,7 +794,14 @@ export class FilesService {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
 
-		return ok(f.v)
+		let [p, res] = f.v
+
+		let e = FolderContentDtoSchema.safeParse(p)
+		if (!e.success) {
+			return error(new Error("Parsing response.", {cause: e.error}))
+		}
+
+		return ok([e.data, res])
 	}
 
 	//

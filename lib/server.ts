@@ -22,38 +22,67 @@ import type {CallToolResult, ListToolsResult} from "@modelcontextprotocol/sdk/ty
 import {CallToolRequestSchema, ListToolsRequestSchema, isInitializeRequest} from "@modelcontextprotocol/sdk/types.js"
 import express from "express"
 import * as z from "zod"
+import type {JsonSchema7Type} from "zod-to-json-schema"
 import {format} from "../util/format.ts"
-import type {CallToolRequest, Extra, SimplifiedToolInfo, ToolInfo, ToolInputSchema, Toolset} from "../util/moremcp.ts"
-import {toInputSchema} from "../util/moremcp.ts"
+import type {
+	CallToolRequest,
+	Extra,
+	SimplifiedToolInfo,
+	ToolInfo,
+	ToolInputSchema,
+	ToolOutputSchema,
+	Toolset,
+} from "../util/moremcp.ts"
+import {toInputSchema, toOutputSchema} from "../util/moremcp.ts"
 import type {Result} from "../util/result.ts"
 import {error, ok, safeAsync, safeSync} from "../util/result.ts"
 import type {Client} from "./client.ts"
 import {Response} from "./client.ts"
 import type {Resolver} from "./resolver.ts"
-import {CallToolInputSchema, GetToolInputSchemaInputSchema, ListToolsInputSchema, MetaToolset} from "./server/meta.ts"
+import {
+	CallToolInputSchema,
+	GetToolInputSchemaInputSchema,
+	GetToolOutputSchemaInputSchema,
+	ListToolsInputSchema,
+	MetaToolset,
+} from "./server/meta.ts"
 import {
 	ArchiveRoomInputSchema,
 	CopyBatchItemsInputSchema,
 	CreateFolderInputSchema,
+	CreateFolderOutputSchema,
 	CreateRoomInputSchema,
+	CreateRoomOutputSchema,
 	DeleteFileInputSchema,
 	DeleteFolderInputSchema,
 	DownloadFileAsTextInputSchema,
 	GetAllPeopleInputSchema,
+	GetAllPeopleOutputSchema,
 	GetFileInfoInputSchema,
+	GetFileInfoOutputSchema,
 	GetFolderContentInputSchema,
+	GetFolderContentOutputSchema,
 	GetFolderInfoInputSchema,
+	GetFolderInfoOutputSchema,
 	GetMyFolderInputSchema,
+	GetMyFolderOutputSchema,
 	GetRoomAccessLevelsSchema,
 	GetRoomInfoInputSchema,
+	GetRoomInfoOutputSchema,
 	GetRoomSecurityInfoInputSchema,
+	GetRoomSecurityInfoOutputSchema,
 	GetRoomsFolderInputSchema,
+	GetRoomsFolderOutputSchema,
 	MoveBatchItemsInputSchema,
 	RegularToolset,
 	RenameFolderInputSchema,
+	RenameFolderOutputSchema,
 	SetRoomSecurityInputSchema,
+	SetRoomSecurityOutputSchema,
 	UpdateFileInputSchema,
+	UpdateFileOutputSchema,
 	UpdateRoomInputSchema,
+	UpdateRoomOutputSchema,
 	UploadFileInputSchema,
 } from "./server/regular.ts"
 import type {Uploader} from "./uploader.ts"
@@ -73,6 +102,11 @@ export const metaTools: ToolInfo[] = [
 		name: "get_tool_input_schema",
 		description: "This is a meta-tool for getting an input schema for a specific tool. The list of available tools can be obtained using the list_tools meta-tool.",
 		inputSchema: toInputSchema(GetToolInputSchemaInputSchema),
+	},
+	{
+		name: "get_tool_output_schema",
+		description: "This is a meta-tool for getting an output schema for a specific tool. The list of available tools can be obtained using the list_tools meta-tool.",
+		inputSchema: toInputSchema(GetToolOutputSchemaInputSchema),
 	},
 	{
 		name: "call_tool",
@@ -95,11 +129,13 @@ export const toolsets: Toolset[] = [
 				name: "get_file_info",
 				description: "Get file information.",
 				inputSchema: toInputSchema(GetFileInfoInputSchema),
+				outputSchema: toOutputSchema(GetFileInfoOutputSchema),
 			},
 			{
 				name: "update_file",
 				description: "Update a file.",
 				inputSchema: toInputSchema(UpdateFileInputSchema),
+				outputSchema: toOutputSchema(UpdateFileOutputSchema),
 			},
 			{
 				name: "copy_batch_items",
@@ -131,6 +167,7 @@ export const toolsets: Toolset[] = [
 				name: "create_folder",
 				description: "Create a folder.",
 				inputSchema: toInputSchema(CreateFolderInputSchema),
+				outputSchema: toOutputSchema(CreateFolderOutputSchema),
 			},
 			{
 				name: "delete_folder",
@@ -141,21 +178,25 @@ export const toolsets: Toolset[] = [
 				name: "get_folder_content",
 				description: "Get content of a folder.",
 				inputSchema: toInputSchema(GetFolderContentInputSchema),
+				outputSchema: toOutputSchema(GetFolderContentOutputSchema),
 			},
 			{
 				name: "get_folder_info",
 				description: "Get folder information.",
 				inputSchema: toInputSchema(GetFolderInfoInputSchema),
+				outputSchema: toOutputSchema(GetFolderInfoOutputSchema),
 			},
 			{
 				name: "rename_folder",
 				description: "Rename a folder.",
 				inputSchema: toInputSchema(RenameFolderInputSchema),
+				outputSchema: toOutputSchema(RenameFolderOutputSchema),
 			},
 			{
 				name: "get_my_folder",
 				description: "Get the 'My Documents' folder.",
 				inputSchema: toInputSchema(GetMyFolderInputSchema),
+				outputSchema: toOutputSchema(GetMyFolderOutputSchema),
 			},
 		],
 	},
@@ -167,16 +208,19 @@ export const toolsets: Toolset[] = [
 				name: "create_room",
 				description: "Create a room.",
 				inputSchema: toInputSchema(CreateRoomInputSchema),
+				outputSchema: toOutputSchema(CreateRoomOutputSchema),
 			},
 			{
 				name: "get_room_info",
 				description: "Get room information.",
 				inputSchema: toInputSchema(GetRoomInfoInputSchema),
+				outputSchema: toOutputSchema(GetRoomInfoOutputSchema),
 			},
 			{
 				name: "update_room",
 				description: "Update a room.",
 				inputSchema: toInputSchema(UpdateRoomInputSchema),
+				outputSchema: toOutputSchema(UpdateRoomOutputSchema),
 			},
 			{
 				name: "archive_room",
@@ -187,16 +231,19 @@ export const toolsets: Toolset[] = [
 				name: "set_room_security",
 				description: "Invite or remove users from a room.",
 				inputSchema: toInputSchema(SetRoomSecurityInputSchema),
+				outputSchema: toOutputSchema(SetRoomSecurityOutputSchema),
 			},
 			{
 				name: "get_room_security_info",
 				description: "Get a list of users with their access levels to a room.",
 				inputSchema: toInputSchema(GetRoomSecurityInfoInputSchema),
+				outputSchema: toOutputSchema(GetRoomSecurityInfoOutputSchema),
 			},
 			{
 				name: "get_rooms_folder",
 				description: "Get the 'Rooms' folder.",
 				inputSchema: toInputSchema(GetRoomsFolderInputSchema),
+				outputSchema: toOutputSchema(GetRoomsFolderOutputSchema),
 			},
 			{
 				name: "get_room_types",
@@ -218,10 +265,13 @@ export const toolsets: Toolset[] = [
 				name: "get_all_people",
 				description: "Get all people.",
 				inputSchema: toInputSchema(GetAllPeopleInputSchema),
+				outputSchema: toOutputSchema(GetAllPeopleOutputSchema),
 			},
 		],
 	},
 ]
+
+export type RouteToolResult = CallToolResult & {isError?: never}
 
 export interface MisconfiguredStdioConfig {
 	server: ProtocolServer
@@ -291,7 +341,7 @@ export class ConfiguredStdioServer {
 	toolsets: Toolset[] = []
 	tools: ToolInfo[] = []
 
-	routeTool: (req: CallToolRequest, extra: Extra) => Promise<Result<string, Error>>
+	routeTool: (req: CallToolRequest, extra: Extra) => Promise<Result<RouteToolResult, Error>>
 
 	constructor(config: ConfiguredStdioConfig) {
 		this.client = config.client
@@ -354,62 +404,72 @@ export class ConfiguredStdioServer {
 			}
 		}
 
-		return {
-			content: [
-				{
-					type: "text",
-					text: pr.v,
-				},
-			],
-		}
+		return pr.v
 	}
 
-	async routeMetaTool(req: CallToolRequest, extra: Extra): Promise<Result<string, Error>> {
-		let cr: Result<SimplifiedToolInfo[] | ToolInputSchema | string, Error>
+	async routeMetaTool(req: CallToolRequest, extra: Extra): Promise<Result<RouteToolResult, Error>> {
+		let mr: Result<SimplifiedToolInfo[] | ToolInputSchema | ToolOutputSchema, Error> | undefined
+		let rr: Result<RouteToolResult, Error> | undefined
 
 		try {
 			switch (req.params.name) {
 			case "list_toolsets":
-				cr = this.meta.listToolsets()
+				mr = this.meta.listToolsets()
 				break
 			case "list_tools":
-				cr = this.meta.listTools(req.params.arguments)
+				mr = this.meta.listTools(req.params.arguments)
 				break
 			case "get_tool_input_schema":
-				cr = this.meta.getToolInputSchema(req.params.arguments)
+				mr = this.meta.getToolInputSchema(req.params.arguments)
+				break
+			case "get_tool_output_schema":
+				mr = this.meta.getToolOutputSchema(req.params.arguments)
 				break
 			case "call_tool":
-				cr = await this.meta.callTool(req, extra)
+				rr = await this.meta.callTool(req, extra)
 				break
 			default:
-				cr = error(new Error(`Tool ${req.params.name} not found.`))
+				mr = error(new Error(`Tool ${req.params.name} not found.`))
 				break
 			}
 		} catch (err) {
 			if (err instanceof Error) {
-				cr = error(err)
+				mr = error(err)
 			} else {
-				cr = error(new Error("Unknown error.", {cause: err}))
+				mr = error(new Error("Unknown error.", {cause: err}))
 			}
 		}
 
-		if (cr.err) {
-			return error(cr.err)
+		if (mr) {
+			if (mr.err) {
+				return error(mr.err)
+			}
+
+			let s = safeSync(JSON.stringify, mr.v, undefined, 2)
+			if (s.err) {
+				return error(new Error("Stringifying value", {cause: s.err}))
+			}
+
+			let r: RouteToolResult = {
+				content: [
+					{
+						type: "text",
+						text: s.v,
+					},
+				],
+			}
+
+			return ok(r)
 		}
 
-		if (typeof cr.v === "string") {
-			return ok(cr.v)
+		if (rr) {
+			return rr
 		}
 
-		let s = safeSync(JSON.stringify, cr.v, undefined, 2)
-		if (s.err) {
-			return error(new Error("Stringifying value", {cause: s.err}))
-		}
-
-		return ok(s.v)
+		return error(new Error("Unknown result type"))
 	}
 
-	async routeRegularTool(req: CallToolRequest, extra: Extra): Promise<Result<string, Error>> {
+	async routeRegularTool(req: CallToolRequest, extra: Extra): Promise<Result<RouteToolResult, Error>> {
 		let f = false
 
 		for (let s of this.toolsets) {
@@ -429,7 +489,7 @@ export class ConfiguredStdioServer {
 			return error(new Error(`Tool ${req.params.name} not found`))
 		}
 
-		let cr: Result<Response | string | object, Error>
+		let cr: Result<Response | JsonSchema7Type | string, Error>
 
 		try {
 			switch (req.params.name) {
@@ -518,60 +578,132 @@ export class ConfiguredStdioServer {
 			}
 		}
 
-		let pr = await (async(): Promise<Result<string, Error>> => {
-			if (cr.err) {
-				return error(cr.err)
+		if (cr.err) {
+			return error(cr.err)
+		}
+
+		if (cr.v instanceof Response) {
+			let h = cr.v.response.headers.get("Content-Type")
+			if (h === null) {
+				return error(new Error("Content-Type header is missing"))
 			}
 
-			if (cr.v instanceof Response) {
-				let h = cr.v.response.headers.get("Content-Type")
-				if (h === null) {
-					return error(new Error("Content-Type header is missing"))
+			if (h.startsWith("application/json")) {
+				let j = await safeAsync(cr.v.response.json.bind(cr.v.response))
+				if (j.err) {
+					return error(new Error("Parsing json response", {cause: j.err}))
 				}
 
-				if (h.startsWith("application/json")) {
-					let p = await safeAsync(cr.v.response.json.bind(cr.v.response))
-					if (p.err) {
-						return error(new Error("Parsing json response", {cause: p.err}))
-					}
-
-					let s = safeSync(JSON.stringify, p.v, undefined, 2)
-					if (s.err) {
-						return error(new Error("Stringifying json value", {cause: s.err}))
-					}
-
-					return ok(s.v)
-				}
-
-				if (h.startsWith("text/")) {
-					let t = await safeAsync(cr.v.response.text.bind(cr.v.response))
-					if (t.err) {
-						return error(new Error("Parsing text response", {cause: t.err}))
-					}
-
-					return ok(t.v)
-				}
-
-				return error(new Error(`Content-Type ${h} is not supported`))
-			}
-
-			if (typeof cr.v === "string") {
-				return ok(cr.v)
-			}
-
-			if (typeof cr.v === "object") {
-				let s = safeSync(JSON.stringify, cr.v, undefined, 2)
+				let s = safeSync(JSON.stringify, j.v, undefined, 2)
 				if (s.err) {
-					return error(new Error("Stringifying object value", {cause: s.err}))
+					return error(new Error("Stringifying json value", {cause: s.err}))
 				}
 
-				return ok(s.v)
+				let r: RouteToolResult = {
+					content: [
+						{
+							type: "text",
+							text: s.v,
+						},
+					],
+				}
+
+				let f = false
+
+				for (let s of this.toolsets) {
+					for (let t of s.tools) {
+						if (t.name === req.params.name) {
+							f = true
+
+							if (t.outputSchema) {
+								r.structuredContent = j.v
+							}
+
+							break
+						}
+					}
+
+					if (f) {
+						break
+					}
+				}
+
+				return ok(r)
 			}
 
-			return error(new Error(`Unknown result type ${typeof cr.v}`))
-		})()
+			if (h.startsWith("text/")) {
+				let t = await safeAsync(cr.v.response.text.bind(cr.v.response))
+				if (t.err) {
+					return error(new Error("Parsing text response", {cause: t.err}))
+				}
 
-		return pr
+				let r: RouteToolResult = {
+					content: [
+						{
+							type: "text",
+							text: t.v,
+						},
+					],
+				}
+
+				return ok(r)
+			}
+
+			return error(new Error(`Content-Type ${h} is not supported`))
+		}
+
+		if (typeof cr.v === "object") {
+			let s = safeSync(JSON.stringify, cr.v, undefined, 2)
+			if (s.err) {
+				return error(new Error("Stringifying object value", {cause: s.err}))
+			}
+
+			let r: RouteToolResult = {
+				content: [
+					{
+						type: "text",
+						text: s.v,
+					},
+				],
+			}
+
+			let f = false
+
+			for (let s of this.toolsets) {
+				for (let t of s.tools) {
+					if (t.name === req.params.name) {
+						f = true
+
+						if (t.outputSchema) {
+							r.structuredContent = cr.v
+						}
+
+						break
+					}
+				}
+
+				if (f) {
+					break
+				}
+			}
+
+			return ok(r)
+		}
+
+		if (typeof cr.v === "string") {
+			let r: RouteToolResult = {
+				content: [
+					{
+						type: "text",
+						text: cr.v,
+					},
+				],
+			}
+
+			return ok(r)
+		}
+
+		return error(new Error("Unknown result type"))
 	}
 }
 

@@ -6,6 +6,10 @@ This document records all notable changes to the project, following the [Keep a 
 
 <!-- There are no noticeable changes in version [unreleased]. -->
 
+### Add
+
+- Add partial support for output schemas ([b50a7bc]).
+
 ### Fixed
 
 - Restore access to regular tools when using meta-tools ([eb84c1f]);
@@ -153,6 +157,7 @@ This document records all notable changes to the project, following the [Keep a 
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[b50a7bc]: https://github.com/onlyoffice/docspace-mcp/commit/b50a7bc2dc0a4554475e9f8f81a08ad7653870d5/
 [eb84c1f]: https://github.com/onlyoffice/docspace-mcp/commit/eb84c1f7ebc16e5af646008b8fffacc51eb4e332/
 [90c2b72]: https://github.com/onlyoffice/docspace-mcp/commit/90c2b72b7205173eabc81270f52778f6c6f16d7e/
 [1eb7792]: https://github.com/onlyoffice/docspace-mcp/commit/1eb7792071515aba0706f8e0374c836c118b9a3f/

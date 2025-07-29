@@ -17,6 +17,7 @@
  */
 
 import * as z from "zod"
+import type {JsonSchema7Type} from "zod-to-json-schema"
 import {zodToJsonSchema} from "zod-to-json-schema"
 import type {Result} from "../../util/result.ts"
 import {error, ok, safeAsync, safeSync} from "../../util/result.ts"
@@ -24,6 +25,11 @@ import {numberUnionToEnum} from "../../util/zod.ts"
 import {
 	CreateFolderFiltersSchema,
 	CreateRoomFiltersSchema,
+	EmployeeDtoSchema,
+	FileDtoSchema,
+	FileShareDtoSchema,
+	FolderContentDtoSchema,
+	FolderDtoSchema,
 	GetAllFiltersSchema,
 	GetFileInfoFiltersSchema,
 	GetFolderFiltersSchema,
@@ -33,8 +39,10 @@ import {
 	GetRoomSecurityFiltersSchema,
 	GetRoomsFolderFiltersSchema,
 	RenameFolderFiltersSchema,
+	RoomSecurityDtoSchema,
 	RoomTypeSchema,
 	SetRoomSecurityFiltersSchema,
+	SuccessApiResponseSchema,
 	UpdateRoomFiltersSchema,
 } from "../client/internal/schemas.ts"
 import type {
@@ -67,9 +75,17 @@ export const GetFileInfoInputSchema = z.object({
 	filters: GetFileInfoFiltersSchema.describe("The filters to apply to the file info. Use them to reduce the size of the response."),
 })
 
+export const GetFileInfoOutputSchema = SuccessApiResponseSchema.extend({
+	response: FileDtoSchema.describe("The file information."),
+})
+
 export const UpdateFileInputSchema = z.object({
 	fileId: z.number().describe("The ID of the file to update."),
 	title: z.string().describe("The new title of the file to set."),
+})
+
+export const UpdateFileOutputSchema = SuccessApiResponseSchema.extend({
+	response: FileDtoSchema.describe("The updated file information."),
 })
 
 export const CopyBatchItemsInputSchema = z.object({
@@ -134,6 +150,10 @@ export const CreateFolderInputSchema = z.object({
 	filters: CreateFolderFiltersSchema.describe("The filters to apply to the folder creation. Use them to reduce the size of the response."),
 })
 
+export const CreateFolderOutputSchema = SuccessApiResponseSchema.extend({
+	response: FolderDtoSchema.describe("The created folder information."),
+})
+
 export const DeleteFolderInputSchema = z.object({
 	folderId: z.number().describe("The ID of the folder to delete."),
 })
@@ -143,9 +163,17 @@ export const GetFolderContentInputSchema = z.object({
 	filters: GetFolderFiltersSchema.describe("The filters to apply to the contents of the folder. Use them to reduce the size of the response."),
 })
 
+export const GetFolderContentOutputSchema = SuccessApiResponseSchema.extend({
+	response: FolderContentDtoSchema.describe("The contents of the folder."),
+})
+
 export const GetFolderInfoInputSchema = z.object({
 	folderId: z.number().describe("The ID of the folder to get info for."),
 	filters: GetFolderInfoFiltersSchema.describe("The filters to apply to the folder info. Use them to reduce the size of the response."),
+})
+
+export const GetFolderInfoOutputSchema = SuccessApiResponseSchema.extend({
+	response: FolderDtoSchema.describe("The folder information."),
 })
 
 export const RenameFolderInputSchema = z.object({
@@ -154,8 +182,16 @@ export const RenameFolderInputSchema = z.object({
 	filters: RenameFolderFiltersSchema.describe("The filters to apply to the folder renaming. Use them to reduce the size of the response."),
 })
 
+export const RenameFolderOutputSchema = SuccessApiResponseSchema.extend({
+	response: FolderDtoSchema.describe("The renamed folder information."),
+})
+
 export const GetMyFolderInputSchema = z.object({
 	filters: GetMyFolderFiltersSchema.describe("The filters to apply to the My Documents folder. Use them to reduce the size of the response."),
+})
+
+export const GetMyFolderOutputSchema = SuccessApiResponseSchema.extend({
+	response: FolderContentDtoSchema.describe("The contents of the My Documents folder."),
 })
 
 //
@@ -224,15 +260,27 @@ export const CreateRoomInputSchema = z.object({
 	filters: CreateRoomFiltersSchema.describe("The filters to apply to the room creation."),
 })
 
+export const CreateRoomOutputSchema = SuccessApiResponseSchema.extend({
+	response: FolderContentDtoSchema.describe("The contents of the created room."),
+})
+
 export const GetRoomInfoInputSchema = z.object({
 	roomId: z.number().describe("The ID of the room to get info for."),
 	filters: GetRoomInfoFiltersSchema.describe("The filters to apply to the room info."),
+})
+
+export const GetRoomInfoOutputSchema = SuccessApiResponseSchema.extend({
+	response: FolderDtoSchema.describe("The room information."),
 })
 
 export const UpdateRoomInputSchema = z.object({
 	roomId: z.number().describe("The ID of the room to update."),
 	title: z.string().optional().describe("The new title of the room to set."),
 	filters: UpdateRoomFiltersSchema.describe("The filters to apply to the room update."),
+})
+
+export const UpdateRoomOutputSchema = SuccessApiResponseSchema.extend({
+	response: FolderDtoSchema.describe("The updated room information."),
 })
 
 export const ArchiveRoomInputSchema = z.object({
@@ -283,13 +331,25 @@ export const SetRoomSecurityInputSchema = z.object({
 	filters: SetRoomSecurityFiltersSchema.describe("The filters to apply to the room security info."),
 })
 
+export const SetRoomSecurityOutputSchema = SuccessApiResponseSchema.extend({
+	response: RoomSecurityDtoSchema.describe("The room security information after the operation."),
+})
+
 export const GetRoomSecurityInfoInputSchema = z.object({
 	roomId: z.number().describe("The ID of the room to get a list of users with their access level for."),
 	filters: GetRoomSecurityFiltersSchema.describe("The filters to apply to the room security info."),
 })
 
+export const GetRoomSecurityInfoOutputSchema = SuccessApiResponseSchema.extend({
+	response: FileShareDtoSchema.describe("The room security information."),
+})
+
 export const GetRoomsFolderInputSchema = z.object({
 	filters: GetRoomsFolderFiltersSchema.describe("The filters to apply to the rooms folder."),
+})
+
+export const GetRoomsFolderOutputSchema = SuccessApiResponseSchema.extend({
+	response: FolderContentDtoSchema.describe("The contents of the rooms folder."),
 })
 
 export const GetRoomAccessLevelsSchema = z.object({
@@ -302,6 +362,10 @@ export const GetRoomAccessLevelsSchema = z.object({
 
 export const GetAllPeopleInputSchema = z.object({
 	filters: GetAllFiltersSchema.describe("The filters to apply to the list of people. Use them to reduce the size of the response."),
+})
+
+export const GetAllPeopleOutputSchema = SuccessApiResponseSchema.extend({
+	response: z.array(EmployeeDtoSchema),
 })
 
 export class RegularToolset {
@@ -834,11 +898,11 @@ export class RegularToolset {
 		return ok(res)
 	}
 
-	getRoomTypes(): Result<object, Error> {
+	getRoomTypes(): Result<JsonSchema7Type, Error> {
 		return ok(zodToJsonSchema(RoomTypeSchema))
 	}
 
-	async getRoomAccessLevels(signal: AbortSignal, p: unknown): Promise<Result<object, Error>> {
+	async getRoomAccessLevels(signal: AbortSignal, p: unknown): Promise<Result<JsonSchema7Type, Error>> {
 		let pr = GetRoomAccessLevelsSchema.safeParse(p)
 		if (!pr.success) {
 			return error(new Error("Parsing input.", {cause: pr.error}))
