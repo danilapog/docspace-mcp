@@ -13,6 +13,14 @@ RUN \
 	pnpm build
 
 FROM node:24.1.0-alpine3.22
+LABEL org.opencontainers.image.authors="Ascensio System SIA <integration@onlyoffice.com>"
+LABEL org.opencontainers.image.url="https://github.com/onlyoffice/docspace-mcp/"
+LABEL org.opencontainers.image.documentation="https://github.com/onlyoffice/docspace-mcp/blob/main/README.md"
+LABEL org.opencontainers.image.source="https://github.com/onlyoffice/docspace-mcp/"
+LABEL org.opencontainers.image.version="2.0.0"
+LABEL org.opencontainers.image.licenses="Apache-2.0"
+LABEL org.opencontainers.image.title="ONLYOFFICE DocSpace MCP Server"
+LABEL org.opencontainers.image.description="ONLYOFFICE DocSpace Model Context Protocol Server"
 ENV NODE_ENV=production
 WORKDIR /srv/onlyoffice-docspace-mcp
 COPY --from=build /srv/onlyoffice-docspace-mcp/bin bin
