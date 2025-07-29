@@ -9,8 +9,10 @@ on:
     - "v*"
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{steps.version.outputs.version}}
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
@@ -18,21 +20,15 @@ jobs:
     - name: Setup mise
       uses: jdx/mise-action@v2
 
+    - name: Store Version
+      id: version
+      run: echo "version=$(jq --raw-output ".version" package.json)" >> "$GITHUB_OUTPUT"
+
     - name: Install Dependencies
       run: pnpm install --frozen-lockfile
 
     - name: Build Package
       run: pnpm build
-
-    - name: Configure Registry
-      run: |
-        pnpm config set //registry.npmjs.org/:_authToken "\${NODE_AUTH_TOKEN}"
-        pnpm config set registry https://registry.npmjs.org
-
-    - name: Publish Package
-      env:
-        NODE_AUTH_TOKEN: ${{secrets.NPM_PUBLISH_TOKEN}}
-      run: pnpm publish --access public --no-git-checks
 
     - name: Create Tarball
       run: pnpm pack
@@ -40,23 +36,134 @@ jobs:
     - name: Create Desktop Extension
       run: pnpm dxt
 
-    - name: Store Package Version
-      run: echo "PACKAGE_VERSION=$(jq -r ".version" package.json)" >> "$GITHUB_ENV"
+    - name: Upload Tarball
+      uses: actions/upload-artifact@v4
+      with:
+        name: tarball
+        path: "*.tgz"
+        if-no-files-found: error
+
+    - name: Upload Desktop Extension
+      uses: actions/upload-artifact@v4
+      with:
+        name: desktop-extension
+        path: "*.dxt"
+        if-no-files-found: error
+
+  npm:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{secrets.NPM_PUBLISH_TOKEN}}
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup mise
+      uses: jdx/mise-action@v2
+
+    - name: Download Tarball
+      uses: actions/download-artifact@v4
+      with:
+        name: tarball
+
+    - name: Configure Registry
+      run: |
+        pnpm config set //registry.npmjs.org/:_authToken "\${NODE_AUTH_TOKEN}"
+        pnpm config set registry https://registry.npmjs.org
+
+    - name: Publish Package
+      run: pnpm publish *.tgz --access public --no-git-checks
+
+  docker:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_NAMESPACE: onlyoffice
+      DOCKER_REPOSITORY: docspace-mcp
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - name: Setup Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{secrets.DOCKER_USERNAME}}
+        password: ${{secrets.DOCKER_PASSWORD}}
+
+    - name: Extract Labels
+      id: labels
+      run: |
+        labels=""
+        while IFS= read -r c; do
+          case "$c" in
+          LABEL*)
+            c=$(echo "$c" | sed "s/^LABEL[[:space:]]*//")
+            n=$(echo "$c" | cut --delimiter="=" --fields=1)
+            v=$(echo "$c" | cut --delimiter="=" --fields=2- | sed "s/\"//g")
+            labels="$labels$n=$v\n"
+            ;;
+          esac
+        done < Dockerfile
+        if [ -n "$labels" ]; then
+          labels=$(printf "%s" "$labels" | sed "s/\\\\n$//")
+        fi
+        printf "labels<<EOF\n%b\nEOF\n" "$labels" >> "$GITHUB_OUTPUT"
+
+    - name: Extract Metadata
+      id: metadata
+      uses: docker/metadata-action@v5
+      with:
+        images: index.docker.io/${{env.DOCKER_NAMESPACE}}/${{env.DOCKER_REPOSITORY}}
+        labels: ${{steps.labels.outputs.labels}}
+        tags: |
+          type=semver,pattern={{major}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}.{{minor}}.{{patch}}
+          type=sha,format=short
+          type=sha,format=long
+
+    - name: Publish Image
+      uses: docker/build-push-action@v6
+      with:
+        push: true
+        platforms: linux/amd64,linux/arm64
+        labels: ${{steps.metadata.outputs.labels}}
+        tags: ${{steps.metadata.outputs.tags}}
+
+    - name: Update Docker Hub Description
+      uses: peter-evans/dockerhub-description@v4
+      with:
+        username: ${{secrets.DOCKER_USERNAME}}
+        password: ${{secrets.DOCKER_PASSWORD}}
+        repository: ${{env.DOCKER_NAMESPACE}}/${{env.DOCKER_REPOSITORY}}
+
+  gh:
+    needs: [build, npm, docker]
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{github.token}}
+    steps:
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        pattern: "*"
+        merge-multiple: true
 
     - name: Create Release
-      env:
-        GH_TOKEN: ${{github.token}}
       run: |
-        gh release create "v${{env.PACKAGE_VERSION}}" \
-          --title "v${{env.PACKAGE_VERSION}}" \
+        gh release create "v${{needs.build.outputs.version}}" \
+          --title "v${{needs.build.outputs.version}}" \
           --notes "See ${{github.server_url}}/${{github.repository}}/blob/main/CHANGELOG.md/"
 
     - name: Upload Tarball
-      env:
-        GH_TOKEN: ${{github.token}}
-      run: gh release upload "v${{env.PACKAGE_VERSION}}" *.tgz
+      run: gh release upload "v${{needs.build.outputs.version}}" *.tgz
 
     - name: Upload Desktop Extension
-      env:
-        GH_TOKEN: ${{github.token}}
-      run: gh release upload "v${{env.PACKAGE_VERSION}}" *.dxt
+      run: gh release upload "v${{needs.build.outputs.version}}" *.dxt
