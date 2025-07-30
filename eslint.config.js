@@ -26,4 +26,12 @@ export default [
 			"n/hashbang": "off",
 		},
 	},
+	{
+		files: ["**/*.ts"],
+		rules: {
+			"new-cap": ["error", {capIsNew: false}],
+			"es-x/no-export-ns-from": "off",
+			"unicorn/prefer-add-event-listener": "off",
+		},
+	},
 ]
