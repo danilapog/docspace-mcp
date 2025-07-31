@@ -16,22 +16,12 @@
  * @license
  */
 
-import config from "@vanyauhalin/eslint-config"
+import type * as express from "express"
+import * as senders from "./senders.ts"
 
-export default [
-	...config,
-	{
-		files: ["app/main.ts"],
-		rules: {
-			"n/hashbang": "off",
-		},
-	},
-	{
-		files: ["**/*.ts"],
-		rules: {
-			"new-cap": ["error", {capIsNew: false}],
-			"es-x/no-export-ns-from": "off",
-			"unicorn/prefer-add-event-listener": "off",
-		},
-	},
-]
+export function notFound(): express.Handler {
+	return (_, res) => {
+		let err = new Error("Not Found")
+		senders.sendRegularError(res, 404, err)
+	}
+}

@@ -24,10 +24,10 @@ import type {
 	ToolInputSchema,
 	ToolOutputSchema,
 	Toolset,
-} from "../../util/moremcp.ts"
-import type {Result} from "../../util/result.ts"
-import {error, ok} from "../../util/result.ts"
-import type {ConfiguredStdioServer, RouteToolResult} from "../server.ts"
+} from "../../../util/moremcp.ts"
+import type {Result} from "../../../util/result.ts"
+import {error, ok} from "../../../util/result.ts"
+import type {RouteToolResult, Server} from "../configured.ts"
 
 export const ListToolsInputSchema = z.object({
 	toolset: z.string().describe("The name of the toolset to list tools from."),
@@ -46,10 +46,10 @@ export const CallToolInputSchema = z.object({
 	input: z.object({}).passthrough().optional().describe("The value that corresponds to the input schema of the tool."),
 })
 
-export class MetaToolset {
-	private s: ConfiguredStdioServer
+export class Tools {
+	private s: Server
 
-	constructor(s: ConfiguredStdioServer) {
+	constructor(s: Server) {
 		this.s = s
 	}
 

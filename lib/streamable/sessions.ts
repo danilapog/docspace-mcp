@@ -1,24 +1,47 @@
-import type * as server from "@modelcontextprotocol/sdk/server/index.js"
+/**
+ * (c) Copyright Ascensio System SIA 2025
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @license
+ */
+
 import type * as streamableHttp from "@modelcontextprotocol/sdk/server/streamableHttp.js"
-import * as result from "../util/result.ts"
+import * as result from "../../util/result.ts"
 
 export interface Session {
 	id: string
-	server: server.Server
 	transport: streamableHttp.StreamableHTTPServerTransport
 	createdAt: Date
 	expiresAt: Date
 }
 
-export interface CreateOptions {
-	id: string
-	server: server.Server
-	transport: streamableHttp.StreamableHTTPServerTransport
+export interface Config {
 	ttl: number
 }
 
+export interface CreateOptions {
+	id: string
+	transport: streamableHttp.StreamableHTTPServerTransport
+}
+
 export class Sessions {
+	private ttl: number
 	private m = new Map<string, Session>()
+
+	constructor(config: Config) {
+		this.ttl = config.ttl
+	}
 
 	create(o: CreateOptions): result.Result<Session, Error> {
 		let createdAt = new Date()
@@ -26,14 +49,13 @@ export class Sessions {
 			return result.error(new Error("Creation date is invalid"))
 		}
 
-		let expiresAt = new Date(createdAt.getTime() + o.ttl)
+		let expiresAt = new Date(createdAt.getTime() + this.ttl)
 		if (Number.isNaN(expiresAt.getTime())) {
 			return result.error(new Error("Expiration date is invalid"))
 		}
 
 		let s: Session = {
 			id: o.id,
-			server: o.server,
 			transport: o.transport,
 			createdAt,
 			expiresAt,
@@ -83,9 +105,9 @@ export class Sessions {
 			return new Error(`Session ${id} not found`)
 		}
 
-		let r = await result.safeAsync(s.server.close.bind(s.server))
+		let r = await result.safeAsync(s.transport.close.bind(s.transport))
 		if (r.err) {
-			return new Error(`Closing server for session ${s.id}`, {cause: r.err})
+			return new Error(`Closing transport for session ${s.id}`, {cause: r.err})
 		}
 	}
 

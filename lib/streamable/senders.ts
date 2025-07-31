@@ -16,22 +16,24 @@
  * @license
  */
 
-import config from "@vanyauhalin/eslint-config"
+import type * as express from "express"
+import * as format from "../../util/format.ts"
 
-export default [
-	...config,
-	{
-		files: ["app/main.ts"],
-		rules: {
-			"n/hashbang": "off",
+export function sendRegularError(res: express.Response, code: number, err: Error): void {
+	res.status(code)
+	res.json({
+		message: format.format(err),
+	})
+}
+
+export function sendJsonrpcError(res: express.Response, httpCode: number, jsonrpcCode: number, err: Error): void {
+	res.status(httpCode)
+	res.json({
+		jsonrpc: "2.0",
+		error: {
+			code: jsonrpcCode,
+			message: format.format(err),
 		},
-	},
-	{
-		files: ["**/*.ts"],
-		rules: {
-			"new-cap": ["error", {capIsNew: false}],
-			"es-x/no-export-ns-from": "off",
-			"unicorn/prefer-add-event-listener": "off",
-		},
-	},
-]
+		id: null,
+	})
+}

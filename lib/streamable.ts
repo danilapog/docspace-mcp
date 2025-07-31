@@ -16,22 +16,9 @@
  * @license
  */
 
-import config from "@vanyauhalin/eslint-config"
-
-export default [
-	...config,
-	{
-		files: ["app/main.ts"],
-		rules: {
-			"n/hashbang": "off",
-		},
-	},
-	{
-		files: ["**/*.ts"],
-		rules: {
-			"new-cap": ["error", {capIsNew: false}],
-			"es-x/no-export-ns-from": "off",
-			"unicorn/prefer-add-event-listener": "off",
-		},
-	},
-]
+export * as base from "./streamable/base.ts"
+export * as handlers from "./streamable/handlers.ts"
+export * as senders from "./streamable/senders.ts"
+export * as server from "./streamable/server.ts"
+export * as sessions from "./streamable/sessions.ts"
+export * as transports from "./streamable/transports.ts"

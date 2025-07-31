@@ -16,22 +16,5 @@
  * @license
  */
 
-import config from "@vanyauhalin/eslint-config"
-
-export default [
-	...config,
-	{
-		files: ["app/main.ts"],
-		rules: {
-			"n/hashbang": "off",
-		},
-	},
-	{
-		files: ["**/*.ts"],
-		rules: {
-			"new-cap": ["error", {capIsNew: false}],
-			"es-x/no-export-ns-from": "off",
-			"unicorn/prefer-add-event-listener": "off",
-		},
-	},
-]
+export * as meta from "./tools/meta.ts"
+export * as regular from "./tools/regular.ts"
