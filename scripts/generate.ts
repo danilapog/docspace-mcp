@@ -18,7 +18,7 @@
 
 import {existsSync} from "node:fs"
 import {readFile, writeFile} from "node:fs/promises"
-import * as server from "../lib/server.ts"
+import * as base from "../lib/base.ts"
 import type {SimplifiedToolInfo, Toolset} from "../util/moremcp.ts"
 
 /**
@@ -55,9 +55,9 @@ async function main(): Promise<void> {
 	let input = await readFile("README.md", "utf8")
 
 	let badges = createBadges()
-	let toolsets = formatToolsets(server.toolsets)
-	let dynamic = formatMetaTools(server.metaTools)
-	let tools = formatTools(server.toolsets)
+	let toolsets = formatToolsets(base.data.regular.toolsets)
+	let dynamic = formatMetaTools(base.data.meta.tools)
+	let tools = formatTools(base.data.regular.toolsets)
 
 	let output = input
 	output = insert("badges", output, badges)

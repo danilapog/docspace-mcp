@@ -17,7 +17,7 @@
  */
 
 import * as z from "zod"
-import * as server from "../lib/server.ts"
+import * as base from "../lib/base.ts"
 import pack from "../package.json" with {type: "json"}
 import type {Result} from "../util/result.ts"
 import {error, ok} from "../util/result.ts"
@@ -234,7 +234,7 @@ function validateUserAgent(v: string | undefined): Result<string, Error> {
 
 function validateToolsets(v: string | undefined): Result<string[], Error> {
 	let a: string[] = []
-	for (let s of server.toolsets) {
+	for (let s of base.data.regular.toolsets) {
 		a.push(s.name)
 	}
 
@@ -256,7 +256,7 @@ function validateToolsets(v: string | undefined): Result<string[], Error> {
 
 function validateTools(v: string | undefined): Result<string[], Error> {
 	let a: string[] = []
-	for (let s of server.toolsets) {
+	for (let s of base.data.regular.toolsets) {
 		for (let t of s.tools) {
 			a.push(t.name)
 		}
@@ -277,7 +277,7 @@ function resolveToolsetsAndTools(toolsets: string[], enabledTools: string[], dis
 	for (let n of toolsets) {
 		x.push(n)
 
-		for (let s of server.toolsets) {
+		for (let s of base.data.regular.toolsets) {
 			if (s.name === n) {
 				for (let t of s.tools) {
 					y.push(t.name)
@@ -288,7 +288,7 @@ function resolveToolsetsAndTools(toolsets: string[], enabledTools: string[], dis
 	}
 
 	for (let n of enabledTools) {
-		for (let s of server.toolsets) {
+		for (let s of base.data.regular.toolsets) {
 			let h = false
 			for (let t of s.tools) {
 				if (t.name === n) {
@@ -318,7 +318,7 @@ function resolveToolsetsAndTools(toolsets: string[], enabledTools: string[], dis
 	}
 
 	for (let sn of x) {
-		for (let s of server.toolsets) {
+		for (let s of base.data.regular.toolsets) {
 			if (s.name === sn) {
 				let h = false
 

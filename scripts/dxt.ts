@@ -1,7 +1,7 @@
 import child from "node:child_process"
 import fs from "node:fs/promises"
 import {promisify} from "node:util"
-import * as server from "../lib/server.ts"
+import * as base from "../lib/base.ts"
 import pack from "../package.json" with {type: "json"}
 
 interface Tool {
@@ -21,7 +21,7 @@ const i = await fs.readFile("dxt-manifest.json", "utf8")
 const m = JSON.parse(i)
 
 m.tools = []
-for (let s of server.toolsets) {
+for (let s of base.data.regular.toolsets) {
 	for (let t of s.tools) {
 		let o: Tool = {
 			name: t.name,
