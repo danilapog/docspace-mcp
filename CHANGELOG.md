@@ -10,6 +10,10 @@ This document records all notable changes to the project, following the [Keep a 
 
 - Add partial support for output schemas ([b50a7bc]).
 
+### Changed
+
+- In the internal streamable server, check `Authorization` and `Referer` headers only during the initialization request ([b6e33bf]).
+
 ### Fixed
 
 - Restore access to regular tools when using meta-tools ([eb84c1f]);
@@ -157,6 +161,7 @@ This document records all notable changes to the project, following the [Keep a 
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[b6e33bf]: https://github.com/onlyoffice/docspace-mcp/commit/b6e33bfeedb13673374f38f8f846a574813a7876/
 [b50a7bc]: https://github.com/onlyoffice/docspace-mcp/commit/b50a7bc2dc0a4554475e9f8f81a08ad7653870d5/
 [eb84c1f]: https://github.com/onlyoffice/docspace-mcp/commit/eb84c1f7ebc16e5af646008b8fffacc51eb4e332/
 [90c2b72]: https://github.com/onlyoffice/docspace-mcp/commit/90c2b72b7205173eabc81270f52778f6c6f16d7e/
