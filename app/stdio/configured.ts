@@ -23,50 +23,62 @@ import * as morefetch from "../../util/morefetch.ts"
 import * as result from "../../util/result.ts"
 
 export interface Config {
-	userAgent: string
+	mcp: Mcp
+	api: Api
+}
+
+export interface Mcp {
 	dynamic: boolean
 	tools: string[]
+}
+
+export interface Api {
+	userAgent: string
+	shared: ApiShared
+}
+
+export interface ApiShared {
 	baseUrl: string
-	origin?: string | undefined
-	apiKey?: string | undefined
-	authToken?: string | undefined
-	username?: string | undefined
-	password?: string | undefined
+	origin: string
+	apiKey: string
+	pat: string
+	username: string
+	password: string
 }
 
 export function start(
 	config: Config,
 ): [Promise<Error | undefined>, () => Promise<Error | undefined>] {
 	let cc: api.client.Config = {
-		userAgent: config.userAgent,
-		sharedBaseUrl: config.baseUrl,
+		userAgent: config.api.userAgent,
+		sharedBaseUrl: config.api.shared.baseUrl,
 		sharedFetch: fetch,
 	}
 
-	if (config.origin) {
-		cc.sharedFetch = morefetch.withOrigin(cc.sharedFetch, config.origin)
+	if (config.api.shared.origin) {
+		cc.sharedFetch = morefetch.withOrigin(cc.sharedFetch, config.api.shared.origin)
 	}
 
 	let cl = new api.client.Client(cc)
 
-	if (config.apiKey) {
-		cl = cl.withApiKey(config.apiKey)
+	if (config.api.shared.apiKey) {
+		cl = cl.withApiKey(config.api.shared.apiKey)
 	}
 
-	if (config.authToken) {
-		cl = cl.withAuthToken(config.authToken)
+	if (config.api.shared.pat) {
+		cl = cl.withAuthToken(config.api.shared.pat)
 	}
 
-	if (config.username && config.password) {
-		cl = cl.withBasicAuth(config.username, config.password)
+	if (config.api.shared.username && config.api.shared.password) {
+		cl = cl.withBasicAuth(config.api.shared.username, config.api.shared.password)
 	}
 
 	let sc: base.configured.Config = {
 		client: cl,
 		resolver: new api.resolver.Resolver(cl),
 		uploader: new api.uploader.Uploader(cl),
-		dynamic: config.dynamic,
-		tools: config.tools,
+		dynamic: config.mcp.dynamic,
+		tools: config.mcp.tools,
 	}
 
 	let s = base.configured.create(sc)

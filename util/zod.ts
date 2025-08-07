@@ -97,3 +97,103 @@ export function numberUnionToEnum<
 
 	return e
 }
+
+export function envBoolean(): (v: string, c: z.RefinementCtx) => boolean | never {
+	return (v, c) => {
+		let t = v.trim().toLowerCase()
+
+		if (t === "yes" || t === "y" || t === "true" || t === "1") {
+			return true
+		}
+
+		if (t === "no" || t === "n" || t === "false" || t === "0") {
+			return false
+		}
+
+		c.addIssue({
+			code: z.ZodIssueCode.custom,
+			message: `Expected one of: yes, y, true, 1, no, n, false, 0, but got ${v}`,
+			fatal: true,
+		})
+
+		return z.NEVER
+	}
+}
+
+export function envNumber(): (v: string, c: z.RefinementCtx) => number | never {
+	return (v, c) => {
+		let n = Number.parseInt(v.trim(), 10)
+
+		if (Number.isNaN(n)) {
+			c.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: `Expected a number, but got ${v}`,
+				fatal: true,
+			})
+			return z.NEVER
+		}
+
+		return n
+	}
+}
+
+export function envUnion<T extends string>(a: T[]): (v: string, c: z.RefinementCtx) => T | never {
+	return (v, c) => {
+		v = v.trim().toLowerCase()
+
+		for (let t of a) {
+			if (t === v) {
+				return t
+			}
+		}
+
+		c.addIssue({
+			code: z.ZodIssueCode.custom,
+			message: `Expected one of: ${a.join(", ")}, but got ${v}`,
+			fatal: true,
+		})
+
+		return z.NEVER
+	}
+}
+
+export function envOptions(a: string[]): (v: string, c: z.RefinementCtx) => string[] | never {
+	return (v, c) => {
+		let x: string[] = []
+		let y: string[] = []
+
+		for (let u of v.split(",")) {
+			u = u.trim().toLowerCase()
+			if (u === "") {
+				continue
+			}
+
+			let h = false
+			for (let n of a) {
+				if (n === u) {
+					h = true
+					break
+				}
+			}
+
+			if (!h && !y.includes(u)) {
+				y.push(u)
+			}
+			if (h && !x.includes(u)) {
+				x.push(u)
+			}
+		}
+
+		if (y.length !== 0) {
+			for (let u of y) {
+				c.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: `Unknown value: ${u}`,
+				})
+			}
+			return z.NEVER
+		}
+
+		return x
+	}
+}
