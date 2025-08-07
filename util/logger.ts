@@ -1,5 +1,6 @@
 import logfmt from "logfmt"
 import * as moreerrors from "./format.ts"
+import * as morestrings from "./morestrings.ts"
 
 export function info(msg: string, o?: object): void {
 	log("INF", msg, o)
@@ -20,41 +21,48 @@ export function mute(): void {
 }
 
 function log(level: string, msg: string, o?: object): void {
-	logfmt.log(format({time: new Date().toISOString(), level, msg, ...o}) as object)
+	logfmt.log(format({time: new Date().toISOString(), level, msg, ...o}))
 }
 
-function format(v: unknown): unknown {
-	if (v === null || v === undefined) {
-		return
+function format(v: object): Record<string, unknown> {
+	let s: Record<string, unknown> = {}
+	for (let [p, e] of Object.entries(v)) {
+		next(s, p, e)
 	}
+	return s
 
-	if (typeof v === "string") {
-		return v.replaceAll("\n", String.raw`\n`).replaceAll("\t", String.raw`\t`)
-	}
-
-	if (Array.isArray(v)) {
-		let a: unknown[] = []
-		for (let e of v) {
-			a.push(format(e))
+	function next(o: Record<string, unknown>, k: string, v: unknown): void {
+		if (v === null || v === undefined) {
+			return
 		}
-		return a
-	}
 
-	if (v instanceof Error) {
-		return format(moreerrors.format(v))
-	}
-
-	if (typeof v === "object") {
-		let r: Record<string, unknown> = {}
-		for (let p of Object.entries(v)) {
-			r[toSnakeCase(p[0])] = format(p[1])
+		if (typeof v === "boolean" || typeof v === "number") {
+			o[morestrings.camelCaseToSnakeCase(k)] = v
+			return
 		}
-		return r
+
+		if (typeof v === "string") {
+			o[morestrings.camelCaseToSnakeCase(k)] = morestrings.escapeWhitespace(v)
+			return
+		}
+
+		if (Array.isArray(v)) {
+			for (let [i, e] of v.entries()) {
+				next(o, `${k}[${i}]`, e)
+			}
+			return
+		}
+
+		if (v instanceof Error) {
+			o[morestrings.camelCaseToSnakeCase(k)] = moreerrors.format(v)
+			return
+		}
+
+		if (typeof v === "object") {
+			for (let [p, e] of Object.entries(v)) {
+				next(o, `${k}.${p}`, e)
+			}
+			return
+		}
 	}
-
-	return v
-}
-
-function toSnakeCase(s: string): string {
-	return s.replaceAll(/(?<=[a-z])(?=[A-Z])/g, "_").toLowerCase()
 }
