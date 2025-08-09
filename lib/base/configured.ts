@@ -23,9 +23,7 @@ import pack from "../../package.json" with {type: "json"}
 import * as format from "../../util/format.ts"
 import type * as moremcp from "../../util/moremcp.ts"
 import * as result from "../../util/result.ts"
-import * as client from "../client.ts"
-import type * as resolver from "../resolver.ts"
-import type * as uploader from "../uploader.ts"
+import * as api from "../api.ts"
 import * as data from "./data.ts"
 import * as tools from "./tools.ts"
 
@@ -37,17 +35,17 @@ export type RouteTool = (
 export type RouteToolResult = types.CallToolResult & {isError?: never}
 
 export interface Config {
-	client: client.Client
-	resolver: resolver.Resolver
-	uploader: uploader.Uploader
+	client: api.client.Client
+	resolver: api.resolver.Resolver
+	uploader: api.uploader.Uploader
 	dynamic: boolean
 	tools: string[]
 }
 
 export class Server {
-	client: client.Client
-	resolver: resolver.Resolver
-	uploader: uploader.Uploader
+	client: api.client.Client
+	resolver: api.resolver.Resolver
+	uploader: api.uploader.Uploader
 
 	meta: tools.meta.Tools
 	regular: tools.regular.Tools
@@ -212,7 +210,7 @@ export class Server {
 			return result.error(new Error(`Tool ${req.params.name} not found`))
 		}
 
-		let cr: result.Result<client.Response | zodToJsonSchema.JsonSchema7Type | string, Error>
+		let cr: result.Result<api.client.Response | zodToJsonSchema.JsonSchema7Type | string, Error>
 
 		try {
 			switch (req.params.name) {
@@ -305,7 +303,7 @@ export class Server {
 			return result.error(cr.err)
 		}
 
-		if (cr.v instanceof client.Response) {
+		if (cr.v instanceof api.client.Response) {
 			let h = cr.v.response.headers.get("Content-Type")
 			if (h === null) {
 				return result.error(new Error("Content-Type header is missing"))

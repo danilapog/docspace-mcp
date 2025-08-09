@@ -17,10 +17,8 @@
  */
 
 import * as stdio from "@modelcontextprotocol/sdk/server/stdio.js"
+import * as api from "../../lib/api.ts"
 import * as base from "../../lib/base.ts"
-import * as client from "../../lib/client.ts"
-import * as resolver from "../../lib/resolver.ts"
-import * as uploader from "../../lib/uploader.ts"
 import * as morefetch from "../../util/morefetch.ts"
 import * as result from "../../util/result.ts"
 
@@ -39,7 +37,7 @@ export interface Config {
 export function start(
 	config: Config,
 ): [Promise<Error | undefined>, () => Promise<Error | undefined>] {
-	let cc: client.Config = {
+	let cc: api.client.Config = {
 		userAgent: config.userAgent,
 		sharedBaseUrl: config.baseUrl,
 		sharedFetch: fetch,
@@ -49,7 +47,7 @@ export function start(
 		cc.sharedFetch = morefetch.withOrigin(cc.sharedFetch, config.origin)
 	}
 
-	let cl = new client.Client(cc)
+	let cl = new api.client.Client(cc)
 
 	if (config.apiKey) {
 		cl = cl.withApiKey(config.apiKey)
@@ -65,8 +63,8 @@ export function start(
 
 	let sc: base.configured.Config = {
 		client: cl,
-		resolver: new resolver.Resolver(cl),
-		uploader: new uploader.Uploader(cl),
+		resolver: new api.resolver.Resolver(cl),
+		uploader: new api.uploader.Uploader(cl),
 		dynamic: config.dynamic,
 		tools: config.tools,
 	}
