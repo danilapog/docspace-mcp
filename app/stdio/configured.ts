@@ -18,7 +18,7 @@
 
 import * as stdio from "@modelcontextprotocol/sdk/server/stdio.js"
 import * as api from "../../lib/api.ts"
-import * as base from "../../lib/base.ts"
+import * as base from "../../lib/mcp/base.ts"
 import * as morefetch from "../../util/morefetch.ts"
 import * as result from "../../util/result.ts"
 

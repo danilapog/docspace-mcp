@@ -18,8 +18,8 @@
 
 import type * as server from "@modelcontextprotocol/sdk/server/index.js"
 import type express from "express"
-import * as result from "../../../util/result.ts"
-import * as api from "../../api.ts"
+import * as result from "../../../../util/result.ts"
+import * as api from "../../../api.ts"
 import * as configured from "../../base/configured.ts"
 
 export interface Config {

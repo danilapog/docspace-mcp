@@ -17,7 +17,7 @@
  */
 
 import express from "express"
-import * as streamable from "../../lib/streamable.ts"
+import * as streamable from "../../lib/mcp/streamable.ts"
 import * as errors from "../../util/errors.ts"
 import * as logger from "../../util/logger.ts"
 import * as moreexpress from "../../util/moreexpress.ts"

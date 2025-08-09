@@ -16,24 +16,5 @@
  * @license
  */
 
-import type * as express from "express"
-import * as format from "../../util/format.ts"
-
-export function sendRegularError(res: express.Response, code: number, err: Error): void {
-	res.status(code)
-	res.json({
-		message: format.format(err),
-	})
-}
-
-export function sendJsonrpcError(res: express.Response, httpCode: number, jsonrpcCode: number, err: Error): void {
-	res.status(httpCode)
-	res.json({
-		jsonrpc: "2.0",
-		error: {
-			code: jsonrpcCode,
-			message: format.format(err),
-		},
-		id: null,
-	})
-}
+export * as base from "./mcp/base.ts"
+export * as streamable from "./mcp/streamable.ts"

@@ -1,7 +1,7 @@
 import child from "node:child_process"
 import fs from "node:fs/promises"
 import {promisify} from "node:util"
-import * as base from "../lib/base.ts"
+import * as base from "../lib/mcp/base.ts"
 import pack from "../package.json" with {type: "json"}
 
 interface Tool {

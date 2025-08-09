@@ -17,7 +17,7 @@
  */
 
 import * as stdio from "@modelcontextprotocol/sdk/server/stdio.js"
-import * as base from "../../lib/base.ts"
+import * as base from "../../lib/mcp/base.ts"
 import * as result from "../../util/result.ts"
 
 export function start(err: Error): [Promise<Error | undefined>, () => Promise<Error | undefined>] {
