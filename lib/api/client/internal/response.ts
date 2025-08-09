@@ -17,8 +17,10 @@
  */
 
 import * as z from "zod"
+import * as morehttp from "../../../../util/morehttp.ts"
 import type {Result} from "../../../../util/result.ts"
 import {error, ok, safeAsync, safeSync} from "../../../../util/result.ts"
+import * as oauth from "../oauth.ts"
 import {
 	ErrorApiResponseSchema,
 	SuccessApiResponseSchema,
@@ -169,4 +171,63 @@ export async function parseSharedResponse(req: Request, res: globalThis.Response
 
 	let r = new Response(req, res)
 	return ok([s.data.data, r])
+}
+
+export async function checkOauthResponse(req: Request, res: globalThis.Response): Promise<Error | undefined> {
+	if (res.status >= 200 && res.status <= 299) {
+		return
+	}
+
+	let r = new Response(req, res)
+
+	let m = `${req.method} ${req.url}: ${res.status}`
+
+	let h = res.headers.get("Content-Type")
+	if (h && morehttp.isContentTypeJson(h)) {
+		let c = safeSync(res.clone.bind(res))
+		if (c.err) {
+			return new Error("Cloning response.", {cause: c.err})
+		}
+
+		let b = await safeAsync(c.v.json.bind(c.v))
+		if (b.err) {
+			return new Error("Parsing response body.", {cause: b.err})
+		}
+
+		let s = oauth.OauthAnyErrorSchema.safeParse(b.v)
+		if (!s.success) {
+			return new Error("Parsing OAuth error.", {cause: s.error})
+		}
+
+		switch (true) {
+		case "error" in s.data:
+			m += ` ${s.data.error} (${s.data.error_description})`
+			break
+
+		case "reason" in s.data:
+			m += ` ${s.data.reason}`
+			break
+
+		// no default
+		}
+	}
+
+	let e = new ErrorResponse(r, m)
+
+	return e
+}
+
+export async function parseOauthResponse(req: Request, res: globalThis.Response): Promise<Result<[unknown, Response], Error>> {
+	let c = safeSync(res.clone.bind(res))
+	if (c.err) {
+		return error(new Error("Cloning response.", {cause: c.err}))
+	}
+
+	let b = await safeAsync(c.v.json.bind(c.v))
+	if (b.err) {
+		return error(new Error("Parsing response body.", {cause: b.err}))
+	}
+
+	let r = new Response(req, res)
+	return ok([b.v, r])
 }

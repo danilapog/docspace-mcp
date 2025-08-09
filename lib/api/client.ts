@@ -20,39 +20,54 @@ import type {Result} from "../../util/result.ts"
 import {error, ok, safeAsync, safeNew, safeSync} from "../../util/result.ts"
 import {AuthService} from "./client/auth.ts"
 import {FilesService} from "./client/files.ts"
-import {injectAuthKey, injectAuthToken, injectBasicAuth} from "./client/internal/auth.ts"
+import {injectAuthKey, injectAuthToken, injectBasicAuth, injectBearerAuth} from "./client/internal/auth.ts"
 import type {Response} from "./client/internal/response.ts"
-import {checkSharedResponse, parseSharedResponse} from "./client/internal/response.ts"
+import {
+	checkOauthResponse,
+	checkSharedResponse,
+	parseOauthResponse,
+	parseSharedResponse,
+} from "./client/internal/response.ts"
+import {OauthService} from "./client/oauth.ts"
 import {PeopleService} from "./client/people.ts"
 
 export {ErrorResponse, Response} from "./client/internal/response.ts"
 
 export * from "./client/auth.ts"
 export * from "./client/files.ts"
+export * from "./client/oauth.ts"
 export * from "./client/people.ts"
 
 export interface Config {
 	userAgent: string
 	sharedBaseUrl: string
 	sharedFetch: typeof globalThis.fetch
+	oauthBaseUrl: string
+	oauthFetch: typeof globalThis.fetch
 }
 
 export class Client {
 	userAgent: string
 	sharedBaseUrl: string
 	sharedBaseFetch: typeof globalThis.fetch
+	oauthBaseUrl: string
+	oauthBaseFetch: typeof globalThis.fetch
 
 	auth: AuthService
 	files: FilesService
+	oauth: OauthService
 	people: PeopleService
 
 	constructor(config: Config) {
 		this.userAgent = config.userAgent
 		this.sharedBaseUrl = config.sharedBaseUrl
 		this.sharedBaseFetch = config.sharedFetch
+		this.oauthBaseUrl = config.oauthBaseUrl
+		this.oauthBaseFetch = config.oauthFetch
 
 		this.auth = new AuthService(this)
 		this.files = new FilesService(this)
+		this.oauth = new OauthService(this)
 		this.people = new PeopleService(this)
 	}
 
@@ -125,11 +140,36 @@ export class Client {
 		return c
 	}
 
+	withBearerAuth(t: string): Client {
+		let c = this.copy()
+
+		let f = c.sharedBaseFetch
+
+		c.sharedBaseFetch = async function sharedBaseFetch(input, init) {
+			if (!(input instanceof Request)) {
+				throw new Error("Unsupported input type.")
+			}
+
+			input = input.clone()
+
+			let err = injectBearerAuth(input, t)
+			if (err) {
+				throw new Error("Injecting bearer authentication.", {cause: err})
+			}
+
+			return await f(input, init)
+		}
+
+		return c
+	}
+
 	copy(): Client {
 		let config: Config = {
 			userAgent: this.userAgent,
 			sharedBaseUrl: this.sharedBaseUrl,
 			sharedFetch: this.sharedBaseFetch,
+			oauthBaseUrl: this.oauthBaseUrl,
+			oauthFetch: this.oauthBaseFetch,
 		}
 		return new Client(config)
 	}
@@ -157,6 +197,19 @@ export class Client {
 			if (s) {
 				u.v.search = s
 			}
+		}
+
+		return ok(u.v.toString())
+	}
+
+	createOauthUrl(path: string): Result<string, Error> {
+		if (!this.oauthBaseUrl.endsWith("/")) {
+			return error(new Error(`Base URL must end with a trailing slash, but ${this.oauthBaseUrl} does not.`))
+		}
+
+		let u = safeNew(URL, path, this.oauthBaseUrl)
+		if (u.err) {
+			return error(new Error("Creating URL.", {cause: u.err}))
 		}
 
 		return ok(u.v.toString())
@@ -231,6 +284,38 @@ export class Client {
 		return ok(r.v)
 	}
 
+	createURLSearchParamsRequest(signal: AbortSignal, url: string, body: URLSearchParams): Result<Request, Error> {
+		let c: RequestInit = {
+			body,
+			method: "POST",
+			signal,
+		}
+
+		let r = safeNew(Request, url, c)
+		if (r.err) {
+			return error(new Error("Creating request.", {cause: r.err}))
+		}
+
+		let h = safeSync(r.v.headers.set.bind(r.v.headers), "Accept", "application/json")
+		if (h.err) {
+			return error(new Error("Setting header.", {cause: h.err}))
+		}
+
+		h = safeSync(r.v.headers.set.bind(r.v.headers), "Content-Type", "application/x-www-form-urlencoded")
+		if (h.err) {
+			return error(new Error("Setting header.", {cause: h.err}))
+		}
+
+		if (this.userAgent) {
+			let h = safeSync(r.v.headers.set.bind(r.v.headers), "User-Agent", this.userAgent)
+			if (h.err) {
+				return error(new Error("Setting header.", {cause: h.err}))
+			}
+		}
+
+		return ok(r.v)
+	}
+
 	async sharedFetch(req: Request): Promise<Result<[unknown, Response], Error>> {
 		let f = await this.sharedBareFetch(req)
 		if (f.err) {
@@ -252,6 +337,34 @@ export class Client {
 		}
 
 		let c = await checkSharedResponse(req, f.v)
+		if (c) {
+			return error(new Error("Checking response.", {cause: c}))
+		}
+
+		return ok(f.v)
+	}
+
+	async oauthFetch(req: Request): Promise<Result<[unknown, Response], Error>> {
+		let f = await this.oauthBareFetch(req)
+		if (f.err) {
+			return error(new Error("Making bare fetch.", {cause: f.err}))
+		}
+
+		let p = await parseOauthResponse(req, f.v)
+		if (p.err) {
+			return error(new Error("Parsing response.", {cause: p.err}))
+		}
+
+		return ok(p.v)
+	}
+
+	async oauthBareFetch(req: Request): Promise<Result<globalThis.Response, Error>> {
+		let f = await safeAsync(this.oauthBaseFetch, req.clone())
+		if (f.err) {
+			return error(new Error("Fetching request.", {cause: f.err}))
+		}
+
+		let c = await checkOauthResponse(req, f.v)
 		if (c) {
 			return error(new Error("Checking response.", {cause: c}))
 		}

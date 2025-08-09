@@ -53,6 +53,10 @@ export function start(
 		userAgent: config.api.userAgent,
 		sharedBaseUrl: config.api.shared.baseUrl,
 		sharedFetch: fetch,
+		oauthBaseUrl: "",
+		oauthFetch() {
+			throw new Error("Not implemented")
+		},
 	}
 
 	if (config.api.shared.origin) {
