@@ -17,18 +17,12 @@
  */
 
 import {existsSync} from "node:fs"
+import * as config from "../app/config.ts"
 
 const envs = new Set<string>([
 	"HTTP_PROXY",
-	"DOCSPACE_BASE_URL",
-	"DOCSPACE_ORIGIN",
-	"DOCSPACE_USER_AGENT",
-	"DOCSPACE_API_KEY",
-	"DOCSPACE_AUTH_TOKEN",
-	"DOCSPACE_USERNAME",
-	"DOCSPACE_PASSWORD",
-	"DOCSPACE_DYNAMIC",
-	"DOCSPACE_TOOLSETS",
+	// eslint-disable-next-line no-underscore-dangle
+	...Object.keys(config.ConfigSchema._def.schema._def.schema._def.shape()),
 ])
 
 export function load(): void {
