@@ -150,7 +150,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FilesController.cs/#L239 | DocSpace Reference}
 	 */
 	async deleteFile(s: AbortSignal, id: number, o: DeleteFileOptions): Promise<Result<[DeleteFileResponseItem[], Response], Error>> {
-		let u = this.c.createUrl(`api/2.0/files/file/${id}`)
+		let u = this.c.createSharedUrl(`api/2.0/files/file/${id}`)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -160,7 +160,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
@@ -179,7 +179,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FilesController.cs/#L305 | DocSpace Reference}
 	 */
 	async getFileInfo(s: AbortSignal, id: number, filters?: GetFileInfoFilters): Promise<Result<[GetFileInfoResponse, Response], Error>> {
-		let u = this.c.createUrl(`api/2.0/files/file/${id}`, filters)
+		let u = this.c.createSharedUrl(`api/2.0/files/file/${id}`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -189,7 +189,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
@@ -208,7 +208,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FilesController.cs/#L399 | DocSpace Reference}
 	 */
 	async updateFile(s: AbortSignal, id: number, o: UpdateFileOptions): Promise<Result<[UpdateFileResponse, Response], Error>> {
-		let u = this.c.createUrl(`api/2.0/files/file/${id}`)
+		let u = this.c.createSharedUrl(`api/2.0/files/file/${id}`)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -218,7 +218,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
@@ -241,7 +241,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FoldersController.cs/#L110 | DocSpace Reference}
 	 */
 	async createFolder(s: AbortSignal, id: number, o: CreateFolderOptions, filters?: CreateFolderFilters): Promise<Result<[CreateFolderResponse, Response], Error>> {
-		let u = this.c.createUrl(`api/2.0/files/folder/${id}`, filters)
+		let u = this.c.createSharedUrl(`api/2.0/files/folder/${id}`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -251,7 +251,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
@@ -270,7 +270,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FoldersController.cs/#L126 | DocSpace Reference}
 	 */
 	async deleteFolder(s: AbortSignal, id: number, o: DeleteFolderOptions): Promise<Result<[DeleteFolderResponseItem[], Response], Error>> {
-		let u = this.c.createUrl(`api/2.0/files/folder/${id}`)
+		let u = this.c.createSharedUrl(`api/2.0/files/folder/${id}`)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -280,7 +280,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
@@ -299,7 +299,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FoldersController.cs/#L161 | DocSpace Reference}
 	 */
 	async getFolder(s: AbortSignal, id: number, filters?: GetFolderFilters): Promise<Result<[GetFolderResponse, Response], Error>> {
-		let u = this.c.createUrl(`api/2.0/files/${id}`, filters)
+		let u = this.c.createSharedUrl(`api/2.0/files/${id}`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -309,7 +309,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
@@ -328,7 +328,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FoldersController.cs/#L180 | DocSpace Reference}
 	 */
 	async getFolderInfo(s: AbortSignal, id: number, filters?: GetFolderInfoFilters): Promise<Result<[GetFolderInfoResponse, Response], Error>> {
-		let u = this.c.createUrl(`api/2.0/files/folder/${id}`, filters)
+		let u = this.c.createSharedUrl(`api/2.0/files/folder/${id}`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -338,7 +338,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
@@ -357,7 +357,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FoldersController.cs/#L255 | DocSpace Reference}
 	 */
 	async renameFolder(s: AbortSignal, id: number, o: RenameFolderOptions, filters?: RenameFolderFilters): Promise<Result<[RenameFolderResponse, Response], Error>> {
-		let u = this.c.createUrl(`api/2.0/files/folder/${id}`, filters)
+		let u = this.c.createSharedUrl(`api/2.0/files/folder/${id}`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -367,7 +367,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
@@ -386,7 +386,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/FoldersController.cs/#L348 | DocSpace Reference}
 	 */
 	async getMyFolder(s: AbortSignal, filters?: GetMyFolderFilters): Promise<Result<[GetMyFolderResponse, Response], Error>> {
-		let u = this.c.createUrl("api/2.0/files/@my", filters)
+		let u = this.c.createSharedUrl("api/2.0/files/@my", filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -396,7 +396,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
@@ -419,7 +419,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/OperationController.cs/#L51 | DocSpace Reference}
 	 */
 	async bulkDownload(s: AbortSignal, o: BulkDownloadOptions): Promise<Result<[BulkDownloadResponseItem[], Response], Error>> {
-		let u = this.c.createUrl("api/2.0/files/fileops/bulkdownload")
+		let u = this.c.createSharedUrl("api/2.0/files/fileops/bulkdownload")
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -429,7 +429,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
@@ -448,7 +448,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/OperationController.cs/#L74 | DocSpace Reference}
 	 */
 	async copyBatchItems(s: AbortSignal, o: CopyBatchItemsOptions): Promise<Result<[CopyBatchItemsResponseItem[], Response], Error>> {
-		let u = this.c.createUrl("api/2.0/files/fileops/copy")
+		let u = this.c.createSharedUrl("api/2.0/files/fileops/copy")
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -458,7 +458,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
@@ -477,7 +477,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/OperationController.cs/#L136 | DocSpace Reference}
 	 */
 	async getOperationStatuses(s: AbortSignal): Promise<Result<[GetOperationStatusesResponseItem[], Response], Error>> {
-		let u = this.c.createUrl("api/2.0/files/fileops")
+		let u = this.c.createSharedUrl("api/2.0/files/fileops")
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -487,7 +487,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
@@ -506,7 +506,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/OperationController.cs/#L173 | DocSpace Reference}
 	 */
 	async moveBatchItems(s: AbortSignal, o: MoveBatchItemsOptions): Promise<Result<[MoveBatchItemsResponseItem[], Response], Error>> {
-		let u = this.c.createUrl("api/2.0/files/fileops/move")
+		let u = this.c.createSharedUrl("api/2.0/files/fileops/move")
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -516,7 +516,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
@@ -539,7 +539,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.1.1-server/products/ASC.Files/Server/Api/SettingsController.cs/#L199 | DocSpace Reference}
 	 */
 	async getFilesSettings(s: AbortSignal): Promise<Result<[GetFilesSettingsResponse, Response], Error>> {
-		let u = this.c.createUrl("api/2.0/files/settings")
+		let u = this.c.createSharedUrl("api/2.0/files/settings")
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -549,7 +549,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
@@ -572,7 +572,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/UploadController.cs/#L76 | DocSpace Reference}
 	 */
 	async createUploadSession(s: AbortSignal, id: number, o: CreateUploadSessionOptions): Promise<Result<[CreateUploadSessionResponse, Response], Error>> {
-		let u = this.c.createUrl(`api/2.0/files/${id}/upload/create_session`)
+		let u = this.c.createSharedUrl(`api/2.0/files/${id}/upload/create_session`)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -582,7 +582,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
@@ -605,7 +605,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/VirtualRoomsController.cs/#L70 | DocSpace Reference}
 	 */
 	async createRoom(s: AbortSignal, o: CreateRoomOptions, filters?: CreateRoomFilters): Promise<Result<[CreateRoomResponse, Response], Error>> {
-		let u = this.c.createUrl("api/2.0/files/rooms", filters)
+		let u = this.c.createSharedUrl("api/2.0/files/rooms", filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -615,7 +615,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
@@ -634,7 +634,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/VirtualRoomsController.cs/#L165 | DocSpace Reference}
 	 */
 	async getRoomInfo(s: AbortSignal, id: number, filters?: GetRoomInfoFilters): Promise<Result<[GetRoomInfoResponse, Response], Error>> {
-		let u = this.c.createUrl(`api/2.0/files/rooms/${id}`, filters)
+		let u = this.c.createSharedUrl(`api/2.0/files/rooms/${id}`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -644,7 +644,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
@@ -663,7 +663,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/VirtualRoomsController.cs/#L180 | DocSpace Reference}
 	 */
 	async updateRoom(s: AbortSignal, id: number, o: UpdateRoomOptions, filters?: UpdateRoomFilters): Promise<Result<[UpdateRoomResponse, Response], Error>> {
-		let u = this.c.createUrl(`api/2.0/files/rooms/${id}`, filters)
+		let u = this.c.createSharedUrl(`api/2.0/files/rooms/${id}`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -673,7 +673,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
@@ -692,7 +692,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/VirtualRoomsController.cs/#L275 | DocSpace Reference}
 	 */
 	async archiveRoom(s: AbortSignal, id: number, o: ArchiveRoomOptions): Promise<Result<[ArchiveRoomResponse, Response], Error>> {
-		let u = this.c.createUrl(`api/2.0/files/rooms/${id}/archive`)
+		let u = this.c.createSharedUrl(`api/2.0/files/rooms/${id}/archive`)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -702,7 +702,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
@@ -721,7 +721,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/VirtualRoomsController.cs/#L311 | DocSpace Reference}
 	 */
 	async setRoomSecurity(s: AbortSignal, id: number, o: SetRoomSecurityOptions, filters?: SetRoomSecurityFilters): Promise<Result<[SetRoomSecurityResponse, Response], Error>> {
-		let u = this.c.createUrl(`api/2.0/files/rooms/${id}/share`, filters)
+		let u = this.c.createSharedUrl(`api/2.0/files/rooms/${id}/share`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -731,7 +731,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
@@ -750,7 +750,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/VirtualRoomsController.cs/#L349 | DocSpace Reference}
 	 */
 	async getRoomSecurityInfo(s: AbortSignal, id: number, filters?: GetRoomSecurityFilters): Promise<Result<[GetRoomSecurityInfoResponse, Response], Error>> {
-		let u = this.c.createUrl(`api/2.0/files/rooms/${id}/share`, filters)
+		let u = this.c.createSharedUrl(`api/2.0/files/rooms/${id}/share`, filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -760,7 +760,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
@@ -779,7 +779,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Api/VirtualRoomsController.cs/#L649 | DocSpace Reference}
 	 */
 	async getRoomsFolder(s: AbortSignal, filters?: GetRoomsFolderFilters): Promise<Result<[GetRoomFolderResponse, Response], Error>> {
-		let u = this.c.createUrl("api/2.0/files/rooms", filters)
+		let u = this.c.createSharedUrl("api/2.0/files/rooms", filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -789,7 +789,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
@@ -812,7 +812,7 @@ export class FilesService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.Files/Server/Startup.cs/#L76 | DocSpace Reference}
 	 */
 	async uploadChunk(s: AbortSignal, id: string, chunk: Blob): Promise<Result<[unknown, Response], Error>> {
-		let u = this.c.createUrl(`ChunkedUploader.ashx?uid=${id}`)
+		let u = this.c.createSharedUrl(`ChunkedUploader.ashx?uid=${id}`)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -829,7 +829,7 @@ export class FilesService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}

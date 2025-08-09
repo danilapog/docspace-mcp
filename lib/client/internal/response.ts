@@ -107,7 +107,7 @@ const ErrorResponseSchema = z.
 		return t
 	})
 
-export async function checkResponse(req: Request, res: globalThis.Response): Promise<Error | undefined> {
+export async function checkSharedResponse(req: Request, res: globalThis.Response): Promise<Error | undefined> {
 	// DocSpace does not always respect HTTP status codes. Even when it returns
 	// HTTP 2xx, it may still include an error in the response body. Therefore,
 	// try to first parse the response body for errors before checking the status
@@ -151,7 +151,7 @@ export async function checkResponse(req: Request, res: globalThis.Response): Pro
 	return e
 }
 
-export async function parseResponse(req: Request, res: globalThis.Response): Promise<Result<[unknown, Response], Error>> {
+export async function parseSharedResponse(req: Request, res: globalThis.Response): Promise<Result<[unknown, Response], Error>> {
 	let c = safeSync(res.clone.bind(res))
 	if (c.err) {
 		return error(new Error("Cloning response.", {cause: c.err}))

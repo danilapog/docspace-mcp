@@ -22,7 +22,7 @@ import {AuthService} from "./client/auth.ts"
 import {FilesService} from "./client/files.ts"
 import {injectAuthKey, injectAuthToken, injectBasicAuth} from "./client/internal/auth.ts"
 import type {Response} from "./client/internal/response.ts"
-import {checkResponse, parseResponse} from "./client/internal/response.ts"
+import {checkSharedResponse, parseSharedResponse} from "./client/internal/response.ts"
 import {PeopleService} from "./client/people.ts"
 
 export {ErrorResponse, Response} from "./client/internal/response.ts"
@@ -32,24 +32,24 @@ export * from "./client/files.ts"
 export * from "./client/people.ts"
 
 export interface Config {
-	baseUrl: string
 	userAgent: string
-	fetch: typeof globalThis.fetch
+	sharedBaseUrl: string
+	sharedFetch: typeof globalThis.fetch
 }
 
 export class Client {
-	baseUrl: string
 	userAgent: string
-	baseFetch: typeof globalThis.fetch
+	sharedBaseUrl: string
+	sharedBaseFetch: typeof globalThis.fetch
 
 	auth: AuthService
 	files: FilesService
 	people: PeopleService
 
 	constructor(config: Config) {
-		this.baseUrl = config.baseUrl
 		this.userAgent = config.userAgent
-		this.baseFetch = config.fetch
+		this.sharedBaseUrl = config.sharedBaseUrl
+		this.sharedBaseFetch = config.sharedFetch
 
 		this.auth = new AuthService(this)
 		this.files = new FilesService(this)
@@ -59,9 +59,9 @@ export class Client {
 	withApiKey(k: string): Client {
 		let c = this.copy()
 
-		let f = c.baseFetch
+		let f = c.sharedBaseFetch
 
-		c.baseFetch = async function baseFetch(input, init) {
+		c.sharedBaseFetch = async function sharedBaseFetch(input, init) {
 			if (!(input instanceof Request)) {
 				throw new Error("Unsupported input type.")
 			}
@@ -82,9 +82,9 @@ export class Client {
 	withAuthToken(t: string): Client {
 		let c = this.copy()
 
-		let f = c.baseFetch
+		let f = c.sharedBaseFetch
 
-		c.baseFetch = async function baseFetch(input, init) {
+		c.sharedBaseFetch = async function sharedBaseFetch(input, init) {
 			if (!(input instanceof Request)) {
 				throw new Error("Unsupported input type.")
 			}
@@ -105,9 +105,9 @@ export class Client {
 	withBasicAuth(u: string, p: string): Client {
 		let c = this.copy()
 
-		let f = c.baseFetch
+		let f = c.sharedBaseFetch
 
-		c.baseFetch = async function baseFetch(input, init) {
+		c.sharedBaseFetch = async function sharedBaseFetch(input, init) {
 			if (!(input instanceof Request)) {
 				throw new Error("Unsupported input type.")
 			}
@@ -127,19 +127,19 @@ export class Client {
 
 	copy(): Client {
 		let config: Config = {
-			baseUrl: this.baseUrl,
 			userAgent: this.userAgent,
-			fetch: this.baseFetch,
+			sharedBaseUrl: this.sharedBaseUrl,
+			sharedFetch: this.sharedBaseFetch,
 		}
 		return new Client(config)
 	}
 
-	createUrl(path: string, query?: object): Result<string, Error> {
-		if (!this.baseUrl.endsWith("/")) {
-			return error(new Error(`Base URL must end with a trailing slash, but ${this.baseUrl} does not.`))
+	createSharedUrl(path: string, query?: object): Result<string, Error> {
+		if (!this.sharedBaseUrl.endsWith("/")) {
+			return error(new Error(`Base URL must end with a trailing slash, but ${this.sharedBaseUrl} does not.`))
 		}
 
-		let u = safeNew(URL, path, this.baseUrl)
+		let u = safeNew(URL, path, this.sharedBaseUrl)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -231,13 +231,13 @@ export class Client {
 		return ok(r.v)
 	}
 
-	async fetch(req: Request): Promise<Result<[unknown, Response], Error>> {
-		let f = await this.bareFetch(req)
+	async sharedFetch(req: Request): Promise<Result<[unknown, Response], Error>> {
+		let f = await this.sharedBareFetch(req)
 		if (f.err) {
 			return error(new Error("Making bare fetch.", {cause: f.err}))
 		}
 
-		let p = await parseResponse(req, f.v)
+		let p = await parseSharedResponse(req, f.v)
 		if (p.err) {
 			return error(new Error("Parsing response.", {cause: p.err}))
 		}
@@ -245,13 +245,13 @@ export class Client {
 		return ok(p.v)
 	}
 
-	async bareFetch(req: Request): Promise<Result<globalThis.Response, Error>> {
-		let f = await safeAsync(this.baseFetch, req.clone())
+	async sharedBareFetch(req: Request): Promise<Result<globalThis.Response, Error>> {
+		let f = await safeAsync(this.sharedBaseFetch, req.clone())
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}
 
-		let c = await checkResponse(req, f.v)
+		let c = await checkSharedResponse(req, f.v)
 		if (c) {
 			return error(new Error("Checking response.", {cause: c}))
 		}

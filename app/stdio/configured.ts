@@ -40,13 +40,13 @@ export function start(
 	config: Config,
 ): [Promise<Error | undefined>, () => Promise<Error | undefined>] {
 	let cc: client.Config = {
-		baseUrl: config.baseUrl,
 		userAgent: config.userAgent,
-		fetch,
+		sharedBaseUrl: config.baseUrl,
+		sharedFetch: fetch,
 	}
 
 	if (config.origin) {
-		cc.fetch = morefetch.withOrigin(cc.fetch, config.origin)
+		cc.sharedFetch = morefetch.withOrigin(cc.sharedFetch, config.origin)
 	}
 
 	let cl = new client.Client(cc)
