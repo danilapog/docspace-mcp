@@ -59,6 +59,13 @@ async function main(): Promise<void> {
 			await start(p, cleanup)
 			return
 		}
+
+		if (!c.v.internal && c.v.mcp.transport === "http") {
+			let [p, cleanup] = streamable.external.start(c.v)
+			watch(cleanup)
+			await start(p, cleanup)
+			return
+		}
 	} catch (err) {
 		logger.error("Executing main", {err})
 	}

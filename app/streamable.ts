@@ -16,4 +16,5 @@
  * @license
  */
 
+export * as external from "./streamable/external.ts"
 export * as internal from "./streamable/internal.ts"
