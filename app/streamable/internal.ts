@@ -24,29 +24,45 @@ import * as moreexpress from "../../util/moreexpress.ts"
 import * as morefetch from "../../util/morefetch.ts"
 
 export interface Config {
-	userAgent: string
+	mcp: Mcp
+	api: Api
+}
+
+export interface Mcp {
 	dynamic: boolean
 	tools: string[]
-	port: number
+	server: McpServer
+	session: McpSession
+}
+
+export interface McpServer {
 	host: string
-	sessionTtl: number
-	sessionInterval: number
+	port: number
+}
+
+export interface McpSession {
+	ttl: number
+	interval: number
+}
+
+export interface Api {
+	userAgent: string
 }
 
 export function start(
 	config: Config,
 ): [Promise<Error | undefined>, () => Promise<Error | undefined>] {
 	let bc: streamable.base.internal.Config = {
-		userAgent: config.userAgent,
-		dynamic: config.dynamic,
-		tools: config.tools,
+		userAgent: config.api.userAgent,
+		dynamic: config.mcp.dynamic,
+		tools: config.mcp.tools,
 		fetch: morefetch.withLogger(globalThis.fetch),
 	}
 
 	let bs = new streamable.base.internal.Servers(bc)
 
 	let sc: streamable.sessions.Config = {
-		ttl: config.sessionTtl,
+		ttl: config.mcp.session.ttl,
 	}
 
 	let ss = new streamable.sessions.Sessions(sc)
@@ -77,9 +93,9 @@ export function start(
 
 	let sa = new AbortController()
 
-	let sw = ss.watch(sa.signal, config.sessionInterval)
+	let sw = ss.watch(sa.signal, config.mcp.session.interval)
 
-	let hs = app.listen(config.port, config.host)
+	let hs = app.listen(config.mcp.server.port, config.mcp.server.host)
 
 	let cleanup = async(): Promise<Error | undefined> => {
 		let errs: Error[] = []
@@ -128,7 +144,11 @@ export function start(
 		}
 
 		function onListening(): void {
-			logger.info("Server started", {host: config.host, port: config.port})
+			let o: Record<string, unknown> = {
+				host: config.mcp.server.host,
+				port: config.mcp.server.port,
+			}
+			logger.info("Server started", o)
 			close()
 		}
 

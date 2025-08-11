@@ -27,16 +27,16 @@ const SIGNALS = ["SIGTERM", "SIGINT"]
 
 async function main(): Promise<void> {
 	try {
-		let c = config.loadConfig()
+		let c = config.load()
 
-		if (c.err || c.v.transport === "stdio") {
+		if (c.err || c.v.mcp.transport === "stdio") {
 			logger.mute()
 		}
 
 		if (c.err) {
 			logger.error("Loading config", {err: c.err})
 		} else {
-			logger.info("Loaded config", config.mask(c.v))
+			logger.info("Loaded config", config.format(c.v))
 		}
 
 		if (c.err) {
@@ -46,14 +46,14 @@ async function main(): Promise<void> {
 			return
 		}
 
-		if (c.v.transport === "stdio") {
+		if (c.v.mcp.transport === "stdio") {
 			let [p, cleanup] = stdio.configured.start(c.v)
 			watch(cleanup)
 			await start(p, cleanup)
 			return
 		}
 
-		if (c.v.internal && c.v.transport === "http") {
+		if (c.v.internal && c.v.mcp.transport === "http") {
 			let [p, cleanup] = streamable.internal.start(c.v)
 			watch(cleanup)
 			await start(p, cleanup)
