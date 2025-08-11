@@ -19,7 +19,7 @@
 import * as streamableHttp from "@modelcontextprotocol/sdk/server/streamableHttp.js"
 import * as logger from "../../util/logger.ts"
 import * as result from "../../util/result.ts"
-import type * as sessions from "./sessions.ts"
+import type * as sessions from "../sessions.ts"
 
 export interface Config {
 	sessions: Sessions
@@ -82,6 +82,11 @@ export class Transports {
 		if (s.err) {
 			return result.error(new Error("Getting session", {cause: s.err}))
 		}
+
+		if (!(s.v.transport instanceof streamableHttp.StreamableHTTPServerTransport)) {
+			return result.error(new Error("Session transport is not a StreamableHTTPServerTransport"))
+		}
+
 		return result.ok(s.v.transport)
 	}
 }
