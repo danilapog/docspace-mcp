@@ -1,4 +1,4 @@
-import {safeSync} from "../../../util/result.ts"
+import {safeSync} from "../../../../util/result.ts"
 
 const headerApiKey = "Authorization"
 const headerAuthToken = "Authorization"

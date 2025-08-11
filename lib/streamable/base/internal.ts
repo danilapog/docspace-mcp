@@ -19,10 +19,8 @@
 import type * as server from "@modelcontextprotocol/sdk/server/index.js"
 import type express from "express"
 import * as result from "../../../util/result.ts"
+import * as api from "../../api.ts"
 import * as configured from "../../base/configured.ts"
-import * as client from "../../client.ts"
-import * as resolver from "../../resolver.ts"
-import * as uploader from "../../uploader.ts"
 
 export interface Config {
 	userAgent: string
@@ -55,20 +53,20 @@ export class Servers {
 			return result.error(new Error("Referer header is required"))
 		}
 
-		let cc: client.Config = {
+		let cc: api.client.Config = {
 			userAgent: this.userAgent,
 			sharedBaseUrl: r,
 			sharedFetch: this.fetch,
 		}
 
-		let c = new client.Client(cc)
+		let c = new api.client.Client(cc)
 
 		c = c.withAuthToken(a)
 
 		let sc: configured.Config = {
 			client: c,
-			resolver: new resolver.Resolver(c),
-			uploader: new uploader.Uploader(c),
+			resolver: new api.resolver.Resolver(c),
+			uploader: new api.uploader.Uploader(c),
 			dynamic: this.dynamic,
 			tools: this.tools,
 		}

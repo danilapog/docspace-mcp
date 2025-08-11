@@ -44,7 +44,7 @@ import {
 	SetRoomSecurityFiltersSchema,
 	SuccessApiResponseSchema,
 	UpdateRoomFiltersSchema,
-} from "../../client/internal/schemas.ts"
+} from "../../api/client/internal/schemas.ts"
 import type {
 	BulkDownloadOptions,
 	CopyBatchItemsOptions,
@@ -59,7 +59,7 @@ import type {
 	SetRoomSecurityOptions,
 	UpdateFileOptions,
 	UpdateRoomOptions,
-} from "../../client.ts"
+} from "../../api/client.ts"
 import type {Server} from "../configured.ts"
 
 //
