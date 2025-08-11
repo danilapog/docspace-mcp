@@ -63,7 +63,7 @@ class Server {
 
 					t = this.transports.create()
 
-					let c = await result.safeAsync(s.v.connect.bind(s), t)
+					let c = await result.safeAsync(s.v.connect.bind(s.v), t)
 					if (c.err) {
 						let err = new Error("Attaching server", {cause: c.err})
 						senders.sendJsonrpcError(res, 500, -32603, err)
@@ -93,13 +93,27 @@ class Server {
 
 			let h = await result.safeAsync(t.handleRequest.bind(t), req, res, req.body)
 			if (h.err) {
-				let err = new Error("Handling request", {cause: h.err})
-				senders.sendJsonrpcError(res, 500, -32603, err)
+				// The handleRequest will most likely populate the response itself;
+				// however, if it does not, we will do it ourselves.
+				if (res.headersSent) {
+					if (!res.writableEnded) {
+						res.end()
+					}
+				} else {
+					let err = new Error("Handling request", {cause: h.err})
+					senders.sendJsonrpcError(res, 500, -32603, err)
+				}
 				return
 			}
 		} catch (err_) {
-			let err = new Error("Internal Server Error", {cause: err_})
-			senders.sendJsonrpcError(res, 500, -32603, err)
+			if (res.headersSent) {
+				if (!res.writableEnded) {
+					res.end()
+				}
+			} else {
+				let err = new Error("Internal Server Error", {cause: err_})
+				senders.sendJsonrpcError(res, 500, -32603, err)
+			}
 		}
 	}
 
@@ -134,13 +148,27 @@ class Server {
 
 			let h = await result.safeAsync(r.v.handleRequest.bind(r.v), req, res)
 			if (h.err) {
-				let err = new Error("Handling request", {cause: h.err})
-				senders.sendJsonrpcError(res, 500, -32603, err)
+				// The handleRequest will most likely populate the response itself;
+				// however, if it does not, we will do it ourselves.
+				if (res.headersSent) {
+					if (!res.writableEnded) {
+						res.end()
+					}
+				} else {
+					let err = new Error("Handling request", {cause: h.err})
+					senders.sendJsonrpcError(res, 500, -32603, err)
+				}
 				return
 			}
 		} catch (err_) {
-			let err = new Error("Internal Server Error", {cause: err_})
-			senders.sendJsonrpcError(res, 500, -32603, err)
+			if (res.headersSent) {
+				if (!res.writableEnded) {
+					res.end()
+				}
+			} else {
+				let err = new Error("Internal Server Error", {cause: err_})
+				senders.sendJsonrpcError(res, 500, -32603, err)
+			}
 		}
 	}
 }
