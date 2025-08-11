@@ -105,3 +105,8 @@ export function sendJsonrpcError(res: express.Response, httpCode: number, jsonrp
 		id: null,
 	})
 }
+
+export function sendMessageError(res: express.Response, code: number, err: Error): void {
+	res.writeHead(code)
+	res.end(moreerrors.format(err))
+}
