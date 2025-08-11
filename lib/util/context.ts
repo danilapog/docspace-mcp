@@ -16,12 +16,18 @@
  * @license
  */
 
-import type * as express from "express"
-import * as senders from "./senders.ts"
+import * as asyncHooks from "node:async_hooks"
 
-export function notFound(): express.Handler {
-	return (_, res) => {
-		let err = new Error("Not Found")
-		senders.sendRegularError(res, 404, err)
-	}
+export interface Context {
+	sessionId?: string
+}
+
+const context = new asyncHooks.AsyncLocalStorage<Context>({name: "context"})
+
+export function run(ctx: Context, cb: () => void): void {
+	context.run(ctx, cb)
+}
+
+export function get(): Context | undefined {
+	return context.getStore()
 }

@@ -17,9 +17,9 @@
  */
 
 import * as z from "zod"
-import * as morehttp from "../../../../util/morehttp.ts"
-import type {Result} from "../../../../util/result.ts"
-import {error, ok, safeAsync, safeSync} from "../../../../util/result.ts"
+import * as morehttp from "../../../util/morehttp.ts"
+import type {Result} from "../../../util/result.ts"
+import {error, ok, safeAsync, safeSync} from "../../../util/result.ts"
 import * as oauth from "../oauth.ts"
 import {
 	ErrorApiResponseSchema,

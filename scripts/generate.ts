@@ -19,7 +19,7 @@
 import {existsSync} from "node:fs"
 import {readFile, writeFile} from "node:fs/promises"
 import * as base from "../lib/mcp/base.ts"
-import type {SimplifiedToolInfo, Toolset} from "../util/moremcp.ts"
+import type {SimplifiedToolInfo, Toolset} from "../lib/util/moremcp.ts"
 
 /**
  * {@link https://code.visualstudio.com/docs/reference/variables-reference/#_input-variables | VS Code Reference}

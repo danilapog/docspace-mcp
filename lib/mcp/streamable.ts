@@ -17,8 +17,6 @@
  */
 
 export * as base from "./streamable/base.ts"
-export * as handlers from "./streamable/handlers.ts"
-export * as senders from "./streamable/senders.ts"
 export * as server from "./streamable/server.ts"
 export * as sessions from "./streamable/sessions.ts"
 export * as transports from "./streamable/transports.ts"

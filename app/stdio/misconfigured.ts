@@ -18,7 +18,7 @@
 
 import * as stdio from "@modelcontextprotocol/sdk/server/stdio.js"
 import * as base from "../../lib/mcp/base.ts"
-import * as result from "../../util/result.ts"
+import * as result from "../../lib/util/result.ts"
 
 export function start(err: Error): [Promise<Error | undefined>, () => Promise<Error | undefined>] {
 	let c: base.misconfigured.Config = {

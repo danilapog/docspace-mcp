@@ -20,10 +20,10 @@ import express from "express"
 import * as client from "../../lib/api/client.ts"
 import * as streamable from "../../lib/mcp/streamable.ts"
 import * as oauth from "../../lib/oauth.ts"
-import * as errors from "../../util/errors.ts"
-import * as logger from "../../util/logger.ts"
-import * as moreexpress from "../../util/moreexpress.ts"
-import * as morefetch from "../../util/morefetch.ts"
+import * as logger from "../../lib/util/logger.ts"
+import * as moreerrors from "../../lib/util/moreerrors.ts"
+import * as moreexpress from "../../lib/util/moreexpress.ts"
+import * as morefetch from "../../lib/util/morefetch.ts"
 
 export interface Config {
 	mcp: Mcp
@@ -170,8 +170,8 @@ export function start(
 	ex.disable("etag")
 	ex.set("json spaces", 2)
 
-	ex.use(moreexpress.contextMiddleware)
-	ex.use(moreexpress.loggerMiddleware)
+	ex.use(moreexpress.context())
+	ex.use(moreexpress.logger())
 
 	ex.use(or)
 	ex.use(os)
@@ -181,7 +181,7 @@ export function start(
 	wr.use("/", mr)
 	ex.use(wr)
 
-	ex.use(streamable.handlers.notFound())
+	ex.use(moreexpress.notFound())
 
 	let sa = new AbortController()
 
@@ -196,7 +196,7 @@ export function start(
 			sa.abort("Cleaning up")
 
 			let err = await sw
-			if (err && !errors.isAborted(err)) {
+			if (err && !moreerrors.isAborted(err)) {
 				errs.push(new Error("Stopping sessions watcher", {cause: err}))
 			}
 

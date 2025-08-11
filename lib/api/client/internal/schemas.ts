@@ -17,7 +17,7 @@
  */
 
 import * as z from "zod"
-import {numberUnionToEnum, stringUnionToEnum, wrapUnion} from "../../../../util/zod.ts"
+import {numberUnionToEnum, stringUnionToEnum, wrapUnion} from "../../../util/morezod.ts"
 
 /**
  * {@link https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/reference-types/#the-object-type | .NET Reference}

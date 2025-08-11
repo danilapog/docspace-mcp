@@ -19,8 +19,8 @@
 import * as server from "@modelcontextprotocol/sdk/server/index.js"
 import * as types from "@modelcontextprotocol/sdk/types.js"
 import pack from "../../../package.json" with {type: "json"}
-import * as format from "../../../util/format.ts"
-import type * as moremcp from "../../../util/moremcp.ts"
+import * as moreerrors from "../../util/moreerrors.ts"
+import type * as moremcp from "../../util/moremcp.ts"
 import * as data from "./data.ts"
 
 export interface Config {
@@ -51,7 +51,7 @@ class Server {
 			content: [
 				{
 					type: "text",
-					text: format.format(this.err),
+					text: moreerrors.format(this.err),
 				},
 			],
 			isError: true,

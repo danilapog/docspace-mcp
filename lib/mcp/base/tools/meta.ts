@@ -24,9 +24,9 @@ import type {
 	ToolInputSchema,
 	ToolOutputSchema,
 	Toolset,
-} from "../../../../util/moremcp.ts"
-import type {Result} from "../../../../util/result.ts"
-import {error, ok} from "../../../../util/result.ts"
+} from "../../../util/moremcp.ts"
+import type {Result} from "../../../util/result.ts"
+import {error, ok} from "../../../util/result.ts"
 import type {RouteToolResult, Server} from "../configured.ts"
 
 export const ListToolsInputSchema = z.object({
