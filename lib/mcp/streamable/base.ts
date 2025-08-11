@@ -16,4 +16,5 @@
  * @license
  */
 
+export * as external from "./base/external.ts"
 export * as internal from "./base/internal.ts"
