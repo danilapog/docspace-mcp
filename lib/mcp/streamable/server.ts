@@ -20,8 +20,8 @@ import type * as server from "@modelcontextprotocol/sdk/server/index.js"
 import type * as streamableHttp from "@modelcontextprotocol/sdk/server/streamableHttp.js"
 import * as types from "@modelcontextprotocol/sdk/types.js"
 import express from "express"
-import * as result from "../../../util/result.ts"
-import * as senders from "./senders.ts"
+import * as moreexpress from "../../util/moreexpress.ts"
+import * as result from "../../util/result.ts"
 
 export interface Config {
 	servers: Servers
@@ -57,7 +57,7 @@ class Server {
 					if (s.err) {
 						// It is most likely 400, rather than 500.
 						let err = new Error("Creating server", {cause: s.err})
-						senders.sendJsonrpcError(res, 400, -32000, err)
+						moreexpress.sendJsonrpcError(res, 400, -32000, err)
 						return
 					}
 
@@ -66,25 +66,25 @@ class Server {
 					let c = await result.safeAsync(s.v.connect.bind(s.v), t)
 					if (c.err) {
 						let err = new Error("Attaching server", {cause: c.err})
-						senders.sendJsonrpcError(res, 500, -32603, err)
+						moreexpress.sendJsonrpcError(res, 500, -32603, err)
 						return
 					}
 				} else {
 					// https://github.com/modelcontextprotocol/typescript-sdk/blob/1.15.1/src/server/streamableHttp.ts#L587
 					let err = new Error("Bad Request: Mcp-Session-Id header is required")
-					senders.sendJsonrpcError(res, 400, -32000, err)
+					moreexpress.sendJsonrpcError(res, 400, -32000, err)
 					return
 				}
 			} else if (Array.isArray(id)) {
 				// https://github.com/modelcontextprotocol/typescript-sdk/blob/1.15.1/src/server/streamableHttp.ts#L597
 				let err = new Error("Bad Request: Mcp-Session-Id header must be a single value")
-				senders.sendJsonrpcError(res, 400, -32000, err)
+				moreexpress.sendJsonrpcError(res, 400, -32000, err)
 				return
 			} else {
 				let r = this.transports.retrieve(id)
 				if (r.err) {
 					let err = new Error("Retrieving transport", {cause: r.err})
-					senders.sendJsonrpcError(res, 404, -32001, err)
+					moreexpress.sendJsonrpcError(res, 404, -32001, err)
 					return
 				}
 
@@ -101,7 +101,7 @@ class Server {
 					}
 				} else {
 					let err = new Error("Handling request", {cause: h.err})
-					senders.sendJsonrpcError(res, 500, -32603, err)
+					moreexpress.sendJsonrpcError(res, 500, -32603, err)
 				}
 				return
 			}
@@ -112,7 +112,7 @@ class Server {
 				}
 			} else {
 				let err = new Error("Internal Server Error", {cause: err_})
-				senders.sendJsonrpcError(res, 500, -32603, err)
+				moreexpress.sendJsonrpcError(res, 500, -32603, err)
 			}
 		}
 	}
@@ -128,21 +128,21 @@ class Server {
 			if (id === undefined || id === "") {
 				// https://github.com/modelcontextprotocol/typescript-sdk/blob/1.15.1/src/server/streamableHttp.ts#L587
 				let err = new Error("Bad Request: Mcp-Session-Id header is required")
-				senders.sendJsonrpcError(res, 400, -32000, err)
+				moreexpress.sendJsonrpcError(res, 400, -32000, err)
 				return
 			}
 
 			if (Array.isArray(id)) {
 				// https://github.com/modelcontextprotocol/typescript-sdk/blob/1.15.1/src/server/streamableHttp.ts#L597
 				let err = new Error("Bad Request: Mcp-Session-Id header must be a single value")
-				senders.sendJsonrpcError(res, 400, -32000, err)
+				moreexpress.sendJsonrpcError(res, 400, -32000, err)
 				return
 			}
 
 			let r = this.transports.retrieve(id)
 			if (r.err) {
 				let err = new Error("Retrieving transport", {cause: r.err})
-				senders.sendJsonrpcError(res, 404, -32001, err)
+				moreexpress.sendJsonrpcError(res, 404, -32001, err)
 				return
 			}
 
@@ -156,7 +156,7 @@ class Server {
 					}
 				} else {
 					let err = new Error("Handling request", {cause: h.err})
-					senders.sendJsonrpcError(res, 500, -32603, err)
+					moreexpress.sendJsonrpcError(res, 500, -32603, err)
 				}
 				return
 			}
@@ -167,7 +167,7 @@ class Server {
 				}
 			} else {
 				let err = new Error("Internal Server Error", {cause: err_})
-				senders.sendJsonrpcError(res, 500, -32603, err)
+				moreexpress.sendJsonrpcError(res, 500, -32603, err)
 			}
 		}
 	}

@@ -18,9 +18,9 @@
 
 import * as auth from "@modelcontextprotocol/sdk/shared/auth.js"
 import express from "express"
-import * as result from "../../util/result.ts"
 import type * as client from "../api/client.ts"
-import * as senders from "../mcp/streamable/senders.ts"
+import * as moreexpress from "../util/moreexpress.ts"
+import * as result from "../util/result.ts"
 
 export interface Config {
 	serverBaseUrl: string
@@ -75,7 +75,7 @@ class Server {
 		let mr = await this.client.oauth.metadata(ac.signal)
 		if (mr.err) {
 			let err = new Error("Discovering OAuth metadata", {cause: mr.err})
-			senders.sendRegularError(res, 500, err)
+			moreexpress.sendJsonError(res, 500, err)
 			return
 		}
 
@@ -84,14 +84,14 @@ class Server {
 		let pr = auth.OAuthMetadataSchema.safeParse(md)
 		if (!pr.success) {
 			let err = new Error("Converting OAuth metadata", {cause: pr.error})
-			senders.sendRegularError(res, 500, err)
+			moreexpress.sendJsonError(res, 500, err)
 			return
 		}
 
 		let ur = result.safeNew(URL, "/register", this.serverBaseUrl)
 		if (ur.err) {
 			let err = new Error("Creating registration endpoint URL", {cause: ur.err})
-			senders.sendRegularError(res, 500, err)
+			moreexpress.sendJsonError(res, 500, err)
 			return
 		}
 

@@ -18,7 +18,7 @@
  * @license
  */
 
-import * as logger from "../util/logger.ts"
+import * as logger from "../lib/util/logger.ts"
 import * as config from "./config.ts"
 import * as stdio from "./stdio.ts"
 import * as streamable from "./streamable.ts"

@@ -17,7 +17,7 @@
  */
 
 import * as z from "zod"
-import * as result from "../../../util/result.ts"
+import * as result from "../../util/result.ts"
 import type * as client from "../client.ts"
 
 /**

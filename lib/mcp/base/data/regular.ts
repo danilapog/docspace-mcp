@@ -17,7 +17,7 @@
  */
 
 import * as z from "zod"
-import * as moremcp from "../../../../util/moremcp.ts"
+import * as moremcp from "../../../util/moremcp.ts"
 import * as regular from "../tools/regular.ts"
 
 export const toolsets: moremcp.Toolset[] = [

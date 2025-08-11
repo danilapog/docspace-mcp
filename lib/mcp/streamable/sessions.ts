@@ -17,7 +17,7 @@
  */
 
 import type * as streamableHttp from "@modelcontextprotocol/sdk/server/streamableHttp.js"
-import * as result from "../../../util/result.ts"
+import * as result from "../../util/result.ts"
 
 export interface Session {
 	id: string

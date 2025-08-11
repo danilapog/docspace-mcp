@@ -18,10 +18,10 @@
 
 import * as z from "zod"
 import * as base from "../lib/mcp/base.ts"
+import type * as morets from "../lib/util/morets.ts"
+import * as morezod from "../lib/util/morezod.ts"
+import * as result from "../lib/util/result.ts"
 import pack from "../package.json" with {type: "json"}
-import type * as morets from "../util/morets.ts"
-import * as result from "../util/result.ts"
-import * as morezod from "../util/zod.ts"
 
 const availableToolsets = (() => {
 	let a: string[] = ["all"]

@@ -18,10 +18,10 @@
 
 import express from "express"
 import * as streamable from "../../lib/mcp/streamable.ts"
-import * as errors from "../../util/errors.ts"
-import * as logger from "../../util/logger.ts"
-import * as moreexpress from "../../util/moreexpress.ts"
-import * as morefetch from "../../util/morefetch.ts"
+import * as logger from "../../lib/util/logger.ts"
+import * as moreerrors from "../../lib/util/moreerrors.ts"
+import * as moreexpress from "../../lib/util/moreexpress.ts"
+import * as morefetch from "../../lib/util/morefetch.ts"
 
 export interface Config {
 	mcp: Mcp
@@ -85,11 +85,11 @@ export function start(
 	app.disable("x-powered-by")
 	app.disable("etag")
 
-	app.use(moreexpress.contextMiddleware)
-	app.use(moreexpress.loggerMiddleware)
+	app.use(moreexpress.context())
+	app.use(moreexpress.logger())
 
 	app.use(mr)
-	app.use(streamable.handlers.notFound())
+	app.use(moreexpress.notFound())
 
 	let sa = new AbortController()
 
@@ -104,7 +104,7 @@ export function start(
 			sa.abort("Cleaning up")
 
 			let err = await sw
-			if (err && !errors.isAborted(err)) {
+			if (err && !moreerrors.isAborted(err)) {
 				errs.push(new Error("Stopping sessions watcher", {cause: err}))
 			}
 

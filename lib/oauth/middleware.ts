@@ -19,8 +19,8 @@
 import * as bearerAuth from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js"
 import type * as types from "@modelcontextprotocol/sdk/server/auth/types.js"
 import type express from "express"
-import * as result from "../../util/result.ts"
 import type * as client from "../api/client.ts"
+import * as result from "../util/result.ts"
 
 export interface Config {
 	resourceBaseUrl: string

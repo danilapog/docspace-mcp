@@ -19,8 +19,8 @@
 import * as stdio from "@modelcontextprotocol/sdk/server/stdio.js"
 import * as api from "../../lib/api.ts"
 import * as base from "../../lib/mcp/base.ts"
-import * as morefetch from "../../util/morefetch.ts"
-import * as result from "../../util/result.ts"
+import * as morefetch from "../../lib/util/morefetch.ts"
+import * as result from "../../lib/util/result.ts"
 
 export interface Config {
 	mcp: Mcp
