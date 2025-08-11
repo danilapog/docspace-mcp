@@ -18,7 +18,7 @@
 
 import {existsSync} from "node:fs"
 import {readFile, writeFile} from "node:fs/promises"
-import * as base from "../lib/base.ts"
+import * as base from "../lib/mcp/base.ts"
 import type {SimplifiedToolInfo, Toolset} from "../util/moremcp.ts"
 
 /**

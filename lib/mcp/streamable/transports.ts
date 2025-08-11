@@ -17,8 +17,8 @@
  */
 
 import * as streamableHttp from "@modelcontextprotocol/sdk/server/streamableHttp.js"
-import * as logger from "../../util/logger.ts"
-import * as result from "../../util/result.ts"
+import * as logger from "../../../util/logger.ts"
+import * as result from "../../../util/result.ts"
 import type * as sessions from "./sessions.ts"
 
 export interface Config {

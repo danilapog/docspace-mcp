@@ -19,11 +19,11 @@
 import * as server from "@modelcontextprotocol/sdk/server/index.js"
 import * as types from "@modelcontextprotocol/sdk/types.js"
 import type * as zodToJsonSchema from "zod-to-json-schema"
-import pack from "../../package.json" with {type: "json"}
-import * as format from "../../util/format.ts"
-import type * as moremcp from "../../util/moremcp.ts"
-import * as result from "../../util/result.ts"
-import * as api from "../api.ts"
+import pack from "../../../package.json" with {type: "json"}
+import * as format from "../../../util/format.ts"
+import type * as moremcp from "../../../util/moremcp.ts"
+import * as result from "../../../util/result.ts"
+import * as api from "../../api.ts"
 import * as data from "./data.ts"
 import * as tools from "./tools.ts"
 

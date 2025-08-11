@@ -17,7 +17,7 @@
  */
 
 import * as z from "zod"
-import * as base from "../lib/base.ts"
+import * as base from "../lib/mcp/base.ts"
 import pack from "../package.json" with {type: "json"}
 import type {Result} from "../util/result.ts"
 import {error, ok} from "../util/result.ts"

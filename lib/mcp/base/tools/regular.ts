@@ -19,9 +19,9 @@
 import * as z from "zod"
 import type {JsonSchema7Type} from "zod-to-json-schema"
 import {zodToJsonSchema} from "zod-to-json-schema"
-import type {Result} from "../../../util/result.ts"
-import {error, ok, safeAsync, safeSync} from "../../../util/result.ts"
-import {numberUnionToEnum} from "../../../util/zod.ts"
+import type {Result} from "../../../../util/result.ts"
+import {error, ok, safeAsync, safeSync} from "../../../../util/result.ts"
+import {numberUnionToEnum} from "../../../../util/zod.ts"
 import {
 	CreateFolderFiltersSchema,
 	CreateRoomFiltersSchema,
@@ -44,7 +44,7 @@ import {
 	SetRoomSecurityFiltersSchema,
 	SuccessApiResponseSchema,
 	UpdateRoomFiltersSchema,
-} from "../../api/client/internal/schemas.ts"
+} from "../../../api/client/internal/schemas.ts"
 import type {
 	BulkDownloadOptions,
 	CopyBatchItemsOptions,
@@ -59,7 +59,7 @@ import type {
 	SetRoomSecurityOptions,
 	UpdateFileOptions,
 	UpdateRoomOptions,
-} from "../../api/client.ts"
+} from "../../../api/client.ts"
 import type {Server} from "../configured.ts"
 
 //

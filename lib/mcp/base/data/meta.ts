@@ -17,7 +17,7 @@
  */
 
 import * as z from "zod"
-import * as moremcp from "../../../util/moremcp.ts"
+import * as moremcp from "../../../../util/moremcp.ts"
 import * as meta from "../tools/meta.ts"
 
 export const tools: moremcp.ToolInfo[] = [
