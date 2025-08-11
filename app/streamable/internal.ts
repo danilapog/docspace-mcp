@@ -16,12 +16,15 @@
  * @license
  */
 
+import type * as server from "@modelcontextprotocol/sdk/server/index.js"
 import express from "express"
-import * as streamable from "../../lib/mcp/streamable.ts"
+import * as api from "../../lib/api.ts"
+import * as mcp from "../../lib/mcp.ts"
 import * as logger from "../../lib/util/logger.ts"
 import * as moreerrors from "../../lib/util/moreerrors.ts"
 import * as moreexpress from "../../lib/util/moreexpress.ts"
 import * as morefetch from "../../lib/util/morefetch.ts"
+import * as result from "../../lib/util/result.ts"
 
 export interface Config {
 	mcp: Mcp
@@ -52,33 +55,64 @@ export interface Api {
 export function start(
 	config: Config,
 ): [Promise<Error | undefined>, () => Promise<Error | undefined>] {
-	let bc: streamable.base.internal.Config = {
-		userAgent: config.api.userAgent,
-		dynamic: config.mcp.dynamic,
-		tools: config.mcp.tools,
-		fetch: morefetch.withLogger(globalThis.fetch),
+	let create = (req: express.Request): result.Result<server.Server, Error> => {
+		let a = req.headers.authorization
+		if (!a) {
+			return result.error(new Error("Authorization header is required"))
+		}
+
+		let r = req.headers.referer
+		if (!r) {
+			return result.error(new Error("Referer header is required"))
+		}
+
+		let cc: api.client.Config = {
+			userAgent: config.api.userAgent,
+			sharedBaseUrl: r,
+			sharedFetch: morefetch.withLogger(globalThis.fetch),
+			oauthBaseUrl: "",
+			oauthFetch() {
+				throw new Error("Not implemented")
+			},
+		}
+
+		let c = new api.client.Client(cc)
+
+		c = c.withAuthToken(a)
+
+		let sc: mcp.base.configured.Config = {
+			client: c,
+			resolver: new api.resolver.Resolver(c),
+			uploader: new api.uploader.Uploader(c),
+			dynamic: config.mcp.dynamic,
+			tools: config.mcp.tools,
+		}
+
+		let s = mcp.base.configured.create(sc)
+
+		return result.ok(s)
 	}
 
-	let bs = new streamable.base.internal.Servers(bc)
-
-	let sc: streamable.sessions.Config = {
+	let sc: mcp.streamable.sessions.Config = {
 		ttl: config.mcp.session.ttl,
 	}
 
-	let ss = new streamable.sessions.Sessions(sc)
+	let ss = new mcp.streamable.sessions.Sessions(sc)
 
-	let tc: streamable.transports.Config = {
+	let tc: mcp.streamable.transports.Config = {
 		sessions: ss,
 	}
 
-	let tt = new streamable.transports.Transports(tc)
+	let tt = new mcp.streamable.transports.Transports(tc)
 
-	let mc: streamable.server.Config = {
-		servers: bs,
+	let mc: mcp.streamable.server.Config = {
+		servers: {
+			create,
+		},
 		transports: tt,
 	}
 
-	let mr = streamable.server.router(mc)
+	let mr = mcp.streamable.server.router(mc)
 
 	let app = express()
 
