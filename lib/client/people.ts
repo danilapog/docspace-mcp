@@ -41,7 +41,7 @@ export class PeopleService {
 	 * {@link https://github.com/ONLYOFFICE/DocSpace-server/blob/v3.0.4-server/products/ASC.People/Server/Api/UserController.cs/#L681 | DocSpace Reference}
 	 */
 	async getAll(s: AbortSignal, filters?: GetAllFilters): Promise<Result<[GetAllResponseItem[], Response], Error>> {
-		let u = this.c.createUrl("api/2.0/people", filters)
+		let u = this.c.createSharedUrl("api/2.0/people", filters)
 		if (u.err) {
 			return error(new Error("Creating URL.", {cause: u.err}))
 		}
@@ -51,7 +51,7 @@ export class PeopleService {
 			return error(new Error("Creating request.", {cause: req.err}))
 		}
 
-		let f = await this.c.fetch(req.v)
+		let f = await this.c.sharedFetch(req.v)
 		if (f.err) {
 			return error(new Error("Fetching request.", {cause: f.err}))
 		}

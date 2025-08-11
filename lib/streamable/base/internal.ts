@@ -56,9 +56,9 @@ export class Servers {
 		}
 
 		let cc: client.Config = {
-			baseUrl: r,
 			userAgent: this.userAgent,
-			fetch: this.fetch,
+			sharedBaseUrl: r,
+			sharedFetch: this.fetch,
 		}
 
 		let c = new client.Client(cc)
