@@ -5,6 +5,7 @@ const headerAuthToken = "Authorization"
 const headerBasicAuth = "Authorization"
 const schemaApiKey = "Bearer"
 const schemaBasicAuth = "Basic"
+const schemaBearerAuth = "Bearer"
 const cookieAuthToken = "asc_auth_key"
 
 export function injectAuthKey(input: Request, k: string): Error | undefined {
@@ -40,6 +41,13 @@ export function injectBasicAuth(input: Request, u: string, p: string): Error | u
 	let v = Buffer.from(`${u}:${p}`, "utf8").toString("base64")
 
 	let h = safeSync(input.headers.set.bind(input.headers), headerBasicAuth, `${schemaBasicAuth} ${v}`)
+	if (h.err) {
+		return new Error("Setting header.", {cause: h.err})
+	}
+}
+
+export function injectBearerAuth(input: Request, t: string): Error | undefined {
+	let h = safeSync(input.headers.set.bind(input.headers), headerAuthToken, `${schemaBearerAuth} ${t}`)
 	if (h.err) {
 		return new Error("Setting header.", {cause: h.err})
 	}

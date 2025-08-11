@@ -1,0 +1,151 @@
+/**
+ * (c) Copyright Ascensio System SIA 2025
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @license
+ */
+
+import * as auth from "@modelcontextprotocol/sdk/shared/auth.js"
+import express from "express"
+import * as result from "../../util/result.ts"
+import type * as client from "../api/client.ts"
+import * as senders from "../mcp/streamable/senders.ts"
+
+export interface Config {
+	serverBaseUrl: string
+	redirectUris: string[]
+	clientId: string
+	clientName: string
+	scopes: string[]
+	tosUri: string
+	policyUri: string
+	clientSecret: string
+	client: Client
+}
+
+export interface Client {
+	oauth: OauthService
+}
+
+export interface OauthService {
+	metadata(s: AbortSignal): Promise<result.Result<[client.OauthMetadataResponse, client.Response], Error>>
+}
+
+class Server {
+	private serverBaseUrl: string
+	private redirectUris: string[]
+	private clientId: string
+	private clientName: string
+	private scopes: string[]
+	private tosUri: string
+	private policyUri: string
+	private clientSecret: string
+	private client: Client
+
+	constructor(config: Config) {
+		this.serverBaseUrl = config.serverBaseUrl
+		this.redirectUris = config.redirectUris
+		this.clientId = config.clientId
+		this.clientName = config.clientName
+		this.scopes = config.scopes
+		this.tosUri = config.tosUri
+		this.policyUri = config.policyUri
+		this.clientSecret = config.clientSecret
+		this.client = config.client
+	}
+
+	/**
+	 * {@link https://github.com/modelcontextprotocol/typescript-sdk/blob/1.17.0/src/client/auth.ts#L616 | MCP Reference} \
+	 * {@link https://datatracker.ietf.org/doc/html/rfc8414#section-3 | RFC 8414 Reference}
+	 */
+	async metadata(_: express.Request, res: express.Response): Promise<void> {
+		let ac = new AbortController()
+
+		let mr = await this.client.oauth.metadata(ac.signal)
+		if (mr.err) {
+			let err = new Error("Discovering OAuth metadata", {cause: mr.err})
+			senders.sendRegularError(res, 500, err)
+			return
+		}
+
+		let [md] = mr.v
+
+		let pr = auth.OAuthMetadataSchema.safeParse(md)
+		if (!pr.success) {
+			let err = new Error("Converting OAuth metadata", {cause: pr.error})
+			senders.sendRegularError(res, 500, err)
+			return
+		}
+
+		let ur = result.safeNew(URL, "/register", this.serverBaseUrl)
+		if (ur.err) {
+			let err = new Error("Creating registration endpoint URL", {cause: ur.err})
+			senders.sendRegularError(res, 500, err)
+			return
+		}
+
+		pr.data.registration_endpoint = ur.v.toString()
+
+		res.status(200)
+		res.json(pr.data)
+	}
+
+	/**
+	 * {@link https://github.com/modelcontextprotocol/typescript-sdk/blob/1.17.0/src/client/auth.ts#L1048 | MCP Reference} \
+	 * {@link https://www.rfc-editor.org/rfc/rfc7591#section-3 | RFC 7591 Client Registration Endpoint Reference} \
+	 * {@link https://www.rfc-editor.org/rfc/rfc7591#section-2 | RFC 7591 Client Metadata Reference} \
+	 * {@link https://www.rfc-editor.org/rfc/rfc7591#section-3.2.1 | RFC 7591 Client Information Response Reference}
+	 */
+	register(_: express.Request, res: express.Response): void {
+		let m: auth.OAuthClientInformationFull = {
+			client_id: this.clientId,
+			redirect_uris: this.redirectUris,
+		}
+
+		if (this.clientName) {
+			m.client_name = this.clientName
+		}
+
+		if (this.scopes.length !== 0) {
+			m.scope = this.scopes.join(" ")
+		}
+
+		if (this.tosUri) {
+			m.tos_uri = this.tosUri
+		}
+
+		if (this.policyUri) {
+			m.policy_uri = this.policyUri
+		}
+
+		if (this.clientSecret) {
+			m.client_secret = this.clientSecret
+		}
+
+		res.status(200)
+		res.json(m)
+	}
+}
+
+export function router(config: Config): express.Router {
+	let s = new Server(config)
+
+	let r = express.Router()
+	r.use(express.json())
+
+	r.get("/.well-known/oauth-authorization-server", s.metadata.bind(s))
+	r.post("/register", s.register.bind(s))
+
+	return r
+}

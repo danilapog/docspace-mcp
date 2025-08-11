@@ -197,3 +197,22 @@ export function envOptions(a: string[]): (v: string, c: z.RefinementCtx) => stri
 		return x
 	}
 }
+
+export function envList(): (v: string, c: z.RefinementCtx) => string[] {
+	return (v) => {
+		let a: string[] = []
+
+		for (let u of v.split(",")) {
+			u = u.trim()
+			if (u === "") {
+				continue
+			}
+
+			if (!a.includes(u)) {
+				a.push(u)
+			}
+		}
+
+		return a
+	}
+}

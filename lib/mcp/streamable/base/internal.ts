@@ -57,6 +57,10 @@ export class Servers {
 			userAgent: this.userAgent,
 			sharedBaseUrl: r,
 			sharedFetch: this.fetch,
+			oauthBaseUrl: "",
+			oauthFetch() {
+				throw new Error("Not implemented")
+			},
 		}
 
 		let c = new api.client.Client(cc)

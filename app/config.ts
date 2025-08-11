@@ -45,6 +45,7 @@ export interface Config {
 	internal: boolean
 	mcp: Mcp
 	api: Api
+	oauth: Oauth
 }
 
 export interface Mcp {
@@ -59,6 +60,7 @@ export interface Mcp {
 }
 
 export interface McpServer {
+	baseUrl: string
 	host: string
 	port: number
 }
@@ -71,6 +73,7 @@ export interface McpSession {
 export interface Api {
 	userAgent: string
 	shared: ApiShared
+	oauth: ApiOauth
 }
 
 export interface ApiShared {
@@ -80,6 +83,31 @@ export interface ApiShared {
 	pat: string
 	username: string
 	password: string
+}
+
+export interface ApiOauth {
+	baseUrl: string
+}
+
+export interface Oauth {
+	resource: OauthResource
+	client: OauthClient
+}
+
+export interface OauthResource {
+	scopesSupported: string[]
+	resourceName: string
+	resourceDocumentation: string
+}
+
+export interface OauthClient {
+	redirectUris: string[]
+	clientId: string
+	clientName: string
+	scopes: string[]
+	tosUri: string
+	policyUri: string
+	clientSecret: string
 }
 
 export const ConfigSchema = z.
@@ -125,6 +153,11 @@ export const ConfigSchema = z.
 		//
 		// MCP Server options
 		//
+
+		DOCSPACE_MCP_BASE_URL: z. // todo: check url
+			string().
+			trim().
+			default(""),
 
 		DOCSPACE_HOST: z. // todo: cannot be empty, see https://github.com/nodejs/node/blob/v24.5.0/lib/net.js#L299
 			string().
@@ -191,6 +224,73 @@ export const ConfigSchema = z.
 		DOCSPACE_PASSWORD: z. // todo: trim
 			string().
 			default(""),
+
+		//
+		// API OAuth options
+		//
+
+		DOCSPACE_OAUTH_BASE_URL: z. // todo: check url
+			string().
+			trim().
+			default("https://oauth.onlyoffice.com/"),
+
+		//
+		// Oauth Resource options
+		//
+
+		DOCSPACE_OAUTH_SCOPES_SUPPORTED: z.
+			string().
+			default("").
+			transform(morezod.envList()),
+
+		DOCSPACE_OAUTH_RESOURCE_NAME: z.
+			string().
+			trim().
+			default(`${pack.name} v${pack.version}`),
+
+		DOCSPACE_OAUTH_RESOURCE_DOCUMENTATION: z. // todo: check url
+			string().
+			trim().
+			default("https://github.com/onlyoffice/docspace-mcp/blob/main/README.md"),
+
+		//
+		// Oauth Client options
+		//
+
+		DOCSPACE_OAUTH_REDIRECT_URIS: z. // todo: check url
+			string().
+			default("").
+			transform(morezod.envList()),
+
+		DOCSPACE_OAUTH_CLIENT_ID: z.
+			string().
+			trim().
+			default(""),
+
+		DOCSPACE_OAUTH_CLIENT_NAME: z.
+			string().
+			trim().
+			default(""),
+
+		DOCSPACE_OAUTH_SCOPES: z.
+			string().
+			default("").
+			transform(morezod.envList()),
+
+		DOCSPACE_OAUTH_TOS_URI: z. // todo: check url
+			string().
+			trim().
+			default(""),
+
+		DOCSPACE_OAUTH_POLICY_URI: z. // todo: check url
+			string().
+			trim().
+			default(""),
+
+		DOCSPACE_OAUTH_CLIENT_SECRET: z.
+			string().
+			trim().
+			default(""),
 	}).
 	transform((o) => {
 		let c: Config = {
@@ -203,6 +303,7 @@ export const ConfigSchema = z.
 				enabledTools: o.DOCSPACE_ENABLED_TOOLS,
 				disabledTools: o.DOCSPACE_DISABLED_TOOLS,
 				server: {
+					baseUrl: o.DOCSPACE_MCP_BASE_URL,
 					host: o.DOCSPACE_HOST,
 					port: o.DOCSPACE_PORT,
 				},
@@ -221,6 +322,25 @@ export const ConfigSchema = z.
 					username: o.DOCSPACE_USERNAME,
 					password: o.DOCSPACE_PASSWORD,
 				},
+				oauth: {
+					baseUrl: o.DOCSPACE_OAUTH_BASE_URL,
+				},
+			},
+			oauth: {
+				resource: {
+					scopesSupported: o.DOCSPACE_OAUTH_SCOPES_SUPPORTED,
+					resourceName: o.DOCSPACE_OAUTH_RESOURCE_NAME,
+					resourceDocumentation: o.DOCSPACE_OAUTH_RESOURCE_DOCUMENTATION,
+				},
+				client: {
+					redirectUris: o.DOCSPACE_OAUTH_REDIRECT_URIS,
+					clientId: o.DOCSPACE_OAUTH_CLIENT_ID,
+					clientName: o.DOCSPACE_OAUTH_CLIENT_NAME,
+					scopes: o.DOCSPACE_OAUTH_SCOPES,
+					tosUri: o.DOCSPACE_OAUTH_TOS_URI,
+					policyUri: o.DOCSPACE_OAUTH_POLICY_URI,
+					clientSecret: o.DOCSPACE_OAUTH_CLIENT_SECRET,
+				},
 			},
 		}
 
@@ -235,7 +355,13 @@ export const ConfigSchema = z.
 		c.mcp.tools = r[1]
 
 		// todo: check if not empty
+		c.mcp.server.baseUrl = ensureTrailing(c.mcp.server.baseUrl)
+
+		// todo: check if not empty
 		c.api.shared.baseUrl = ensureTrailing(c.api.shared.baseUrl)
+
+		// todo: check if not empty
+		c.api.oauth.baseUrl = ensureTrailing(c.api.oauth.baseUrl)
 
 		return c
 	}).
@@ -251,13 +377,6 @@ export const ConfigSchema = z.
 			ctx.addIssue({
 				code: z.ZodIssueCode.custom,
 				message: "No tools left",
-			})
-		}
-
-		if (o.mcp.transport === "http" && !o.internal) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				message: "HTTP transport is only available for internal use",
 			})
 		}
 
@@ -285,6 +404,22 @@ export const ConfigSchema = z.
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
 					message: "Expected only one of API key, PAT, or (username and password) to be set for stdio transport",
+				})
+			}
+		}
+
+		if (!o.internal && o.mcp.transport === "http") {
+			if (!o.mcp.server.baseUrl) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: "MCP server base URL is required for HTTP transport",
+				})
+			}
+
+			if (!o.oauth.client.clientId) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: "OAuth client ID is required for HTTP transport",
 				})
 			}
 		}
@@ -407,6 +542,7 @@ export function format(c: Config): object {
 	let session: morets.RecursivePartial<McpSession> = {}
 	let api: morets.RecursivePartial<Api> = {}
 	let shared: morets.RecursivePartial<ApiShared> = {}
+	let oauth: morets.RecursivePartial<ApiOauth> = {}
 
 	if (c.internal) {
 		o.internal = c.internal
@@ -426,6 +562,10 @@ export function format(c: Config): object {
 
 	if (c.mcp.tools.length !== 0) {
 		mcp.tools = c.mcp.tools
+	}
+
+	if (c.mcp.server.baseUrl) {
+		server.baseUrl = c.mcp.server.baseUrl
 	}
 
 	if (c.mcp.server.host) {
@@ -486,6 +626,14 @@ export function format(c: Config): object {
 
 	if (Object.keys(shared).length !== 0) {
 		api.shared = shared
+	}
+
+	if (c.api.oauth.baseUrl) {
+		oauth.baseUrl = c.api.oauth.baseUrl
+	}
+
+	if (Object.keys(oauth).length !== 0) {
+		api.oauth = oauth
 	}
 
 	if (Object.keys(api).length !== 0) {
