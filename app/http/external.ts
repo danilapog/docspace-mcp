@@ -16,6 +16,7 @@
  * @license
  */
 
+import type http from "node:http"
 import type * as server from "@modelcontextprotocol/sdk/server/index.js"
 import express from "express"
 import * as api from "../../lib/api.ts"
@@ -26,6 +27,7 @@ import * as moreerrors from "../../lib/util/moreerrors.ts"
 import * as moreexpress from "../../lib/util/moreexpress.ts"
 import * as morefetch from "../../lib/util/morefetch.ts"
 import * as result from "../../lib/util/result.ts"
+import type * as shared from "../shared.ts"
 
 export interface Config {
 	mcp: Mcp
@@ -87,10 +89,57 @@ export interface OauthClient {
 	clientSecret: string
 }
 
-export function start(
-	config: Config,
-): [Promise<Error | undefined>, () => Promise<Error | undefined>] {
-	let create = (req: express.Request): result.Result<server.Server, Error> => {
+type CreateServer = (req: express.Request) => result.Result<server.Server, Error>
+
+interface App {
+	oauth: AppOauth
+	streamable: AppMcp
+	express: express.Express
+}
+
+interface AppOauth {
+	resource: express.Router
+	server: express.Router
+	middleware: express.Handler
+}
+
+interface AppMcp {
+	sessions: mcp.sessions.Sessions
+	server: express.Router
+}
+
+export function start(config: Config): [shared.P, shared.Cleanup] {
+	let a = createApp(config)
+	if (a.err) {
+		// eslint-disable-next-line typescript/require-await
+		return [Promise.resolve(a.err), async() => undefined]
+	}
+	return startApp(config, a.v)
+}
+
+function createApp(config: Config): result.Result<App, Error> {
+	let create = createCreateServer(config)
+
+	let o = createOauth(config)
+	if (o.err) {
+		return result.error(new Error("Creating OAuth", {cause: o.err}))
+	}
+
+	let s = createStreamable(config, create)
+
+	let e = createExpress(o.v, s)
+
+	let a: App = {
+		oauth: o.v,
+		streamable: s,
+		express: e,
+	}
+
+	return result.ok(a)
+}
+
+function createCreateServer(config: Config): CreateServer {
+	return (req) => {
 		if (!req.auth) {
 			return result.error(new Error("OAuth middleware was not registered"))
 		}
@@ -130,7 +179,9 @@ export function start(
 
 		return result.ok(s)
 	}
+}
 
+function createOauth(config: Config): result.Result<AppOauth, Error> {
 	let cc: api.client.Config = {
 		userAgent: config.api.userAgent,
 		sharedBaseUrl: "",
@@ -141,20 +192,20 @@ export function start(
 		oauthFetch: morefetch.withLogger(globalThis.fetch),
 	}
 
-	let cl = new api.client.Client(cc)
+	let c = new api.client.Client(cc)
 
-	cl = cl.withApiKey(config.api.shared.apiKey)
+	c = c.withApiKey(config.api.shared.apiKey)
 
-	let orc: oauth.resource.Config = {
+	let rc: oauth.resource.Config = {
 		resourceBaseUrl: config.mcp.server.baseUrl,
 		scopesSupported: config.oauth.resource.scopesSupported,
 		resourceName: config.oauth.resource.resourceName,
 		resourceDocumentation: config.oauth.resource.resourceDocumentation,
 	}
 
-	let or = oauth.resource.router(orc)
+	let r = oauth.resource.router(rc)
 
-	let osc: oauth.server.Config = {
+	let sc: oauth.server.Config = {
 		serverBaseUrl: config.mcp.server.baseUrl,
 		redirectUris: config.oauth.client.redirectUris,
 		clientId: config.oauth.client.clientId,
@@ -163,88 +214,118 @@ export function start(
 		tosUri: config.oauth.client.tosUri,
 		policyUri: config.oauth.client.policyUri,
 		clientSecret: config.oauth.client.clientSecret,
-		client: cl,
+		client: c,
 	}
 
-	let os = oauth.server.router(osc)
+	let s = oauth.server.router(sc)
 
-	let omc: oauth.middleware.Config = {
+	let mc: oauth.middleware.Config = {
 		resourceBaseUrl: config.mcp.server.baseUrl,
-		client: cl,
+		client: c,
 	}
 
-	let oh = oauth.middleware.handler(omc)
-	if (oh.err) {
-		// eslint-disable-next-line typescript/require-await
-		return [Promise.resolve(oh.err), async() => undefined]
+	let m = oauth.middleware.handler(mc)
+	if (m.err) {
+		return result.error(new Error("Creating OAuth middleware", {cause: m.err}))
 	}
 
+	let a: AppOauth = {
+		resource: r,
+		server: s,
+		middleware: m.v,
+	}
+
+	return result.ok(a)
+}
+
+function createStreamable(config: Config, create: CreateServer): AppMcp {
 	let sc: mcp.sessions.Config = {
 		ttl: config.mcp.session.ttl,
 	}
 
-	let ss = new mcp.sessions.Sessions(sc)
+	let s = new mcp.sessions.Sessions(sc)
 
 	let tc: mcp.streamable.transports.Config = {
-		sessions: ss,
+		sessions: s,
 	}
 
-	let tt = new mcp.streamable.transports.Transports(tc)
+	let t = new mcp.streamable.transports.Transports(tc)
 
-	let mc: mcp.streamable.server.Config = {
+	let rc: mcp.streamable.server.Config = {
 		servers: {
 			create,
 		},
-		transports: tt,
+		transports: t,
 	}
 
-	let mr = mcp.streamable.server.router(mc)
+	let r = mcp.streamable.server.router(rc)
 
-	let ex = express()
+	let a: AppMcp = {
+		sessions: s,
+		server: r,
+	}
 
-	ex.disable("x-powered-by")
-	ex.disable("etag")
-	ex.set("json spaces", 2)
+	return a
+}
 
-	ex.use(moreexpress.context())
-	ex.use(moreexpress.logger())
+function createExpress(o: AppOauth, s: AppMcp): express.Express {
+	let e = express()
 
-	ex.use(or)
-	ex.use(os)
+	e.disable("x-powered-by")
+	e.disable("etag")
+	e.set("json spaces", 2)
 
-	let wr = express.Router()
-	wr.use(oh.v)
-	wr.use("/", mr)
-	ex.use(wr)
+	e.use(moreexpress.context())
+	e.use(moreexpress.logger())
 
-	ex.use(moreexpress.notFound())
+	e.use(o.resource)
+	e.use(o.server)
 
-	let sa = new AbortController()
+	let r = express.Router()
+	r.use(o.middleware)
+	r.use("/", s.server)
+	e.use(r)
 
-	let sw = ss.watch(sa.signal, config.mcp.session.interval)
+	e.use(moreexpress.notFound())
 
-	let hs = ex.listen(config.mcp.server.port, config.mcp.server.host)
+	return e
+}
 
-	let cleanup = async(): Promise<Error | undefined> => {
+function startApp(config: Config, a: App): [shared.P, shared.Cleanup] {
+	let c = new AbortController()
+
+	let w = a.streamable.sessions.watch(c.signal, config.mcp.session.interval)
+
+	let h = a.express.listen(config.mcp.server.port, config.mcp.server.host)
+
+	let cleanup = createCleanup(a, c, w, h)
+
+	let p = createPromise(config, h)
+
+	return [p, cleanup]
+}
+
+function createCleanup(a: App, c: AbortController, w: shared.P, h: http.Server): shared.Cleanup {
+	return async() => {
 		let errs: Error[] = []
 
-		if (!sa.signal.aborted) {
-			sa.abort("Cleaning up")
+		if (!c.signal.aborted) {
+			c.abort("Cleaning up")
 
-			let err = await sw
+			let err = await w
 			if (err && !moreerrors.isAborted(err)) {
 				errs.push(new Error("Stopping sessions watcher", {cause: err}))
 			}
 
-			err = await ss.clear()
+			err = await a.streamable.sessions.clear()
 			if (err) {
 				errs.push(new Error("Clearing sessions", {cause: err}))
 			}
 		}
 
-		if (hs.listening) {
+		if (h.listening) {
 			let err = await new Promise<Error | undefined>((res) => {
-				hs.close((err) => {
+				h.close((err) => {
 					if (err) {
 						res(new Error("Closing HTTP server", {cause: err}))
 					} else {
@@ -262,10 +343,12 @@ export function start(
 			return new Error("Multiple errors", {cause: errs})
 		}
 	}
+}
 
-	let p = new Promise<Error | undefined>((res) => {
-		hs.once("error", onError)
-		hs.once("listening", onListening)
+async function createPromise(config: Config, h: http.Server): shared.P {
+	return await new Promise((res) => {
+		h.once("error", onError)
+		h.once("listening", onListening)
 
 		function onError(err: Error): void {
 			close(new Error("Starting HTTP server", {cause: err}))
@@ -281,11 +364,9 @@ export function start(
 		}
 
 		function close(err?: Error): void {
-			hs.removeListener("error", onError)
-			hs.removeListener("listening", onListening)
+			h.removeListener("error", onError)
+			h.removeListener("listening", onListening)
 			res(err)
 		}
 	})
-
-	return [p, cleanup]
 }
