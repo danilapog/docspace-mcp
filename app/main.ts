@@ -20,8 +20,8 @@
 
 import * as logger from "../lib/util/logger.ts"
 import * as config from "./config.ts"
+import * as http from "./http.ts"
 import * as stdio from "./stdio.ts"
-import * as streamable from "./streamable.ts"
 
 const SIGNALS = ["SIGTERM", "SIGINT"]
 
@@ -54,14 +54,14 @@ async function main(): Promise<void> {
 		}
 
 		if (c.v.internal && c.v.mcp.transport === "http") {
-			let [p, cleanup] = streamable.internal.start(c.v)
+			let [p, cleanup] = http.internal.start(c.v)
 			watch(cleanup)
 			await start(p, cleanup)
 			return
 		}
 
 		if (!c.v.internal && c.v.mcp.transport === "http") {
-			let [p, cleanup] = streamable.external.start(c.v)
+			let [p, cleanup] = http.external.start(c.v)
 			watch(cleanup)
 			await start(p, cleanup)
 			return
