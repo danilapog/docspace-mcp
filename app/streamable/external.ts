@@ -16,14 +16,16 @@
  * @license
  */
 
+import type * as server from "@modelcontextprotocol/sdk/server/index.js"
 import express from "express"
-import * as client from "../../lib/api/client.ts"
-import * as streamable from "../../lib/mcp/streamable.ts"
+import * as api from "../../lib/api.ts"
+import * as mcp from "../../lib/mcp.ts"
 import * as oauth from "../../lib/oauth.ts"
 import * as logger from "../../lib/util/logger.ts"
 import * as moreerrors from "../../lib/util/moreerrors.ts"
 import * as moreexpress from "../../lib/util/moreexpress.ts"
 import * as morefetch from "../../lib/util/morefetch.ts"
+import * as result from "../../lib/util/result.ts"
 
 export interface Config {
 	mcp: Mcp
@@ -88,7 +90,48 @@ export interface OauthClient {
 export function start(
 	config: Config,
 ): [Promise<Error | undefined>, () => Promise<Error | undefined>] {
-	let cc: client.Config = {
+	let create = (req: express.Request): result.Result<server.Server, Error> => {
+		if (!req.auth) {
+			return result.error(new Error("OAuth middleware was not registered"))
+		}
+
+		let p = api.client.decodeOauthTokenPayload(req.auth.token)
+		if (p.err) {
+			return result.error(new Error("Decoding OAuth token", {cause: p.err}))
+		}
+
+		if (!p.v.aud.endsWith("/")) {
+			p.v.aud += "/"
+		}
+
+		let cc: api.client.Config = {
+			userAgent: config.api.userAgent,
+			sharedBaseUrl: p.v.aud,
+			sharedFetch: morefetch.withLogger(globalThis.fetch),
+			oauthBaseUrl: "",
+			oauthFetch() {
+				throw new Error("Not implemented")
+			},
+		}
+
+		let c = new api.client.Client(cc)
+
+		c = c.withBearerAuth(req.auth.token)
+
+		let sc: mcp.base.configured.Config = {
+			client: c,
+			resolver: new api.resolver.Resolver(c),
+			uploader: new api.uploader.Uploader(c),
+			dynamic: config.mcp.dynamic,
+			tools: config.mcp.tools,
+		}
+
+		let s = mcp.base.configured.create(sc)
+
+		return result.ok(s)
+	}
+
+	let cc: api.client.Config = {
 		userAgent: config.api.userAgent,
 		sharedBaseUrl: "",
 		sharedFetch() {
@@ -98,7 +141,7 @@ export function start(
 		oauthFetch: morefetch.withLogger(globalThis.fetch),
 	}
 
-	let cl = new client.Client(cc)
+	let cl = new api.client.Client(cc)
 
 	cl = cl.withApiKey(config.api.shared.apiKey)
 
@@ -136,33 +179,26 @@ export function start(
 		return [Promise.resolve(oh.err), async() => undefined]
 	}
 
-	let bc: streamable.base.external.Config = {
-		userAgent: config.api.userAgent,
-		dynamic: config.mcp.dynamic,
-		tools: config.mcp.tools,
-		fetch: morefetch.withLogger(globalThis.fetch),
-	}
-
-	let bs = new streamable.base.external.Servers(bc)
-
-	let sc: streamable.sessions.Config = {
+	let sc: mcp.streamable.sessions.Config = {
 		ttl: config.mcp.session.ttl,
 	}
 
-	let ss = new streamable.sessions.Sessions(sc)
+	let ss = new mcp.streamable.sessions.Sessions(sc)
 
-	let tc: streamable.transports.Config = {
+	let tc: mcp.streamable.transports.Config = {
 		sessions: ss,
 	}
 
-	let tt = new streamable.transports.Transports(tc)
+	let tt = new mcp.streamable.transports.Transports(tc)
 
-	let mc: streamable.server.Config = {
-		servers: bs,
+	let mc: mcp.streamable.server.Config = {
+		servers: {
+			create,
+		},
 		transports: tt,
 	}
 
-	let mr = streamable.server.router(mc)
+	let mr = mcp.streamable.server.router(mc)
 
 	let ex = express()
 
