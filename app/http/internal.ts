@@ -16,6 +16,7 @@
  * @license
  */
 
+import type http from "node:http"
 import type * as server from "@modelcontextprotocol/sdk/server/index.js"
 import express from "express"
 import * as api from "../../lib/api.ts"
@@ -25,6 +26,7 @@ import * as moreerrors from "../../lib/util/moreerrors.ts"
 import * as moreexpress from "../../lib/util/moreexpress.ts"
 import * as morefetch from "../../lib/util/morefetch.ts"
 import * as result from "../../lib/util/result.ts"
+import type * as shared from "../shared.ts"
 
 export interface Config {
 	mcp: Mcp
@@ -52,10 +54,40 @@ export interface Api {
 	userAgent: string
 }
 
-export function start(
-	config: Config,
-): [Promise<Error | undefined>, () => Promise<Error | undefined>] {
-	let create = (req: express.Request): result.Result<server.Server, Error> => {
+type CreateServer = (req: express.Request) => result.Result<server.Server, Error>
+
+interface App {
+	streamable: AppMcp
+	express: express.Express
+}
+
+interface AppMcp {
+	sessions: mcp.sessions.Sessions
+	server: express.Router
+}
+
+export function start(config: Config): [shared.P, shared.Cleanup] {
+	let a = createApp(config)
+	return startApp(config, a)
+}
+
+function createApp(config: Config): App {
+	let create = createCreateServer(config)
+
+	let s = createStreamable(config, create)
+
+	let e = createExpress(s)
+
+	let a: App = {
+		streamable: s,
+		express: e,
+	}
+
+	return a
+}
+
+function createCreateServer(config: Config): CreateServer {
+	return (req: express.Request): result.Result<server.Server, Error> => {
 		let a = req.headers.authorization
 		if (!a) {
 			return result.error(new Error("Authorization header is required"))
@@ -92,65 +124,89 @@ export function start(
 
 		return result.ok(s)
 	}
+}
 
+function createStreamable(config: Config, create: CreateServer): AppMcp {
 	let sc: mcp.sessions.Config = {
 		ttl: config.mcp.session.ttl,
 	}
 
-	let ss = new mcp.sessions.Sessions(sc)
+	let s = new mcp.sessions.Sessions(sc)
 
 	let tc: mcp.streamable.transports.Config = {
-		sessions: ss,
+		sessions: s,
 	}
 
-	let tt = new mcp.streamable.transports.Transports(tc)
+	let t = new mcp.streamable.transports.Transports(tc)
 
-	let mc: mcp.streamable.server.Config = {
+	let rc: mcp.streamable.server.Config = {
 		servers: {
 			create,
 		},
-		transports: tt,
+		transports: t,
 	}
 
-	let mr = mcp.streamable.server.router(mc)
+	let r = mcp.streamable.server.router(rc)
 
-	let app = express()
+	let a: AppMcp = {
+		sessions: s,
+		server: r,
+	}
 
-	app.disable("x-powered-by")
-	app.disable("etag")
+	return a
+}
 
-	app.use(moreexpress.context())
-	app.use(moreexpress.logger())
+function createExpress(s: AppMcp): express.Express {
+	let e = express()
 
-	app.use(mr)
-	app.use(moreexpress.notFound())
+	e.disable("x-powered-by")
+	e.disable("etag")
 
-	let sa = new AbortController()
+	e.use(moreexpress.context())
+	e.use(moreexpress.logger())
 
-	let sw = ss.watch(sa.signal, config.mcp.session.interval)
+	e.use(s.server)
 
-	let hs = app.listen(config.mcp.server.port, config.mcp.server.host)
+	e.use(moreexpress.notFound())
 
-	let cleanup = async(): Promise<Error | undefined> => {
+	return e
+}
+
+function startApp(config: Config, a: App): [shared.P, shared.Cleanup] {
+	let c = new AbortController()
+
+	let w = a.streamable.sessions.watch(c.signal, config.mcp.session.interval)
+
+	let h = a.express.listen(config.mcp.server.port, config.mcp.server.host)
+
+	let cleanup = createCleanup(a, c, w, h)
+
+	let p = createPromise(config, h)
+
+	return [p, cleanup]
+}
+
+function createCleanup(a: App, c: AbortController, w: shared.P, h: http.Server): shared.Cleanup {
+	return async() => {
 		let errs: Error[] = []
 
-		if (!sa.signal.aborted) {
-			sa.abort("Cleaning up")
+		if (!c.signal.aborted) {
+			c.abort("Cleaning up")
 
-			let err = await sw
+			let err = await w
 			if (err && !moreerrors.isAborted(err)) {
 				errs.push(new Error("Stopping sessions watcher", {cause: err}))
 			}
 
-			err = await ss.clear()
+			err = await a.streamable.sessions.clear()
 			if (err) {
 				errs.push(new Error("Clearing sessions", {cause: err}))
 			}
 		}
 
-		if (hs.listening) {
+		if (h.listening) {
 			let err = await new Promise<Error | undefined>((res) => {
-				hs.close((err) => {
+				h.close((err) => {
 					if (err) {
 						res(new Error("Closing HTTP server", {cause: err}))
 					} else {
@@ -168,10 +224,12 @@ export function start(
 			return new Error("Multiple errors", {cause: errs})
 		}
 	}
+}
 
-	let p = new Promise<Error | undefined>((res) => {
-		hs.once("error", onError)
-		hs.once("listening", onListening)
+async function createPromise(config: Config, h: http.Server): shared.P {
+	return await new Promise((res) => {
+		h.once("error", onError)
+		h.once("listening", onListening)
 
 		function onError(err: Error): void {
 			close(new Error("Starting HTTP server", {cause: err}))
@@ -187,11 +245,9 @@ export function start(
 		}
 
 		function close(err?: Error): void {
-			hs.removeListener("error", onError)
-			hs.removeListener("listening", onListening)
+			h.removeListener("error", onError)
+			h.removeListener("listening", onListening)
 			res(err)
 		}
 	})
-
-	return [p, cleanup]
 }
