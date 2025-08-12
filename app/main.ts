@@ -21,6 +21,7 @@
 import * as logger from "../lib/util/logger.ts"
 import * as config from "./config.ts"
 import * as http from "./http.ts"
+import type * as shared from "./shared.ts"
 import * as stdio from "./stdio.ts"
 
 const SIGNALS = ["SIGTERM", "SIGINT"]
@@ -73,10 +74,7 @@ async function main(): Promise<void> {
 	process.exit(1)
 }
 
-async function start(
-	p: Promise<Error | undefined>,
-	cleanup: () => Promise<Error | undefined>,
-): Promise<void> {
+async function start(p: shared.P, cleanup: shared.Cleanup): Promise<void> {
 	let err = await p
 	if (err) {
 		logger.error("Server failed to start", {err})
@@ -90,7 +88,7 @@ async function start(
 	}
 }
 
-function watch(cleanup: () => Promise<Error | undefined>): void {
+function watch(cleanup: shared.Cleanup): void {
 	for (let s of SIGNALS) {
 		process.on(s, () => {
 			void (async() => {
