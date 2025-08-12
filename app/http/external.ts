@@ -87,6 +87,17 @@ export interface Server {
 	baseUrl: string
 	host: string
 	port: number
+	rateLimits: RateLimits
+}
+
+export interface RateLimits {
+	oauthMetadata: RateLimit
+	oauthRegister: RateLimit
+}
+
+export interface RateLimit {
+	capacity: number
+	window: number
 }
 
 type CreateServer = (req: express.Request) => result.Result<server.Server, Error>
@@ -201,6 +212,8 @@ function createOauth(config: Config): result.Result<AppOauth, Error> {
 	c = c.withApiKey(config.api.shared.apiKey)
 
 	let rc: oauth.resource.Config = {
+		metadataRateLimitCapacity: config.server.rateLimits.oauthMetadata.capacity,
+		metadataRateLimitWindow: config.server.rateLimits.oauthMetadata.window,
 		resourceBaseUrl: config.server.baseUrl,
 		scopesSupported: config.oauth.resource.scopesSupported,
 		resourceName: config.oauth.resource.resourceName,
@@ -211,6 +224,10 @@ function createOauth(config: Config): result.Result<AppOauth, Error> {
 
 	let sc: oauth.server.Config = {
 		serverBaseUrl: config.server.baseUrl,
+		metadataRateLimitCapacity: config.server.rateLimits.oauthMetadata.capacity,
+		metadataRateLimitWindow: config.server.rateLimits.oauthMetadata.window,
+		registerRateLimitCapacity: config.server.rateLimits.oauthRegister.capacity,
+		registerRateLimitWindow: config.server.rateLimits.oauthRegister.window,
 		redirectUris: config.oauth.client.redirectUris,
 		clientId: config.oauth.client.clientId,
 		clientName: config.oauth.client.clientName,

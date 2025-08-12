@@ -108,6 +108,17 @@ export interface Server {
 	baseUrl: string
 	host: string
 	port: number
+	rateLimits: RateLimits
+}
+
+export interface RateLimits {
+	oauthMetadata: RateLimit
+	oauthRegister: RateLimit
+}
+
+export interface RateLimit {
+	capacity: number
+	window: number
 }
 
 export const ConfigSchema = z.
@@ -291,6 +302,34 @@ export const ConfigSchema = z.
 			default("8080").
 			transform(morezod.envNumber()).
 			pipe(z.number().min(1).max(65534)), // todo: change to 0-64535
+
+		//
+		// Server Rate Limits options
+		//
+
+		DOCSPACE_SERVER_RATE_LIMITS_OAUTH_METADATA_CAPACITY: z.
+			string().
+			default("200").
+			transform(morezod.envNumber()).
+			pipe(z.number().min(0)),
+
+		DOCSPACE_SERVER_RATE_LIMITS_OAUTH_METADATA_WINDOW: z.
+			string().
+			default("1000"). // 1 second
+			transform(morezod.envNumber()).
+			pipe(z.number().min(0)),
+
+		DOCSPACE_SERVER_RATE_LIMITS_OAUTH_REGISTER_CAPACITY: z.
+			string().
+			default("20").
+			transform(morezod.envNumber()).
+			pipe(z.number().min(0)),
+
+		DOCSPACE_SERVER_RATE_LIMITS_OAUTH_REGISTER_WINDOW: z.
+			string().
+			default("3600000"). // 1 hour
+			transform(morezod.envNumber()).
+			pipe(z.number().min(0)),
 	}).
 	transform((o) => {
 		let c: Config = {
@@ -341,6 +380,16 @@ export const ConfigSchema = z.
 				baseUrl: o.DOCSPACE_SERVER_BASE_URL,
 				host: o.DOCSPACE_HOST,
 				port: o.DOCSPACE_PORT,
+				rateLimits: {
+					oauthMetadata: {
+						capacity: o.DOCSPACE_SERVER_RATE_LIMITS_OAUTH_METADATA_CAPACITY,
+						window: o.DOCSPACE_SERVER_RATE_LIMITS_OAUTH_METADATA_WINDOW,
+					},
+					oauthRegister: {
+						capacity: o.DOCSPACE_SERVER_RATE_LIMITS_OAUTH_REGISTER_CAPACITY,
+						window: o.DOCSPACE_SERVER_RATE_LIMITS_OAUTH_REGISTER_WINDOW,
+					},
+				},
 			},
 		}
 
