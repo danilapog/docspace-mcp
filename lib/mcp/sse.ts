@@ -16,7 +16,5 @@
  * @license
  */
 
-export * as base from "./mcp/base.ts"
-export * as sessions from "./mcp/sessions.ts"
-export * as sse from "./mcp/sse.ts"
-export * as streamable from "./mcp/streamable.ts"
+export * as server from "./sse/server.ts"
+export * as transports from "./sse/transports.ts"
