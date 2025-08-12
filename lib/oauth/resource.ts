@@ -19,10 +19,13 @@
 import * as errors from "@modelcontextprotocol/sdk/server/auth/errors.js"
 import * as allowedMethods from "@modelcontextprotocol/sdk/server/auth/middleware/allowedMethods.js"
 import type * as auth from "@modelcontextprotocol/sdk/shared/auth.js"
+import cors from "cors"
 import express from "express"
 import * as expressRateLimit from "express-rate-limit"
 
 export interface Config {
+	metadataCorsOrigin: string
+	metadataCorsMaxAge: number
 	metadataRateLimitCapacity: number
 	metadataRateLimitWindow: number
 	resourceBaseUrl: string
@@ -32,6 +35,8 @@ export interface Config {
 }
 
 class Server {
+	private metadataCorsOrigin: string
+	private metadataCorsMaxAge: number
 	private metadataRateLimitCapacity: number
 	private metadataRateLimitWindow: number
 	private resourceBaseUrl: string
@@ -40,12 +45,43 @@ class Server {
 	private resourceDocumentation: string
 
 	constructor(config: Config) {
+		this.metadataCorsOrigin = config.metadataCorsOrigin
+		this.metadataCorsMaxAge = config.metadataCorsMaxAge
 		this.metadataRateLimitCapacity = config.metadataRateLimitCapacity
 		this.metadataRateLimitWindow = config.metadataRateLimitWindow
 		this.resourceBaseUrl = config.resourceBaseUrl
 		this.scopesSupported = config.scopesSupported
 		this.resourceName = config.resourceName
 		this.resourceDocumentation = config.resourceDocumentation
+	}
+
+	metadataCors(): express.Handler {
+		if (!this.metadataCorsOrigin) {
+			return (_, __, next) => {
+				next()
+			}
+		}
+
+		let o: cors.CorsOptions = {
+			origin: this.metadataCorsOrigin,
+			methods: ["GET"],
+		}
+
+		let exposedHeaders: string[] = []
+
+		if (this.metadataRateLimitCapacity && this.metadataRateLimitWindow) {
+			exposedHeaders.push("Retry-After")
+		}
+
+		if (exposedHeaders.length !== 0) {
+			o.exposedHeaders = exposedHeaders
+		}
+
+		if (this.metadataCorsMaxAge) {
+			o.maxAge = this.metadataCorsMaxAge
+		}
+
+		return cors(o)
 	}
 
 	metadataRateLimit(): express.Handler {
@@ -101,6 +137,7 @@ export function router(config: Config): express.Router {
 	g.use(express.json())
 
 	let m = express.Router()
+	m.use(s.metadataCors())
 	m.use(allowedMethods.allowedMethods(["GET"]))
 	m.use(s.metadataRateLimit())
 	m.get("/", s.metadata.bind(s))

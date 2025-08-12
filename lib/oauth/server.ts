@@ -19,6 +19,7 @@
 import * as errors from "@modelcontextprotocol/sdk/server/auth/errors.js"
 import * as allowedMethods from "@modelcontextprotocol/sdk/server/auth/middleware/allowedMethods.js"
 import * as auth from "@modelcontextprotocol/sdk/shared/auth.js"
+import cors from "cors"
 import express from "express"
 import * as expressRateLimit from "express-rate-limit"
 import type * as client from "../api/client.ts"
@@ -27,8 +28,12 @@ import * as result from "../util/result.ts"
 
 export interface Config {
 	serverBaseUrl: string
+	metadataCorsOrigin: string
+	metadataCorsMaxAge: number
 	metadataRateLimitCapacity: number
 	metadataRateLimitWindow: number
+	registerCorsOrigin: string
+	registerCorsMaxAge: number
 	registerRateLimitCapacity: number
 	registerRateLimitWindow: number
 	redirectUris: string[]
@@ -51,8 +56,12 @@ export interface OauthService {
 
 class Server {
 	private serverBaseUrl: string
+	private metadataCorsOrigin: string
+	private metadataCorsMaxAge: number
 	private metadataRateLimitCapacity: number
 	private metadataRateLimitWindow: number
+	private registerCorsOrigin: string
+	private registerCorsMaxAge: number
 	private registerRateLimitCapacity: number
 	private registerRateLimitWindow: number
 	private redirectUris: string[]
@@ -66,8 +75,12 @@ class Server {
 
 	constructor(config: Config) {
 		this.serverBaseUrl = config.serverBaseUrl
+		this.metadataCorsOrigin = config.metadataCorsOrigin
+		this.metadataCorsMaxAge = config.metadataCorsMaxAge
 		this.metadataRateLimitCapacity = config.metadataRateLimitCapacity
 		this.metadataRateLimitWindow = config.metadataRateLimitWindow
+		this.registerCorsOrigin = config.registerCorsOrigin
+		this.registerCorsMaxAge = config.registerCorsMaxAge
 		this.registerRateLimitCapacity = config.registerRateLimitCapacity
 		this.registerRateLimitWindow = config.registerRateLimitWindow
 		this.redirectUris = config.redirectUris
@@ -78,6 +91,35 @@ class Server {
 		this.policyUri = config.policyUri
 		this.clientSecret = config.clientSecret
 		this.client = config.client
+	}
+
+	metadataCors(): express.Handler {
+		if (!this.metadataCorsOrigin) {
+			return (_, __, next) => {
+				next()
+			}
+		}
+
+		let o: cors.CorsOptions = {
+			origin: this.metadataCorsOrigin,
+			methods: ["GET"],
+		}
+
+		let exposedHeaders: string[] = []
+
+		if (this.metadataRateLimitCapacity && this.metadataRateLimitWindow) {
+			exposedHeaders.push("Retry-After")
+		}
+
+		if (exposedHeaders.length !== 0) {
+			o.exposedHeaders = exposedHeaders
+		}
+
+		if (this.metadataCorsMaxAge) {
+			o.maxAge = this.metadataCorsMaxAge
+		}
+
+		return cors(o)
 	}
 
 	metadataRateLimit(): express.Handler {
@@ -96,6 +138,35 @@ class Server {
 				TooManyRequestsError("You have exceeded the rate limit for authorization server metadata requests").
 				toResponseObject(),
 		})
+	}
+
+	registerCors(): express.Handler {
+		if (!this.registerCorsOrigin) {
+			return (_, __, next) => {
+				next()
+			}
+		}
+
+		let o: cors.CorsOptions = {
+			origin: this.registerCorsOrigin,
+			methods: ["POST"],
+		}
+
+		let exposedHeaders: string[] = []
+
+		if (this.registerRateLimitCapacity && this.registerRateLimitWindow) {
+			exposedHeaders.push("Retry-After")
+		}
+
+		if (exposedHeaders.length !== 0) {
+			o.exposedHeaders = exposedHeaders
+		}
+
+		if (this.registerCorsMaxAge) {
+			o.maxAge = this.registerCorsMaxAge
+		}
+
+		return cors(o)
 	}
 
 	/**
@@ -201,11 +272,13 @@ export function router(config: Config): express.Router {
 	g.use(express.json())
 
 	let m = express.Router()
+	m.use(s.metadataCors())
 	m.use(allowedMethods.allowedMethods(["GET"]))
 	m.use(s.metadataRateLimit())
 	m.get("/", s.metadata.bind(s))
 
 	let r = express.Router()
+	r.use(s.registerCors())
 	r.use(allowedMethods.allowedMethods(["POST"]))
 	r.use(s.registerRateLimit())
 	r.post("/", s.register.bind(s))
