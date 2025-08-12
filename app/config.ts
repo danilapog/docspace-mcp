@@ -46,6 +46,7 @@ export interface Config {
 	mcp: Mcp
 	api: Api
 	oauth: Oauth
+	server: Server
 }
 
 export interface Mcp {
@@ -55,14 +56,7 @@ export interface Mcp {
 	tools: string[]
 	enabledTools: string[]
 	disabledTools: string[]
-	server: McpServer
 	session: McpSession
-}
-
-export interface McpServer {
-	baseUrl: string
-	host: string
-	port: number
 }
 
 export interface McpSession {
@@ -110,6 +104,12 @@ export interface OauthClient {
 	clientSecret: string
 }
 
+export interface Server {
+	baseUrl: string
+	host: string
+	port: number
+}
+
 export const ConfigSchema = z.
 	object({
 		//
@@ -149,26 +149,6 @@ export const ConfigSchema = z.
 			string().
 			default("").
 			transform(morezod.envOptions([...availableTools])),
-
-		//
-		// MCP Server options
-		//
-
-		DOCSPACE_MCP_BASE_URL: z. // todo: check url
-			string().
-			trim().
-			default(""),
-
-		DOCSPACE_HOST: z. // todo: cannot be empty, see https://github.com/nodejs/node/blob/v24.5.0/lib/net.js#L299
-			string().
-			trim().
-			default("127.0.0.1"),
-
-		DOCSPACE_PORT: z.
-			string().
-			default("8080").
-			transform(morezod.envNumber()).
-			pipe(z.number().min(1).max(65534)), // todo: change to 0-64535
 
 		//
 		// MCP Session options
@@ -291,6 +271,26 @@ export const ConfigSchema = z.
 			string().
 			trim().
 			default(""),
+
+		//
+		// Server options
+		//
+
+		DOCSPACE_SERVER_BASE_URL: z. // todo: check url
+			string().
+			trim().
+			default(""),
+
+		DOCSPACE_HOST: z. // todo: cannot be empty, see https://github.com/nodejs/node/blob/v24.5.0/lib/net.js#L299
+			string().
+			trim().
+			default("127.0.0.1"),
+
+		DOCSPACE_PORT: z.
+			string().
+			default("8080").
+			transform(morezod.envNumber()).
+			pipe(z.number().min(1).max(65534)), // todo: change to 0-64535
 	}).
 	transform((o) => {
 		let c: Config = {
@@ -302,11 +302,6 @@ export const ConfigSchema = z.
 				tools: [],
 				enabledTools: o.DOCSPACE_ENABLED_TOOLS,
 				disabledTools: o.DOCSPACE_DISABLED_TOOLS,
-				server: {
-					baseUrl: o.DOCSPACE_MCP_BASE_URL,
-					host: o.DOCSPACE_HOST,
-					port: o.DOCSPACE_PORT,
-				},
 				session: {
 					ttl: o.DOCSPACE_SESSION_TTL,
 					interval: o.DOCSPACE_SESSION_INTERVAL,
@@ -342,6 +337,11 @@ export const ConfigSchema = z.
 					clientSecret: o.DOCSPACE_OAUTH_CLIENT_SECRET,
 				},
 			},
+			server: {
+				baseUrl: o.DOCSPACE_SERVER_BASE_URL,
+				host: o.DOCSPACE_HOST,
+				port: o.DOCSPACE_PORT,
+			},
 		}
 
 		c.mcp.toolsets = normalizeToolsets(c.mcp.toolsets)
@@ -355,13 +355,13 @@ export const ConfigSchema = z.
 		c.mcp.tools = r[1]
 
 		// todo: check if not empty
-		c.mcp.server.baseUrl = ensureTrailing(c.mcp.server.baseUrl)
-
-		// todo: check if not empty
 		c.api.shared.baseUrl = ensureTrailing(c.api.shared.baseUrl)
 
 		// todo: check if not empty
 		c.api.oauth.baseUrl = ensureTrailing(c.api.oauth.baseUrl)
+
+		// todo: check if not empty
+		c.server.baseUrl = ensureTrailing(c.server.baseUrl)
 
 		return c
 	}).
@@ -409,10 +409,10 @@ export const ConfigSchema = z.
 		}
 
 		if (!o.internal && o.mcp.transport === "http") {
-			if (!o.mcp.server.baseUrl) {
+			if (!o.server.baseUrl) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
-					message: "MCP server base URL is required for HTTP transport",
+					message: "Server base URL is required for HTTP transport",
 				})
 			}
 
@@ -538,11 +538,11 @@ function ensureTrailing(u: string): string {
 export function format(c: Config): object {
 	let o: morets.RecursivePartial<Config> = {}
 	let mcp: morets.RecursivePartial<Mcp> = {}
-	let server: morets.RecursivePartial<McpServer> = {}
 	let session: morets.RecursivePartial<McpSession> = {}
 	let api: morets.RecursivePartial<Api> = {}
 	let shared: morets.RecursivePartial<ApiShared> = {}
 	let oauth: morets.RecursivePartial<ApiOauth> = {}
+	let server: morets.RecursivePartial<Server> = {}
 
 	if (c.internal) {
 		o.internal = c.internal
@@ -562,22 +562,6 @@ export function format(c: Config): object {
 
 	if (c.mcp.tools.length !== 0) {
 		mcp.tools = c.mcp.tools
-	}
-
-	if (c.mcp.server.baseUrl) {
-		server.baseUrl = c.mcp.server.baseUrl
-	}
-
-	if (c.mcp.server.host) {
-		server.host = c.mcp.server.host
-	}
-
-	if (c.mcp.server.port) {
-		server.port = c.mcp.server.port
-	}
-
-	if (Object.keys(server).length !== 0) {
-		mcp.server = server
 	}
 
 	if (c.mcp.session.ttl) {
@@ -638,6 +622,22 @@ export function format(c: Config): object {
 
 	if (Object.keys(api).length !== 0) {
 		o.api = api
+	}
+
+	if (c.server.baseUrl) {
+		server.baseUrl = c.server.baseUrl
+	}
+
+	if (c.server.host) {
+		server.host = c.server.host
+	}
+
+	if (c.server.port) {
+		server.port = c.server.port
+	}
+
+	if (Object.keys(server).length !== 0) {
+		o.server = server
 	}
 
 	return o

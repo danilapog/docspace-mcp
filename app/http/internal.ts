@@ -31,18 +31,13 @@ import type * as shared from "../shared.ts"
 export interface Config {
 	mcp: Mcp
 	api: Api
+	server: Server
 }
 
 export interface Mcp {
 	dynamic: boolean
 	tools: string[]
-	server: McpServer
 	session: McpSession
-}
-
-export interface McpServer {
-	host: string
-	port: number
 }
 
 export interface McpSession {
@@ -52,6 +47,11 @@ export interface McpSession {
 
 export interface Api {
 	userAgent: string
+}
+
+export interface Server {
+	host: string
+	port: number
 }
 
 type CreateServer = (req: express.Request) => result.Result<server.Server, Error>
@@ -177,7 +177,7 @@ function startApp(config: Config, a: App): [shared.P, shared.Cleanup] {
 
 	let w = a.streamable.sessions.watch(c.signal, config.mcp.session.interval)
 
-	let h = a.express.listen(config.mcp.server.port, config.mcp.server.host)
+	let h = a.express.listen(config.server.port, config.server.host)
 
 	let cleanup = createCleanup(a, c, w, h)
 
@@ -237,8 +237,8 @@ async function createPromise(config: Config, h: http.Server): shared.P {
 
 		function onListening(): void {
 			let o: Record<string, unknown> = {
-				host: config.mcp.server.host,
-				port: config.mcp.server.port,
+				host: config.server.host,
+				port: config.server.port,
 			}
 			logger.info("Server started", o)
 			close()
