@@ -16,10 +16,15 @@
  * @license
  */
 
+import * as errors from "@modelcontextprotocol/sdk/server/auth/errors.js"
+import * as allowedMethods from "@modelcontextprotocol/sdk/server/auth/middleware/allowedMethods.js"
 import type * as auth from "@modelcontextprotocol/sdk/shared/auth.js"
 import express from "express"
+import * as expressRateLimit from "express-rate-limit"
 
 export interface Config {
+	metadataRateLimitCapacity: number
+	metadataRateLimitWindow: number
 	resourceBaseUrl: string
 	scopesSupported: string[]
 	resourceName: string
@@ -27,20 +32,43 @@ export interface Config {
 }
 
 class Server {
+	private metadataRateLimitCapacity: number
+	private metadataRateLimitWindow: number
 	private resourceBaseUrl: string
 	private scopesSupported: string[]
 	private resourceName: string
 	private resourceDocumentation: string
 
 	constructor(config: Config) {
+		this.metadataRateLimitCapacity = config.metadataRateLimitCapacity
+		this.metadataRateLimitWindow = config.metadataRateLimitWindow
 		this.resourceBaseUrl = config.resourceBaseUrl
 		this.scopesSupported = config.scopesSupported
 		this.resourceName = config.resourceName
 		this.resourceDocumentation = config.resourceDocumentation
 	}
 
+	metadataRateLimit(): express.Handler {
+		if (!this.metadataRateLimitCapacity || !this.metadataRateLimitWindow) {
+			return (_, __, next) => {
+				next()
+			}
+		}
+
+		return expressRateLimit.rateLimit({
+			windowMs: this.metadataRateLimitWindow,
+			limit: this.metadataRateLimitCapacity,
+			standardHeaders: true,
+			legacyHeaders: false,
+			message: new errors.
+				TooManyRequestsError("You have exceeded the rate limit for protected resource metadata requests").
+				toResponseObject(),
+		})
+	}
+
 	/**
-	 * {@link https://github.com/modelcontextprotocol/typescript-sdk/blob/1.17.0/src/client/auth.ts#L485 | MCP Reference} \
+	 * {@link https://github.com/modelcontextprotocol/typescript-sdk/blob/1.17.0/src/client/auth.ts#L485 | MCP Client Reference} \
+	 * {@link https://github.com/modelcontextprotocol/typescript-sdk/blob/1.17.0/src/server/auth/handlers/metadata.ts#6 | MCP Server Reference} \
 	 * {@link https://www.rfc-editor.org/rfc/rfc9728#section-3 | RFC 9728 Obtaining Protected Resource Metadata Reference} \
 	 * {@link https://www.rfc-editor.org/rfc/rfc9728#name-protected-resource-metadata | RFC 9728 Protected Resource Metadata Reference}
 	 */
@@ -69,10 +97,15 @@ class Server {
 export function router(config: Config): express.Router {
 	let s = new Server(config)
 
-	let r = express.Router()
-	r.use(express.json())
+	let g = express.Router()
+	g.use(express.json())
 
-	r.get("/.well-known/oauth-protected-resource", s.metadata.bind(s))
+	let m = express.Router()
+	m.use(allowedMethods.allowedMethods(["GET"]))
+	m.use(s.metadataRateLimit())
+	m.get("/", s.metadata.bind(s))
 
-	return r
+	g.get("/.well-known/oauth-protected-resource", m)
+
+	return g
 }
