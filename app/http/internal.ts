@@ -93,11 +93,11 @@ export function start(
 		return result.ok(s)
 	}
 
-	let sc: mcp.streamable.sessions.Config = {
+	let sc: mcp.sessions.Config = {
 		ttl: config.mcp.session.ttl,
 	}
 
-	let ss = new mcp.streamable.sessions.Sessions(sc)
+	let ss = new mcp.sessions.Sessions(sc)
 
 	let tc: mcp.streamable.transports.Config = {
 		sessions: ss,

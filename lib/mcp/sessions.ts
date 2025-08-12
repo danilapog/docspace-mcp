@@ -16,14 +16,17 @@
  * @license
  */
 
-import type * as streamableHttp from "@modelcontextprotocol/sdk/server/streamableHttp.js"
-import * as result from "../../util/result.ts"
+import * as result from "../util/result.ts"
 
 export interface Session {
 	id: string
-	transport: streamableHttp.StreamableHTTPServerTransport
+	transport: Transport
 	createdAt: Date
 	expiresAt: Date
+}
+
+export interface Transport {
+	close(): Promise<void>
 }
 
 export interface Config {
@@ -32,7 +35,7 @@ export interface Config {
 
 export interface CreateOptions {
 	id: string
-	transport: streamableHttp.StreamableHTTPServerTransport
+	transport: Transport
 }
 
 export class Sessions {

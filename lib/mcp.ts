@@ -17,4 +17,5 @@
  */
 
 export * as base from "./mcp/base.ts"
+export * as sessions from "./mcp/sessions.ts"
 export * as streamable from "./mcp/streamable.ts"
