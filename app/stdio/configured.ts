@@ -21,6 +21,7 @@ import * as api from "../../lib/api.ts"
 import * as base from "../../lib/mcp/base.ts"
 import * as morefetch from "../../lib/util/morefetch.ts"
 import * as result from "../../lib/util/result.ts"
+import type * as shared from "../shared.ts"
 
 export interface Config {
 	mcp: Mcp
@@ -46,9 +47,7 @@ export interface ApiShared {
 	password: string
 }
 
-export function start(
-	config: Config,
-): [Promise<Error | undefined>, () => Promise<Error | undefined>] {
+export function start(config: Config): [shared.P, shared.Cleanup] {
 	let cc: api.client.Config = {
 		userAgent: config.api.userAgent,
 		sharedBaseUrl: config.api.shared.baseUrl,
@@ -89,14 +88,14 @@ export function start(
 
 	let t = new stdio.StdioServerTransport()
 
-	let cleanup = async(): Promise<Error | undefined> => {
+	let cleanup: shared.Cleanup = async() => {
 		let r = await result.safeAsync(s.close.bind(s))
 		if (r.err) {
 			return new Error("Closing transport", {cause: r.err})
 		}
 	}
 
-	let p = new Promise<Error | undefined>((res) => {
+	let p: shared.P = new Promise((res) => {
 		s.connect(t).
 			// eslint-disable-next-line promise/prefer-await-to-then
 			then(() => {

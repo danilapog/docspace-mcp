@@ -19,8 +19,9 @@
 import * as stdio from "@modelcontextprotocol/sdk/server/stdio.js"
 import * as base from "../../lib/mcp/base.ts"
 import * as result from "../../lib/util/result.ts"
+import type * as shared from "../shared.ts"
 
-export function start(err: Error): [Promise<Error | undefined>, () => Promise<Error | undefined>] {
+export function start(err: Error): [shared.P, shared.Cleanup] {
 	let c: base.misconfigured.Config = {
 		err,
 	}
@@ -29,14 +30,14 @@ export function start(err: Error): [Promise<Error | undefined>, () => Promise<Er
 
 	let t = new stdio.StdioServerTransport()
 
-	let cleanup = async(): Promise<Error | undefined> => {
+	let cleanup: shared.Cleanup = async() => {
 		let r = await result.safeAsync(s.close.bind(s))
 		if (r.err) {
 			return new Error("Closing transport", {cause: r.err})
 		}
 	}
 
-	let p = new Promise<Error | undefined>((res) => {
+	let p: shared.P = new Promise((res) => {
 		s.connect(t).
 			// eslint-disable-next-line promise/prefer-await-to-then
 			then(() => {
