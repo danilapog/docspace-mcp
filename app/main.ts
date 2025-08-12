@@ -77,8 +77,6 @@ async function start(
 	p: Promise<Error | undefined>,
 	cleanup: () => Promise<Error | undefined>,
 ): Promise<void> {
-	logger.info("Starting server")
-
 	let err = await p
 	if (err) {
 		logger.error("Server failed to start", {err})
@@ -90,8 +88,6 @@ async function start(
 
 		process.exit(1)
 	}
-
-	logger.info("Server started successfully")
 }
 
 function watch(cleanup: () => Promise<Error | undefined>): void {
