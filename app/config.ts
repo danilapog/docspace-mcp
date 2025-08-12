@@ -586,107 +586,247 @@ function ensureTrailing(u: string): string {
 
 export function format(c: Config): object {
 	let o: morets.RecursivePartial<Config> = {}
-	let mcp: morets.RecursivePartial<Mcp> = {}
-	let session: morets.RecursivePartial<McpSession> = {}
-	let api: morets.RecursivePartial<Api> = {}
-	let shared: morets.RecursivePartial<ApiShared> = {}
-	let oauth: morets.RecursivePartial<ApiOauth> = {}
-	let server: morets.RecursivePartial<Server> = {}
 
-	if (c.internal) {
-		o.internal = c.internal
-	}
-
-	if (c.mcp.transport) {
-		mcp.transport = c.mcp.transport
-	}
-
-	if (c.mcp.dynamic) {
-		mcp.dynamic = c.mcp.dynamic
-	}
-
-	if (c.mcp.toolsets.length !== 0) {
-		mcp.toolsets = c.mcp.toolsets
-	}
-
-	if (c.mcp.tools.length !== 0) {
-		mcp.tools = c.mcp.tools
-	}
-
-	if (c.mcp.session.ttl) {
-		session.ttl = c.mcp.session.ttl
-	}
-
-	if (c.mcp.session.interval) {
-		session.interval = c.mcp.session.interval
-	}
-
-	if (Object.keys(session).length !== 0) {
-		mcp.session = session
-	}
-
+	let mcp = formatMcp(c.mcp)
 	if (Object.keys(mcp).length !== 0) {
 		o.mcp = mcp
 	}
 
-	if (c.api.userAgent) {
-		api.userAgent = c.api.userAgent
-	}
-
-	if (c.api.shared.baseUrl) {
-		shared.baseUrl = c.api.shared.baseUrl
-	}
-
-	if (c.api.shared.origin) {
-		shared.origin = c.api.shared.origin
-	}
-
-	if (c.api.shared.apiKey) {
-		shared.apiKey = "***"
-	}
-
-	if (c.api.shared.pat) {
-		shared.pat = "***"
-	}
-
-	if (c.api.shared.username) {
-		shared.username = "***"
-	}
-
-	if (c.api.shared.password) {
-		shared.password = "***"
-	}
-
-	if (Object.keys(shared).length !== 0) {
-		api.shared = shared
-	}
-
-	if (c.api.oauth.baseUrl) {
-		oauth.baseUrl = c.api.oauth.baseUrl
-	}
-
-	if (Object.keys(oauth).length !== 0) {
-		api.oauth = oauth
-	}
-
+	let api = formatApi(c.api)
 	if (Object.keys(api).length !== 0) {
 		o.api = api
 	}
 
-	if (c.server.baseUrl) {
-		server.baseUrl = c.server.baseUrl
+	let oauth = formatOauth(c.oauth)
+	if (Object.keys(oauth).length !== 0) {
+		o.oauth = oauth
 	}
 
-	if (c.server.host) {
-		server.host = c.server.host
-	}
-
-	if (c.server.port) {
-		server.port = c.server.port
-	}
-
+	let server = formatServer(c.server)
 	if (Object.keys(server).length !== 0) {
 		o.server = server
+	}
+
+	return o
+}
+
+function formatMcp(c: Mcp): morets.RecursivePartial<Mcp> {
+	let o: morets.RecursivePartial<Mcp> = {}
+
+	if (c.transport) {
+		o.transport = c.transport
+	}
+
+	if (c.dynamic) {
+		o.dynamic = c.dynamic
+	}
+
+	if (c.toolsets.length !== 0) {
+		o.toolsets = c.toolsets
+	}
+
+	if (c.tools.length !== 0) {
+		o.tools = c.tools
+	}
+
+	let session = formatMcpSession(c.session)
+	if (Object.keys(session).length !== 0) {
+		o.session = session
+	}
+
+	return o
+}
+
+function formatMcpSession(c: McpSession): morets.RecursivePartial<McpSession> {
+	let o: morets.RecursivePartial<McpSession> = {}
+
+	if (c.ttl) {
+		o.ttl = c.ttl
+	}
+
+	if (c.interval) {
+		o.interval = c.interval
+	}
+
+	return o
+}
+
+function formatApi(c: Api): morets.RecursivePartial<Api> {
+	let o: morets.RecursivePartial<Api> = {}
+
+	if (c.userAgent) {
+		o.userAgent = c.userAgent
+	}
+
+	let shared = formatApiShared(c.shared)
+	if (Object.keys(shared).length !== 0) {
+		o.shared = shared
+	}
+
+	let oauth = formatApiOauth(c.oauth)
+	if (Object.keys(oauth).length !== 0) {
+		o.oauth = oauth
+	}
+
+	return o
+}
+
+function formatApiShared(c: ApiShared): morets.RecursivePartial<ApiShared> {
+	let o: morets.RecursivePartial<ApiShared> = {}
+
+	if (c.baseUrl) {
+		o.baseUrl = c.baseUrl
+	}
+
+	if (c.origin) {
+		o.origin = c.origin
+	}
+
+	if (c.apiKey) {
+		o.apiKey = "***"
+	}
+
+	if (c.pat) {
+		o.pat = "***"
+	}
+
+	if (c.username) {
+		o.username = "***"
+	}
+
+	if (c.password) {
+		o.password = "***"
+	}
+
+	return o
+}
+
+function formatApiOauth(c: ApiOauth): morets.RecursivePartial<ApiOauth> {
+	let o: morets.RecursivePartial<ApiOauth> = {}
+
+	if (c.baseUrl) {
+		o.baseUrl = c.baseUrl
+	}
+
+	return o
+}
+
+function formatOauth(c: Oauth): morets.RecursivePartial<Oauth> {
+	let o: morets.RecursivePartial<Oauth> = {}
+
+	let resource = formatOauthResource(c.resource)
+	if (Object.keys(resource).length !== 0) {
+		o.resource = resource
+	}
+
+	let client = formatOauthClient(c.client)
+	if (Object.keys(client).length !== 0) {
+		o.client = client
+	}
+
+	return o
+}
+
+function formatOauthResource(c: OauthResource): morets.RecursivePartial<OauthResource> {
+	let o: morets.RecursivePartial<OauthResource> = {}
+
+	if (c.scopesSupported.length !== 0) {
+		o.scopesSupported = c.scopesSupported
+	}
+
+	if (c.resourceName) {
+		o.resourceName = c.resourceName
+	}
+
+	if (c.resourceDocumentation) {
+		o.resourceDocumentation = c.resourceDocumentation
+	}
+
+	return o
+}
+
+function formatOauthClient(c: OauthClient): morets.RecursivePartial<OauthClient> {
+	let o: morets.RecursivePartial<OauthClient> = {}
+
+	if (c.redirectUris.length !== 0) {
+		o.redirectUris = c.redirectUris
+	}
+
+	if (c.clientId) {
+		o.clientId = c.clientId
+	}
+
+	if (c.clientName) {
+		o.clientName = c.clientName
+	}
+
+	if (c.scopes.length !== 0) {
+		o.scopes = c.scopes
+	}
+
+	if (c.tosUri) {
+		o.tosUri = c.tosUri
+	}
+
+	if (c.policyUri) {
+		o.policyUri = c.policyUri
+	}
+
+	if (c.clientSecret) {
+		o.clientSecret = "***"
+	}
+
+	return o
+}
+
+function formatServer(c: Server): morets.RecursivePartial<Server> {
+	let o: morets.RecursivePartial<Server> = {}
+
+	if (c.baseUrl) {
+		o.baseUrl = c.baseUrl
+	}
+
+	if (c.host) {
+		o.host = c.host
+	}
+
+	if (c.port) {
+		o.port = c.port
+	}
+
+	let rateLimits = formatRateLimits(c.rateLimits)
+	if (Object.keys(rateLimits).length !== 0) {
+		o.rateLimits = rateLimits
+	}
+
+	return o
+}
+
+function formatRateLimits(c: RateLimits): morets.RecursivePartial<RateLimits> {
+	let o: morets.RecursivePartial<RateLimits> = {}
+
+	let oauthMetadata = formatRateLimit(c.oauthMetadata)
+	if (Object.keys(oauthMetadata).length !== 0) {
+		o.oauthMetadata = oauthMetadata
+	}
+
+	let oauthRegister = formatRateLimit(c.oauthRegister)
+	if (Object.keys(oauthRegister).length !== 0) {
+		o.oauthRegister = oauthRegister
+	}
+
+	return o
+}
+
+function formatRateLimit(c: RateLimit): morets.RecursivePartial<RateLimit> {
+	let o: morets.RecursivePartial<RateLimit> = {}
+
+	if (c.capacity) {
+		o.capacity = c.capacity
+	}
+
+	if (c.window) {
+		o.window = c.window
 	}
 
 	return o
