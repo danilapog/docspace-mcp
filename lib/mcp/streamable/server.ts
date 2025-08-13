@@ -20,10 +20,13 @@ import type * as server from "@modelcontextprotocol/sdk/server/index.js"
 import type * as streamableHttp from "@modelcontextprotocol/sdk/server/streamableHttp.js"
 import * as types from "@modelcontextprotocol/sdk/types.js"
 import express from "express"
+import * as expressRateLimit from "express-rate-limit"
 import * as moreerrors from "../../util/moreerrors.ts"
 import * as result from "../../util/result.ts"
 
 export interface Config {
+	rateLimitCapacity: number
+	rateLimitWindow: number
 	servers: Servers
 	transports: Transports
 }
@@ -38,12 +41,37 @@ export interface Transports {
 }
 
 class Server {
+	private rateLimitCapacity: number
+	private rateLimitWindow: number
 	private servers: Servers
 	private transports: Transports
 
 	constructor(config: Config) {
+		this.rateLimitCapacity = config.rateLimitCapacity
+		this.rateLimitWindow = config.rateLimitWindow
 		this.servers = config.servers
 		this.transports = config.transports
+	}
+
+	rateLimit(): express.Handler {
+		if (!this.rateLimitCapacity || !this.rateLimitWindow) {
+			return (_, __, next) => {
+				next()
+			}
+		}
+
+		return expressRateLimit.rateLimit({
+			windowMs: this.rateLimitWindow,
+			limit: this.rateLimitCapacity,
+			standardHeaders: true,
+			legacyHeaders: false,
+			message: new moreerrors.
+				JsonrpcError(
+					-32000,
+					"Too many requests, please try again later",
+				).
+				toObject(),
+		})
 	}
 
 	async post(req: express.Request, res: express.Response): Promise<void> {
@@ -234,6 +262,8 @@ export function router(c: Config): express.Router {
 
 	let r = express.Router()
 	r.use(express.json())
+
+	r.use(s.rateLimit())
 
 	r.post("/mcp", s.post.bind(s))
 	r.get("/mcp", s.get.bind(s))

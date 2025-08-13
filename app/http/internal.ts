@@ -140,6 +140,8 @@ function createStreamable(config: Config, create: CreateServer): AppMcp {
 	let t = new mcp.streamable.transports.Transports(tc)
 
 	let rc: mcp.streamable.server.Config = {
+		rateLimitCapacity: 0,
+		rateLimitWindow: 0,
 		servers: {
 			create,
 		},

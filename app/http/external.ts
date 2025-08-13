@@ -102,6 +102,7 @@ export interface CorsItem {
 }
 
 export interface RateLimits {
+	mcp: RateLimit
 	oauthMetadata: RateLimit
 	oauthRegister: RateLimit
 }
@@ -290,6 +291,8 @@ function createSse(config: Config, create: CreateServer): AppMcp {
 	let t = new mcp.sse.transports.Transports(tc)
 
 	let rc: mcp.sse.server.Config = {
+		rateLimitCapacity: config.server.rateLimits.mcp.capacity,
+		rateLimitWindow: config.server.rateLimits.mcp.window,
 		servers: {
 			create,
 		},
@@ -320,6 +323,8 @@ function createStreamable(config: Config, create: CreateServer): AppMcp {
 	let t = new mcp.streamable.transports.Transports(tc)
 
 	let rc: mcp.streamable.server.Config = {
+		rateLimitCapacity: config.server.rateLimits.mcp.capacity,
+		rateLimitWindow: config.server.rateLimits.mcp.window,
 		servers: {
 			create,
 		},
