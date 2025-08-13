@@ -201,7 +201,7 @@ class Server {
 		let mr = await this.client.oauth.metadata(ac.signal)
 		if (mr.err) {
 			let err = new Error("Discovering OAuth metadata", {cause: mr.err})
-			moreexpress.sendJsonError(res, 500, err)
+			moreexpress.sendOauthError(res, 500, err)
 			return
 		}
 
@@ -210,14 +210,14 @@ class Server {
 		let pr = auth.OAuthMetadataSchema.safeParse(md)
 		if (!pr.success) {
 			let err = new Error("Converting OAuth metadata", {cause: pr.error})
-			moreexpress.sendJsonError(res, 500, err)
+			moreexpress.sendOauthError(res, 500, err)
 			return
 		}
 
 		let ur = result.safeNew(URL, "/register", this.serverBaseUrl)
 		if (ur.err) {
 			let err = new Error("Creating registration endpoint URL", {cause: ur.err})
-			moreexpress.sendJsonError(res, 500, err)
+			moreexpress.sendOauthError(res, 500, err)
 			return
 		}
 

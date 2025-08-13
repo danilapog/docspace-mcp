@@ -106,6 +106,14 @@ export function sendJsonrpcError(res: express.Response, httpCode: number, jsonrp
 	})
 }
 
+export function sendOauthError(res: express.Response, code: number, err: Error): void {
+	res.status(code)
+	res.json({
+		error: "server_error",
+		error_description: moreerrors.format(err),
+	})
+}
+
 export function sendMessageError(res: express.Response, code: number, err: Error): void {
 	res.writeHead(code)
 	res.end(moreerrors.format(err))
