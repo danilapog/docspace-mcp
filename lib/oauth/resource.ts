@@ -139,7 +139,6 @@ export function router(config: Config): express.Router {
 	let s = new Server(config)
 
 	let g = express.Router()
-	g.use(express.json())
 
 	let m = express.Router()
 	m.use(s.metadataCors())
