@@ -20,7 +20,7 @@ import type * as server from "@modelcontextprotocol/sdk/server/index.js"
 import type * as streamableHttp from "@modelcontextprotocol/sdk/server/streamableHttp.js"
 import * as types from "@modelcontextprotocol/sdk/types.js"
 import express from "express"
-import * as moreexpress from "../../util/moreexpress.ts"
+import * as moreerrors from "../../util/moreerrors.ts"
 import * as result from "../../util/result.ts"
 
 export interface Config {
@@ -56,8 +56,13 @@ class Server {
 					let s = this.servers.create(req)
 					if (s.err) {
 						// It is most likely 400, rather than 500.
-						let err = new Error("Creating server", {cause: s.err})
-						moreexpress.sendJsonrpcError(res, 400, -32000, err)
+						let err = new moreerrors.JsonrpcError(
+							-32000,
+							"Creating server",
+							{cause: s.err},
+						)
+						res.status(400)
+						res.json(err.toObject())
 						return
 					}
 
@@ -65,26 +70,44 @@ class Server {
 
 					let c = await result.safeAsync(s.v.connect.bind(s.v), t)
 					if (c.err) {
-						let err = new Error("Attaching server", {cause: c.err})
-						moreexpress.sendJsonrpcError(res, 500, -32603, err)
+						let err = new moreerrors.JsonrpcError(
+							-32603,
+							"Attaching server",
+							{cause: c.err},
+						)
+						res.status(500)
+						res.json(err.toObject())
 						return
 					}
 				} else {
 					// https://github.com/modelcontextprotocol/typescript-sdk/blob/1.15.1/src/server/streamableHttp.ts#L587
-					let err = new Error("Bad Request: Mcp-Session-Id header is required")
-					moreexpress.sendJsonrpcError(res, 400, -32000, err)
+					let err = new moreerrors.JsonrpcError(
+						-32000,
+						"Bad Request: Mcp-Session-Id header is required",
+					)
+					res.status(400)
+					res.json(err.toObject())
 					return
 				}
 			} else if (Array.isArray(id)) {
 				// https://github.com/modelcontextprotocol/typescript-sdk/blob/1.15.1/src/server/streamableHttp.ts#L597
-				let err = new Error("Bad Request: Mcp-Session-Id header must be a single value")
-				moreexpress.sendJsonrpcError(res, 400, -32000, err)
+				let err = new moreerrors.JsonrpcError(
+					-32000,
+					"Bad Request: Mcp-Session-Id header must be a single value",
+				)
+				res.status(400)
+				res.json(err.toObject())
 				return
 			} else {
 				let r = this.transports.retrieve(id)
 				if (r.err) {
-					let err = new Error("Retrieving transport", {cause: r.err})
-					moreexpress.sendJsonrpcError(res, 404, -32001, err)
+					let err = new moreerrors.JsonrpcError(
+						-32001,
+						"Retrieving transport",
+						{cause: r.err},
+					)
+					res.status(404)
+					res.json(err.toObject())
 					return
 				}
 
@@ -100,8 +123,13 @@ class Server {
 						res.end()
 					}
 				} else {
-					let err = new Error("Handling request", {cause: h.err})
-					moreexpress.sendJsonrpcError(res, 500, -32603, err)
+					let err = new moreerrors.JsonrpcError(
+						-32603,
+						"Handling request",
+						{cause: h.err},
+					)
+					res.status(500)
+					res.json(err.toObject())
 				}
 				return
 			}
@@ -111,8 +139,13 @@ class Server {
 					res.end()
 				}
 			} else {
-				let err = new Error("Internal Server Error", {cause: err_})
-				moreexpress.sendJsonrpcError(res, 500, -32603, err)
+				let err = new moreerrors.JsonrpcError(
+					-32603,
+					"Internal Server Error",
+					{cause: err_},
+				)
+				res.status(500)
+				res.json(err.toObject())
 			}
 		}
 	}
@@ -127,22 +160,35 @@ class Server {
 
 			if (id === undefined || id === "") {
 				// https://github.com/modelcontextprotocol/typescript-sdk/blob/1.15.1/src/server/streamableHttp.ts#L587
-				let err = new Error("Bad Request: Mcp-Session-Id header is required")
-				moreexpress.sendJsonrpcError(res, 400, -32000, err)
+				let err = new moreerrors.JsonrpcError(
+					-32000,
+					"Bad Request: Mcp-Session-Id header is required",
+				)
+				res.status(400)
+				res.json(err.toObject())
 				return
 			}
 
 			if (Array.isArray(id)) {
 				// https://github.com/modelcontextprotocol/typescript-sdk/blob/1.15.1/src/server/streamableHttp.ts#L597
-				let err = new Error("Bad Request: Mcp-Session-Id header must be a single value")
-				moreexpress.sendJsonrpcError(res, 400, -32000, err)
+				let err = new moreerrors.JsonrpcError(
+					-32000,
+					"Bad Request: Mcp-Session-Id header must be a single value",
+				)
+				res.status(400)
+				res.json(err.toObject())
 				return
 			}
 
 			let r = this.transports.retrieve(id)
 			if (r.err) {
-				let err = new Error("Retrieving transport", {cause: r.err})
-				moreexpress.sendJsonrpcError(res, 404, -32001, err)
+				let err = new moreerrors.JsonrpcError(
+					-32001,
+					"Retrieving transport",
+					{cause: r.err},
+				)
+				res.status(404)
+				res.json(err.toObject())
 				return
 			}
 
@@ -155,8 +201,13 @@ class Server {
 						res.end()
 					}
 				} else {
-					let err = new Error("Handling request", {cause: h.err})
-					moreexpress.sendJsonrpcError(res, 500, -32603, err)
+					let err = new moreerrors.JsonrpcError(
+						-32603,
+						"Handling request",
+						{cause: h.err},
+					)
+					res.status(500)
+					res.json(err.toObject())
 				}
 				return
 			}
@@ -166,8 +217,13 @@ class Server {
 					res.end()
 				}
 			} else {
-				let err = new Error("Internal Server Error", {cause: err_})
-				moreexpress.sendJsonrpcError(res, 500, -32603, err)
+				let err = new moreerrors.JsonrpcError(
+					-32603,
+					"Internal Server Error",
+					{cause: err_},
+				)
+				res.status(500)
+				res.json(err.toObject())
 			}
 		}
 	}

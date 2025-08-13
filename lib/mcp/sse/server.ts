@@ -19,7 +19,7 @@
 import type * as server from "@modelcontextprotocol/sdk/server/index.js"
 import type * as sse from "@modelcontextprotocol/sdk/server/sse.js"
 import express from "express"
-import * as moreexpress from "../../util/moreexpress.ts"
+import * as moreerrors from "../../util/moreerrors.ts"
 import * as result from "../../util/result.ts"
 
 export interface Config {
@@ -50,8 +50,9 @@ class Server {
 			let s = this.servers.create(req)
 			if (s.err) {
 				// It is most likely 400, rather than 500.
-				let err = new Error("Creating server", {cause: s.err})
-				moreexpress.sendMessageError(res, 400, err)
+				let err = new moreerrors.MessageError("Creating server", {cause: s.err})
+				res.writeHead(400)
+				res.end(err.toString())
 				return
 			}
 
@@ -59,8 +60,9 @@ class Server {
 
 			let c = await result.safeAsync(s.v.connect.bind(s.v), t)
 			if (c.err) {
-				let err = new Error("Attaching server", {cause: c.err})
-				moreexpress.sendMessageError(res, 500, err)
+				let err = new moreerrors.MessageError("Attaching server", {cause: c.err})
+				res.writeHead(500)
+				res.end(err.toString())
 				return
 			}
 		} catch (err_) {
@@ -69,8 +71,9 @@ class Server {
 					res.end()
 				}
 			} else {
-				let err = new Error("Internal Server Error", {cause: err_})
-				moreexpress.sendMessageError(res, 500, err)
+				let err = new moreerrors.MessageError("Internal Server Error", {cause: err_})
+				res.writeHead(500)
+				res.end(err.toString())
 			}
 		}
 	}
@@ -81,22 +84,25 @@ class Server {
 
 			if (id === undefined || id === "") {
 				// https://github.com/modelcontextprotocol/typescript-sdk/blob/1.15.1/src/server/streamableHttp.ts#L587
-				let err = new Error("Bad Request: Mcp-Session-Id header is required")
-				moreexpress.sendMessageError(res, 400, err)
+				let err = new moreerrors.MessageError("Bad Request: Mcp-Session-Id header is required")
+				res.writeHead(400)
+				res.end(err.toString())
 				return
 			}
 
 			if (Array.isArray(id)) {
 				// https://github.com/modelcontextprotocol/typescript-sdk/blob/1.15.1/src/server/streamableHttp.ts#L597
-				let err = new Error("Bad Request: Mcp-Session-Id header must be a single value")
-				moreexpress.sendMessageError(res, 400, err)
+				let err = new moreerrors.MessageError("Bad Request: Mcp-Session-Id header must be a single value")
+				res.writeHead(400)
+				res.end(err.toString())
 				return
 			}
 
 			let r = this.transports.retrieve(id)
 			if (r.err) {
-				let err = new Error("Retrieving transport", {cause: r.err})
-				moreexpress.sendMessageError(res, 404, err)
+				let err = new moreerrors.MessageError("Retrieving transport", {cause: r.err})
+				res.writeHead(404)
+				res.end(err.toString())
 				return
 			}
 
@@ -109,8 +115,9 @@ class Server {
 						res.end()
 					}
 				} else {
-					let err = new Error("Handling post message", {cause: h.err})
-					moreexpress.sendMessageError(res, 500, err)
+					let err = new moreerrors.MessageError("Handling post message", {cause: h.err})
+					res.writeHead(500)
+					res.end(err.toString())
 				}
 				return
 			}
@@ -120,8 +127,9 @@ class Server {
 					res.end()
 				}
 			} else {
-				let err = new Error("Internal Server Error", {cause: err_})
-				moreexpress.sendMessageError(res, 500, err)
+				let err = new moreerrors.MessageError("Internal Server Error", {cause: err_})
+				res.writeHead(500)
+				res.end(err.toString())
 			}
 		}
 	}
