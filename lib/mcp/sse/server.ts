@@ -99,7 +99,7 @@ class Server {
 		o.exposedHeaders = exposedHeaders
 
 		if (this.corsMaxAge) {
-			o.maxAge = this.corsMaxAge
+			o.maxAge = this.corsMaxAge / 1000
 		}
 
 		return cors(o)
