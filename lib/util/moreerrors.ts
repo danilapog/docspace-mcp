@@ -18,6 +18,74 @@
 
 import * as z from "zod"
 
+export class JsonError extends Error {
+	name: "JsonError"
+
+	constructor(message: string, options?: ErrorOptions) {
+		super(message, options)
+		this.name = "JsonError"
+	}
+
+	toObject(): object {
+		return {
+			message: format(this),
+		}
+	}
+}
+
+export class JsonrpcError extends Error {
+	name: "JsonrpcError"
+	code: number
+
+	constructor(code: number, message: string, options?: ErrorOptions) {
+		super(message, options)
+		this.name = "JsonrpcError"
+		this.code = code
+	}
+
+	toObject(): object {
+		return {
+			jsonrpc: "2.0",
+			error: {
+				code: this.code,
+				message: format(this),
+			},
+			id: null,
+		}
+	}
+}
+
+export class OauthError extends Error {
+	name: "OauthError"
+	error: string
+
+	constructor(error: string, message: string, options?: ErrorOptions) {
+		super(message, options)
+		this.name = "OauthError"
+		this.error = error
+	}
+
+	toObject(): object {
+		return {
+			error: this.error,
+			error_description: format(this),
+		}
+	}
+}
+
+export class MessageError extends Error {
+	name: "MessageError"
+
+	constructor(message: string, options?: ErrorOptions) {
+		super(message, options)
+		this.name = "MessageError"
+	}
+
+	toString(): string {
+		return format(this)
+	}
+}
+
 export function isAborted(err: unknown): boolean {
 	if (!(err instanceof Error)) {
 		return false

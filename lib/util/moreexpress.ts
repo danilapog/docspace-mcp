@@ -82,39 +82,8 @@ export function logger(): express.Handler {
 
 export function notFound(): express.Handler {
 	return (_, res) => {
-		let err = new Error("Not Found")
-		sendJsonError(res, 404, err)
+		let err = new moreerrors.JsonError("Not Found")
+		res.status(404)
+		res.json(err.toObject())
 	}
-}
-
-export function sendJsonError(res: express.Response, code: number, err: Error): void {
-	res.status(code)
-	res.json({
-		message: moreerrors.format(err),
-	})
-}
-
-export function sendJsonrpcError(res: express.Response, httpCode: number, jsonrpcCode: number, err: Error): void {
-	res.status(httpCode)
-	res.json({
-		jsonrpc: "2.0",
-		error: {
-			code: jsonrpcCode,
-			message: moreerrors.format(err),
-		},
-		id: null,
-	})
-}
-
-export function sendOauthError(res: express.Response, code: number, err: Error): void {
-	res.status(code)
-	res.json({
-		error: "server_error",
-		error_description: moreerrors.format(err),
-	})
-}
-
-export function sendMessageError(res: express.Response, code: number, err: Error): void {
-	res.writeHead(code)
-	res.end(moreerrors.format(err))
 }

@@ -23,7 +23,7 @@ import cors from "cors"
 import express from "express"
 import * as expressRateLimit from "express-rate-limit"
 import type * as client from "../api/client.ts"
-import * as moreexpress from "../util/moreexpress.ts"
+import * as moreerrors from "../util/moreerrors.ts"
 import * as result from "../util/result.ts"
 
 export interface Config {
@@ -200,8 +200,13 @@ class Server {
 
 		let mr = await this.client.oauth.metadata(ac.signal)
 		if (mr.err) {
-			let err = new Error("Discovering OAuth metadata", {cause: mr.err})
-			moreexpress.sendOauthError(res, 500, err)
+			let err = new moreerrors.OauthError(
+				"server_error",
+				"Discovering OAuth metadata",
+				{cause: mr.err},
+			)
+			res.status(500)
+			res.json(err.toObject())
 			return
 		}
 
@@ -209,15 +214,25 @@ class Server {
 
 		let pr = auth.OAuthMetadataSchema.safeParse(md)
 		if (!pr.success) {
-			let err = new Error("Converting OAuth metadata", {cause: pr.error})
-			moreexpress.sendOauthError(res, 500, err)
+			let err = new moreerrors.OauthError(
+				"server_error",
+				"Converting OAuth metadata",
+				{cause: pr.error},
+			)
+			res.status(500)
+			res.json(err.toObject())
 			return
 		}
 
 		let ur = result.safeNew(URL, "/register", this.serverBaseUrl)
 		if (ur.err) {
-			let err = new Error("Creating registration endpoint URL", {cause: ur.err})
-			moreexpress.sendOauthError(res, 500, err)
+			let err = new moreerrors.OauthError(
+				"server_error",
+				"Creating registration endpoint URL",
+				{cause: ur.err},
+			)
+			res.status(500)
+			res.json(err.toObject())
 			return
 		}
 
