@@ -92,6 +92,7 @@ export interface Server {
 }
 
 export interface Cors {
+	mcp: CorsItem
 	oauthMetadata: CorsItem
 	oauthRegister: CorsItem
 }
@@ -291,6 +292,10 @@ function createSse(config: Config, create: CreateServer): AppMcp {
 	let t = new mcp.sse.transports.Transports(tc)
 
 	let rc: mcp.sse.server.Config = {
+		corsOrigin: config.server.cors.mcp.origin,
+		corsMaxAge: config.server.cors.mcp.maxAge,
+		corsAllowedHeaders: ["Authorization"],
+		corsExposedHeaders: ["WWW-Authenticate"],
 		rateLimitCapacity: config.server.rateLimits.mcp.capacity,
 		rateLimitWindow: config.server.rateLimits.mcp.window,
 		servers: {
@@ -323,6 +328,10 @@ function createStreamable(config: Config, create: CreateServer): AppMcp {
 	let t = new mcp.streamable.transports.Transports(tc)
 
 	let rc: mcp.streamable.server.Config = {
+		corsOrigin: config.server.cors.mcp.origin,
+		corsMaxAge: config.server.cors.mcp.maxAge,
+		corsAllowedHeaders: ["Authorization"],
+		corsExposedHeaders: ["WWW-Authenticate"],
 		rateLimitCapacity: config.server.rateLimits.mcp.capacity,
 		rateLimitWindow: config.server.rateLimits.mcp.window,
 		servers: {

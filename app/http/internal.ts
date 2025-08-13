@@ -140,6 +140,10 @@ function createStreamable(config: Config, create: CreateServer): AppMcp {
 	let t = new mcp.streamable.transports.Transports(tc)
 
 	let rc: mcp.streamable.server.Config = {
+		corsOrigin: "",
+		corsMaxAge: 0,
+		corsAllowedHeaders: [],
+		corsExposedHeaders: [],
 		rateLimitCapacity: 0,
 		rateLimitWindow: 0,
 		servers: {
