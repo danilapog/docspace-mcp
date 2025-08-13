@@ -33,19 +33,13 @@ export interface Config {
 	mcp: Mcp
 	api: Api
 	oauth: Oauth
+	server: Server
 }
 
 export interface Mcp {
 	dynamic: boolean
 	tools: string[]
-	server: McpServer
 	session: McpSession
-}
-
-export interface McpServer {
-	baseUrl: string
-	host: string
-	port: number
 }
 
 export interface McpSession {
@@ -87,6 +81,12 @@ export interface OauthClient {
 	tosUri: string
 	policyUri: string
 	clientSecret: string
+}
+
+export interface Server {
+	baseUrl: string
+	host: string
+	port: number
 }
 
 type CreateServer = (req: express.Request) => result.Result<server.Server, Error>
@@ -201,7 +201,7 @@ function createOauth(config: Config): result.Result<AppOauth, Error> {
 	c = c.withApiKey(config.api.shared.apiKey)
 
 	let rc: oauth.resource.Config = {
-		resourceBaseUrl: config.mcp.server.baseUrl,
+		resourceBaseUrl: config.server.baseUrl,
 		scopesSupported: config.oauth.resource.scopesSupported,
 		resourceName: config.oauth.resource.resourceName,
 		resourceDocumentation: config.oauth.resource.resourceDocumentation,
@@ -210,7 +210,7 @@ function createOauth(config: Config): result.Result<AppOauth, Error> {
 	let r = oauth.resource.router(rc)
 
 	let sc: oauth.server.Config = {
-		serverBaseUrl: config.mcp.server.baseUrl,
+		serverBaseUrl: config.server.baseUrl,
 		redirectUris: config.oauth.client.redirectUris,
 		clientId: config.oauth.client.clientId,
 		clientName: config.oauth.client.clientName,
@@ -224,7 +224,7 @@ function createOauth(config: Config): result.Result<AppOauth, Error> {
 	let s = oauth.server.router(sc)
 
 	let mc: oauth.middleware.Config = {
-		resourceBaseUrl: config.mcp.server.baseUrl,
+		resourceBaseUrl: config.server.baseUrl,
 		client: c,
 	}
 
@@ -335,7 +335,7 @@ function startApp(config: Config, a: App): [shared.P, shared.Cleanup] {
 
 	let tw = a.streamable.sessions.watch(tc.signal, config.mcp.session.interval)
 
-	let h = a.express.listen(config.mcp.server.port, config.mcp.server.host)
+	let h = a.express.listen(config.server.port, config.server.host)
 
 	let cleanup = createCleanup(a, sc, sw, tc, tw, h)
 
@@ -409,8 +409,8 @@ async function createPromise(config: Config, h: http.Server): shared.P {
 
 		function onListening(): void {
 			let o: Record<string, unknown> = {
-				host: config.mcp.server.host,
-				port: config.mcp.server.port,
+				host: config.server.host,
+				port: config.server.port,
 			}
 			logger.info("Server started", o)
 			close()
