@@ -16,14 +16,21 @@
  * @license
  */
 
+import * as errors from "@modelcontextprotocol/sdk/server/auth/errors.js"
+import * as allowedMethods from "@modelcontextprotocol/sdk/server/auth/middleware/allowedMethods.js"
 import * as auth from "@modelcontextprotocol/sdk/shared/auth.js"
 import express from "express"
+import * as expressRateLimit from "express-rate-limit"
 import type * as client from "../api/client.ts"
 import * as moreexpress from "../util/moreexpress.ts"
 import * as result from "../util/result.ts"
 
 export interface Config {
 	serverBaseUrl: string
+	metadataRateLimitCapacity: number
+	metadataRateLimitWindow: number
+	registerRateLimitCapacity: number
+	registerRateLimitWindow: number
 	redirectUris: string[]
 	clientId: string
 	clientName: string
@@ -44,6 +51,10 @@ export interface OauthService {
 
 class Server {
 	private serverBaseUrl: string
+	private metadataRateLimitCapacity: number
+	private metadataRateLimitWindow: number
+	private registerRateLimitCapacity: number
+	private registerRateLimitWindow: number
 	private redirectUris: string[]
 	private clientId: string
 	private clientName: string
@@ -55,6 +66,10 @@ class Server {
 
 	constructor(config: Config) {
 		this.serverBaseUrl = config.serverBaseUrl
+		this.metadataRateLimitCapacity = config.metadataRateLimitCapacity
+		this.metadataRateLimitWindow = config.metadataRateLimitWindow
+		this.registerRateLimitCapacity = config.registerRateLimitCapacity
+		this.registerRateLimitWindow = config.registerRateLimitWindow
 		this.redirectUris = config.redirectUris
 		this.clientId = config.clientId
 		this.clientName = config.clientName
@@ -65,8 +80,48 @@ class Server {
 		this.client = config.client
 	}
 
+	metadataRateLimit(): express.Handler {
+		if (!this.metadataRateLimitCapacity || !this.metadataRateLimitWindow) {
+			return (_, __, next) => {
+				next()
+			}
+		}
+
+		return expressRateLimit.rateLimit({
+			windowMs: this.metadataRateLimitWindow,
+			limit: this.metadataRateLimitCapacity,
+			standardHeaders: true,
+			legacyHeaders: false,
+			message: new errors.
+				TooManyRequestsError("You have exceeded the rate limit for authorization server metadata requests").
+				toResponseObject(),
+		})
+	}
+
 	/**
-	 * {@link https://github.com/modelcontextprotocol/typescript-sdk/blob/1.17.0/src/client/auth.ts#L616 | MCP Reference} \
+	 * {@link https://github.com/modelcontextprotocol/typescript-sdk/blob/1.17.0/src/server/auth/handlers/register.ts#L66 | MCP Reference}
+	 */
+	registerRateLimit(): express.Handler {
+		if (!this.registerRateLimitCapacity || !this.registerRateLimitWindow) {
+			return (_, __, next) => {
+				next()
+			}
+		}
+
+		return expressRateLimit.rateLimit({
+			windowMs: this.registerRateLimitWindow,
+			limit: this.registerRateLimitCapacity,
+			standardHeaders: true,
+			legacyHeaders: false,
+			message: new errors.
+				TooManyRequestsError("You have exceeded the rate limit for client registration requests").
+				toResponseObject(),
+		})
+	}
+
+	/**
+	 * {@link https://github.com/modelcontextprotocol/typescript-sdk/blob/1.17.0/src/client/auth.ts#L616 | MCP Client Reference} \
+	 * {@link https://github.com/modelcontextprotocol/typescript-sdk/blob/1.17.0/src/server/auth/handlers/metadata.ts#6 | MCP Server Reference} \
 	 * {@link https://datatracker.ietf.org/doc/html/rfc8414#section-3 | RFC 8414 Reference}
 	 */
 	async metadata(_: express.Request, res: express.Response): Promise<void> {
@@ -102,7 +157,8 @@ class Server {
 	}
 
 	/**
-	 * {@link https://github.com/modelcontextprotocol/typescript-sdk/blob/1.17.0/src/client/auth.ts#L1048 | MCP Reference} \
+	 * {@link https://github.com/modelcontextprotocol/typescript-sdk/blob/1.17.0/src/client/auth.ts#L1048 | MCP Client Reference} \
+	 * {@link https://github.com/modelcontextprotocol/typescript-sdk/blob/1.17.0/src/server/auth/handlers/register.ts#L45 | MCP Server Reference} \
 	 * {@link https://www.rfc-editor.org/rfc/rfc7591#section-3 | RFC 7591 Client Registration Endpoint Reference} \
 	 * {@link https://www.rfc-editor.org/rfc/rfc7591#section-2 | RFC 7591 Client Metadata Reference} \
 	 * {@link https://www.rfc-editor.org/rfc/rfc7591#section-3.2.1 | RFC 7591 Client Information Response Reference}
@@ -141,11 +197,21 @@ class Server {
 export function router(config: Config): express.Router {
 	let s = new Server(config)
 
+	let g = express.Router()
+	g.use(express.json())
+
+	let m = express.Router()
+	m.use(allowedMethods.allowedMethods(["GET"]))
+	m.use(s.metadataRateLimit())
+	m.get("/", s.metadata.bind(s))
+
 	let r = express.Router()
-	r.use(express.json())
+	r.use(allowedMethods.allowedMethods(["POST"]))
+	r.use(s.registerRateLimit())
+	r.post("/", s.register.bind(s))
 
-	r.get("/.well-known/oauth-authorization-server", s.metadata.bind(s))
-	r.post("/register", s.register.bind(s))
+	g.get("/.well-known/oauth-authorization-server", m)
+	g.post("/register", r)
 
-	return r
+	return g
 }
