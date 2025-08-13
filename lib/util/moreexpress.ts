@@ -87,3 +87,41 @@ export function notFound(): express.Handler {
 		res.json(err.toObject())
 	}
 }
+
+const ETAG_HEADERS: string[] = [
+	"ETag",
+	"If-Modified-Since",
+	"If-Match",
+	"If-None-Match",
+	"If-Range",
+	"If-Unmodified-Since",
+]
+
+const NO_CACHE_HEADERS: Record<string, string> = {
+	"Expires": new Date(0).toUTCString(),
+	"Cache-Control": "no-cache, no-store, no-transform, must-revalidate, private, max-age=0",
+	"Pragma": "no-cache",
+	"X-Accel-Expires": "0",
+}
+
+/**
+ * {@link https://github.com/go-pkgz/rest/blob/v1.20.4/nocache.go | go-pkgz/rest Reference}
+ */
+export function noCache(): express.Handler {
+	return (req, res, next) => {
+		for (let h of ETAG_HEADERS) {
+			h = h.toLowerCase()
+			if (req.headers[h] !== undefined) {
+				// eslint-disable-next-line typescript/no-dynamic-delete
+				delete req.headers[h]
+			}
+		}
+
+		for (let [h, v] of Object.entries(NO_CACHE_HEADERS)) {
+			h = h.toLowerCase()
+			res.header(h, v)
+		}
+
+		next()
+	}
+}
