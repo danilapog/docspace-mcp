@@ -19,12 +19,17 @@
 import type * as server from "@modelcontextprotocol/sdk/server/index.js"
 import type * as streamableHttp from "@modelcontextprotocol/sdk/server/streamableHttp.js"
 import * as types from "@modelcontextprotocol/sdk/types.js"
+import cors from "cors"
 import express from "express"
 import * as expressRateLimit from "express-rate-limit"
 import * as moreerrors from "../../util/moreerrors.ts"
 import * as result from "../../util/result.ts"
 
 export interface Config {
+	corsOrigin: string
+	corsMaxAge: number
+	corsAllowedHeaders: string[]
+	corsExposedHeaders: string[]
 	rateLimitCapacity: number
 	rateLimitWindow: number
 	servers: Servers
@@ -41,16 +46,58 @@ export interface Transports {
 }
 
 class Server {
+	private corsOrigin: string
+	private corsMaxAge: number
+	private corsAllowedHeaders: string[]
+	private corsExposedHeaders: string[]
 	private rateLimitCapacity: number
 	private rateLimitWindow: number
 	private servers: Servers
 	private transports: Transports
 
 	constructor(config: Config) {
+		this.corsOrigin = config.corsOrigin
+		this.corsMaxAge = config.corsMaxAge
+		this.corsAllowedHeaders = config.corsAllowedHeaders
+		this.corsExposedHeaders = config.corsExposedHeaders
 		this.rateLimitCapacity = config.rateLimitCapacity
 		this.rateLimitWindow = config.rateLimitWindow
 		this.servers = config.servers
 		this.transports = config.transports
+	}
+
+	cors(): express.Handler {
+		if (!this.corsOrigin) {
+			return (_, __, next) => {
+				next()
+			}
+		}
+
+		let o: cors.CorsOptions = {
+			origin: this.corsOrigin,
+			methods: ["GET", "POST", "DELETE"],
+			allowedHeaders: [
+				...this.corsAllowedHeaders,
+				"Mcp-Session-Id",
+			],
+		}
+
+		let exposedHeaders: string[] = [
+			...this.corsExposedHeaders,
+			"Mcp-Session-Id",
+		]
+
+		if (this.rateLimitCapacity && this.rateLimitWindow) {
+			exposedHeaders.push("Retry-After")
+		}
+
+		o.exposedHeaders = exposedHeaders
+
+		if (this.corsMaxAge) {
+			o.maxAge = this.corsMaxAge
+		}
+
+		return cors(o)
 	}
 
 	rateLimit(): express.Handler {
@@ -263,6 +310,7 @@ export function router(c: Config): express.Router {
 	let r = express.Router()
 	r.use(express.json())
 
+	r.use(s.cors())
 	r.use(s.rateLimit())
 
 	r.post("/mcp", s.post.bind(s))
