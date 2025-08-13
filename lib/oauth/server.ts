@@ -150,6 +150,7 @@ class Server {
 		let o: cors.CorsOptions = {
 			origin: this.registerCorsOrigin,
 			methods: ["POST"],
+			allowedHeaders: ["Content-Type"],
 		}
 
 		let exposedHeaders: string[] = []

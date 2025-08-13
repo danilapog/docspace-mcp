@@ -78,6 +78,7 @@ class Server {
 			methods: ["GET", "POST", "DELETE"],
 			allowedHeaders: [
 				...this.corsAllowedHeaders,
+				"Content-Type",
 				"Mcp-Session-Id",
 			],
 		}
