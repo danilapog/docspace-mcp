@@ -113,6 +113,7 @@ export interface Server {
 }
 
 export interface Cors {
+	mcp: CorsItem
 	oauthMetadata: CorsItem
 	oauthRegister: CorsItem
 }
@@ -319,6 +320,17 @@ export const ConfigSchema = z.
 		// Server CORS options
 		//
 
+		DOCSPACE_SERVER_CORS_MCP_ORIGIN: z.
+			string().
+			trim().
+			default("*"),
+
+		DOCSPACE_SERVER_CORS_MCP_MAX_AGE: z.
+			string().
+			default("86400"). // 1 day
+			transform(morezod.envNumber()).
+			pipe(z.number().min(0)),
+
 		DOCSPACE_SERVER_CORS_OAUTH_METADATA_ORIGIN: z.
 			string().
 			trim().
@@ -431,6 +443,10 @@ export const ConfigSchema = z.
 				host: o.DOCSPACE_HOST,
 				port: o.DOCSPACE_PORT,
 				cors: {
+					mcp: {
+						origin: o.DOCSPACE_SERVER_CORS_MCP_ORIGIN,
+						maxAge: o.DOCSPACE_SERVER_CORS_MCP_MAX_AGE,
+					},
 					oauthMetadata: {
 						origin: o.DOCSPACE_SERVER_CORS_OAUTH_METADATA_ORIGIN,
 						maxAge: o.DOCSPACE_SERVER_CORS_OAUTH_METADATA_MAX_AGE,
@@ -873,6 +889,11 @@ function formatServer(c: Server): morets.RecursivePartial<Server> {
 
 function formatCors(c: Cors): morets.RecursivePartial<Cors> {
 	let o: morets.RecursivePartial<Cors> = {}
+
+	let mcp = formatCorsItem(c.mcp)
+	if (Object.keys(mcp).length !== 0) {
+		o.mcp = mcp
+	}
 
 	let oauthMetadata = formatCorsItem(c.oauthMetadata)
 	if (Object.keys(oauthMetadata).length !== 0) {
