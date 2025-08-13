@@ -108,7 +108,18 @@ export interface Server {
 	baseUrl: string
 	host: string
 	port: number
+	cors: Cors
 	rateLimits: RateLimits
+}
+
+export interface Cors {
+	oauthMetadata: CorsItem
+	oauthRegister: CorsItem
+}
+
+export interface CorsItem {
+	origin: string
+	maxAge: number
 }
 
 export interface RateLimits {
@@ -304,6 +315,32 @@ export const ConfigSchema = z.
 			pipe(z.number().min(1).max(65534)), // todo: change to 0-64535
 
 		//
+		// Server CORS options
+		//
+
+		DOCSPACE_SERVER_CORS_OAUTH_METADATA_ORIGIN: z.
+			string().
+			trim().
+			default("*"),
+
+		DOCSPACE_SERVER_CORS_OAUTH_METADATA_MAX_AGE: z.
+			string().
+			default("86400"). // 1 day
+			transform(morezod.envNumber()).
+			pipe(z.number().min(0)),
+
+		DOCSPACE_SERVER_CORS_OAUTH_REGISTER_ORIGIN: z.
+			string().
+			trim().
+			default("*"),
+
+		DOCSPACE_SERVER_CORS_OAUTH_REGISTER_MAX_AGE: z.
+			string().
+			default("86400"). // 1 day
+			transform(morezod.envNumber()).
+			pipe(z.number().min(0)),
+
+		//
 		// Server Rate Limits options
 		//
 
@@ -380,6 +417,16 @@ export const ConfigSchema = z.
 				baseUrl: o.DOCSPACE_SERVER_BASE_URL,
 				host: o.DOCSPACE_HOST,
 				port: o.DOCSPACE_PORT,
+				cors: {
+					oauthMetadata: {
+						origin: o.DOCSPACE_SERVER_CORS_OAUTH_METADATA_ORIGIN,
+						maxAge: o.DOCSPACE_SERVER_CORS_OAUTH_METADATA_MAX_AGE,
+					},
+					oauthRegister: {
+						origin: o.DOCSPACE_SERVER_CORS_OAUTH_REGISTER_ORIGIN,
+						maxAge: o.DOCSPACE_SERVER_CORS_OAUTH_REGISTER_MAX_AGE,
+					},
+				},
 				rateLimits: {
 					oauthMetadata: {
 						capacity: o.DOCSPACE_SERVER_RATE_LIMITS_OAUTH_METADATA_CAPACITY,
@@ -794,9 +841,44 @@ function formatServer(c: Server): morets.RecursivePartial<Server> {
 		o.port = c.port
 	}
 
+	let cors = formatCors(c.cors)
+	if (Object.keys(cors).length !== 0) {
+		o.cors = cors
+	}
+
 	let rateLimits = formatRateLimits(c.rateLimits)
 	if (Object.keys(rateLimits).length !== 0) {
 		o.rateLimits = rateLimits
+	}
+
+	return o
+}
+
+function formatCors(c: Cors): morets.RecursivePartial<Cors> {
+	let o: morets.RecursivePartial<Cors> = {}
+
+	let oauthMetadata = formatCorsItem(c.oauthMetadata)
+	if (Object.keys(oauthMetadata).length !== 0) {
+		o.oauthMetadata = oauthMetadata
+	}
+
+	let oauthRegister = formatCorsItem(c.oauthRegister)
+	if (Object.keys(oauthRegister).length !== 0) {
+		o.oauthRegister = oauthRegister
+	}
+
+	return o
+}
+
+function formatCorsItem(c: CorsItem): morets.RecursivePartial<CorsItem> {
+	let o: morets.RecursivePartial<CorsItem> = {}
+
+	if (c.origin) {
+		o.origin = c.origin
+	}
+
+	if (c.maxAge) {
+		o.maxAge = c.maxAge
 	}
 
 	return o
