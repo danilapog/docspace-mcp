@@ -123,6 +123,7 @@ export interface CorsItem {
 }
 
 export interface RateLimits {
+	mcp: RateLimit
 	oauthMetadata: RateLimit
 	oauthRegister: RateLimit
 }
@@ -344,6 +345,18 @@ export const ConfigSchema = z.
 		// Server Rate Limits options
 		//
 
+		DOCSPACE_SERVER_RATE_LIMITS_MCP_CAPACITY: z.
+			string().
+			default("1000").
+			transform(morezod.envNumber()).
+			pipe(z.number().min(0)),
+
+		DOCSPACE_SERVER_RATE_LIMITS_MCP_WINDOW: z.
+			string().
+			default("1000"). // 1 second
+			transform(morezod.envNumber()).
+			pipe(z.number().min(0)),
+
 		DOCSPACE_SERVER_RATE_LIMITS_OAUTH_METADATA_CAPACITY: z.
 			string().
 			default("200").
@@ -428,6 +441,10 @@ export const ConfigSchema = z.
 					},
 				},
 				rateLimits: {
+					mcp: {
+						capacity: o.DOCSPACE_SERVER_RATE_LIMITS_MCP_CAPACITY,
+						window: o.DOCSPACE_SERVER_RATE_LIMITS_MCP_WINDOW,
+					},
 					oauthMetadata: {
 						capacity: o.DOCSPACE_SERVER_RATE_LIMITS_OAUTH_METADATA_CAPACITY,
 						window: o.DOCSPACE_SERVER_RATE_LIMITS_OAUTH_METADATA_WINDOW,
@@ -886,6 +903,11 @@ function formatCorsItem(c: CorsItem): morets.RecursivePartial<CorsItem> {
 
 function formatRateLimits(c: RateLimits): morets.RecursivePartial<RateLimits> {
 	let o: morets.RecursivePartial<RateLimits> = {}
+
+	let mcp = formatRateLimit(c.mcp)
+	if (Object.keys(mcp).length !== 0) {
+		o.mcp = mcp
+	}
 
 	let oauthMetadata = formatRateLimit(c.oauthMetadata)
 	if (Object.keys(oauthMetadata).length !== 0) {
