@@ -87,7 +87,12 @@ class Server {
 		]
 
 		if (this.rateLimitCapacity && this.rateLimitWindow) {
-			exposedHeaders.push("Retry-After")
+			exposedHeaders.push(
+				"Retry-After",
+				"RateLimit-Limit",
+				"RateLimit-Remaining",
+				"RateLimit-Reset",
+			)
 		}
 
 		o.exposedHeaders = exposedHeaders

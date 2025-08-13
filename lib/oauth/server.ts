@@ -155,7 +155,12 @@ class Server {
 		let exposedHeaders: string[] = []
 
 		if (this.registerRateLimitCapacity && this.registerRateLimitWindow) {
-			exposedHeaders.push("Retry-After")
+			exposedHeaders.push(
+				"Retry-After",
+				"RateLimit-Limit",
+				"RateLimit-Remaining",
+				"RateLimit-Reset",
+			)
 		}
 
 		if (exposedHeaders.length !== 0) {
