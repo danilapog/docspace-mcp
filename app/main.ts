@@ -54,15 +54,8 @@ async function main(): Promise<void> {
 			return
 		}
 
-		if (c.v.internal && c.v.mcp.transport === "http") {
-			let [p, cleanup] = http.internal.start(c.v)
-			watch(cleanup)
-			await start(p, cleanup)
-			return
-		}
-
-		if (!c.v.internal && c.v.mcp.transport === "http") {
-			let [p, cleanup] = http.external.start(c.v)
+		if (c.v.mcp.transport === "http") {
+			let [p, cleanup] = http.start(c.v)
 			watch(cleanup)
 			await start(p, cleanup)
 			return
