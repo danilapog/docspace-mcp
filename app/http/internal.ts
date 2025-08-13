@@ -161,6 +161,7 @@ function createExpress(s: AppMcp): express.Express {
 
 	e.disable("x-powered-by")
 	e.disable("etag")
+	e.set("json spaces", 2)
 
 	e.use(moreexpress.context())
 	e.use(moreexpress.logger())
