@@ -24,6 +24,7 @@ import express from "express"
 import * as expressRateLimit from "express-rate-limit"
 import type * as client from "../api/client.ts"
 import * as moreerrors from "../util/moreerrors.ts"
+import * as moreexpress from "../util/moreexpress.ts"
 import * as result from "../util/result.ts"
 
 export interface Config {
@@ -302,6 +303,7 @@ export function router(config: Config): express.Router {
 	r.use(s.registerCors())
 	r.use(allowedMethods.allowedMethods(["POST"]))
 	r.use(s.registerRateLimit())
+	r.use(moreexpress.noCache())
 	r.post("/", s.register.bind(s))
 
 	g.get("/.well-known/oauth-authorization-server", m)
