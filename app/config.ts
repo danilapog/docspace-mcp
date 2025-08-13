@@ -327,7 +327,7 @@ export const ConfigSchema = z.
 
 		DOCSPACE_SERVER_CORS_MCP_MAX_AGE: z.
 			string().
-			default("86400"). // 1 day
+			default("86400000"). // 1 day
 			transform(morezod.envNumber()).
 			pipe(z.number().min(0)),
 
@@ -338,7 +338,7 @@ export const ConfigSchema = z.
 
 		DOCSPACE_SERVER_CORS_OAUTH_METADATA_MAX_AGE: z.
 			string().
-			default("86400"). // 1 day
+			default("86400000"). // 1 day
 			transform(morezod.envNumber()).
 			pipe(z.number().min(0)),
 
@@ -349,7 +349,7 @@ export const ConfigSchema = z.
 
 		DOCSPACE_SERVER_CORS_OAUTH_REGISTER_MAX_AGE: z.
 			string().
-			default("86400"). // 1 day
+			default("86400000"). // 1 day
 			transform(morezod.envNumber()).
 			pipe(z.number().min(0)),
 

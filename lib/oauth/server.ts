@@ -116,7 +116,7 @@ class Server {
 		}
 
 		if (this.metadataCorsMaxAge) {
-			o.maxAge = this.metadataCorsMaxAge
+			o.maxAge = this.metadataCorsMaxAge / 1000
 		}
 
 		return cors(o)
@@ -169,7 +169,7 @@ class Server {
 		}
 
 		if (this.registerCorsMaxAge) {
-			o.maxAge = this.registerCorsMaxAge
+			o.maxAge = this.registerCorsMaxAge / 1000
 		}
 
 		return cors(o)
