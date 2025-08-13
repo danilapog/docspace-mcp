@@ -87,7 +87,18 @@ export interface Server {
 	baseUrl: string
 	host: string
 	port: number
+	cors: Cors
 	rateLimits: RateLimits
+}
+
+export interface Cors {
+	oauthMetadata: CorsItem
+	oauthRegister: CorsItem
+}
+
+export interface CorsItem {
+	origin: string
+	maxAge: number
 }
 
 export interface RateLimits {
@@ -212,6 +223,8 @@ function createOauth(config: Config): result.Result<AppOauth, Error> {
 	c = c.withApiKey(config.api.shared.apiKey)
 
 	let rc: oauth.resource.Config = {
+		metadataCorsOrigin: config.server.cors.oauthMetadata.origin,
+		metadataCorsMaxAge: config.server.cors.oauthMetadata.maxAge,
 		metadataRateLimitCapacity: config.server.rateLimits.oauthMetadata.capacity,
 		metadataRateLimitWindow: config.server.rateLimits.oauthMetadata.window,
 		resourceBaseUrl: config.server.baseUrl,
@@ -224,8 +237,12 @@ function createOauth(config: Config): result.Result<AppOauth, Error> {
 
 	let sc: oauth.server.Config = {
 		serverBaseUrl: config.server.baseUrl,
+		metadataCorsOrigin: config.server.cors.oauthMetadata.origin,
+		metadataCorsMaxAge: config.server.cors.oauthMetadata.maxAge,
 		metadataRateLimitCapacity: config.server.rateLimits.oauthMetadata.capacity,
 		metadataRateLimitWindow: config.server.rateLimits.oauthMetadata.window,
+		registerCorsOrigin: config.server.cors.oauthRegister.origin,
+		registerCorsMaxAge: config.server.cors.oauthRegister.maxAge,
 		registerRateLimitCapacity: config.server.rateLimits.oauthRegister.capacity,
 		registerRateLimitWindow: config.server.rateLimits.oauthRegister.window,
 		redirectUris: config.oauth.client.redirectUris,
