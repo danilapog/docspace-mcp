@@ -93,6 +93,7 @@ type CreateServer = (req: express.Request) => result.Result<server.Server, Error
 
 interface App {
 	oauth: AppOauth
+	sse: AppMcp
 	streamable: AppMcp
 	express: express.Express
 }
@@ -125,13 +126,16 @@ function createApp(config: Config): result.Result<App, Error> {
 		return result.error(new Error("Creating OAuth", {cause: o.err}))
 	}
 
-	let s = createStreamable(config, create)
+	let s = createSse(config, create)
 
-	let e = createExpress(o.v, s)
+	let t = createStreamable(config, create)
+
+	let e = createExpress(o.v, s, t)
 
 	let a: App = {
 		oauth: o.v,
-		streamable: s,
+		sse: s,
+		streamable: t,
 		express: e,
 	}
 
@@ -238,6 +242,36 @@ function createOauth(config: Config): result.Result<AppOauth, Error> {
 	return result.ok(a)
 }
 
+function createSse(config: Config, create: CreateServer): AppMcp {
+	let sc: mcp.sessions.Config = {
+		ttl: config.mcp.session.ttl,
+	}
+
+	let s = new mcp.sessions.Sessions(sc)
+
+	let tc: mcp.sse.transports.Config = {
+		sessions: s,
+	}
+
+	let t = new mcp.sse.transports.Transports(tc)
+
+	let rc: mcp.sse.server.Config = {
+		servers: {
+			create,
+		},
+		transports: t,
+	}
+
+	let r = mcp.sse.server.router(rc)
+
+	let a: AppMcp = {
+		sessions: s,
+		server: r,
+	}
+
+	return a
+}
+
 function createStreamable(config: Config, create: CreateServer): AppMcp {
 	let sc: mcp.sessions.Config = {
 		ttl: config.mcp.session.ttl,
@@ -268,7 +302,7 @@ function createStreamable(config: Config, create: CreateServer): AppMcp {
 	return a
 }
 
-function createExpress(o: AppOauth, s: AppMcp): express.Express {
+function createExpress(o: AppOauth, s: AppMcp, t: AppMcp): express.Express {
 	let e = express()
 
 	e.disable("x-powered-by")
@@ -284,6 +318,7 @@ function createExpress(o: AppOauth, s: AppMcp): express.Express {
 	let r = express.Router()
 	r.use(o.middleware)
 	r.use("/", s.server)
+	r.use("/", t.server)
 	e.use(r)
 
 	e.use(moreexpress.notFound())
@@ -292,34 +327,52 @@ function createExpress(o: AppOauth, s: AppMcp): express.Express {
 }
 
 function startApp(config: Config, a: App): [shared.P, shared.Cleanup] {
-	let c = new AbortController()
+	let sc = new AbortController()
 
-	let w = a.streamable.sessions.watch(c.signal, config.mcp.session.interval)
+	let sw = a.sse.sessions.watch(sc.signal, config.mcp.session.interval)
+
+	let tc = new AbortController()
+
+	let tw = a.streamable.sessions.watch(tc.signal, config.mcp.session.interval)
 
 	let h = a.express.listen(config.mcp.server.port, config.mcp.server.host)
 
-	let cleanup = createCleanup(a, c, w, h)
+	let cleanup = createCleanup(a, sc, sw, tc, tw, h)
 
 	let p = createPromise(config, h)
 
 	return [p, cleanup]
 }
 
-function createCleanup(a: App, c: AbortController, w: shared.P, h: http.Server): shared.Cleanup {
+function createCleanup(a: App, sc: AbortController, sw: shared.P, tc: AbortController, tw: shared.P, h: http.Server): shared.Cleanup {
 	return async() => {
 		let errs: Error[] = []
 
-		if (!c.signal.aborted) {
-			c.abort("Cleaning up")
+		if (!sc.signal.aborted) {
+			sc.abort("Cleaning up")
 
-			let err = await w
+			let err = await sw
 			if (err && !moreerrors.isAborted(err)) {
-				errs.push(new Error("Stopping sessions watcher", {cause: err}))
+				errs.push(new Error("Stopping sse sessions watcher", {cause: err}))
+			}
+
+			err = await a.sse.sessions.clear()
+			if (err) {
+				errs.push(new Error("Clearing sse sessions", {cause: err}))
+			}
+		}
+
+		if (!tc.signal.aborted) {
+			tc.abort("Cleaning up")
+
+			let err = await tw
+			if (err && !moreerrors.isAborted(err)) {
+				errs.push(new Error("Stopping streamable sessions watcher", {cause: err}))
 			}
 
 			err = await a.streamable.sessions.clear()
 			if (err) {
-				errs.push(new Error("Clearing sessions", {cause: err}))
+				errs.push(new Error("Clearing streamable sessions", {cause: err}))
 			}
 		}
 
