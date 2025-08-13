@@ -255,7 +255,15 @@ class Server {
 	 * {@link https://www.rfc-editor.org/rfc/rfc7591#section-2 | RFC 7591 Client Metadata Reference} \
 	 * {@link https://www.rfc-editor.org/rfc/rfc7591#section-3.2.1 | RFC 7591 Client Information Response Reference}
 	 */
-	register(_: express.Request, res: express.Response): void {
+	register(req: express.Request, res: express.Response): void {
+		let p = auth.OAuthClientMetadataSchema.safeParse(req.body)
+		if (!p.success) {
+			let err = new errors.InvalidClientMetadataError(p.error.message)
+			res.status(400)
+			res.json(err.toResponseObject())
+			return
+		}
+
 		let m: auth.OAuthClientInformationFull = {
 			client_id: this.clientId,
 			redirect_uris: this.redirectUris,
