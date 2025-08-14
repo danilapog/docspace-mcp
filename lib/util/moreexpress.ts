@@ -42,7 +42,7 @@ const INCOMING = "-->"
 interface Payload {
 	sessionId?: string
 	method?: string
-	path?: string
+	url?: string
 	status?: number
 	duration?: string
 }
@@ -57,7 +57,7 @@ export function logger(): express.Handler {
 		}
 
 		p.method = req.method
-		p.path = req.path
+		p.url = req.url
 
 		globalLogger.info(INCOMING, p)
 
