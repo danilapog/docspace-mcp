@@ -136,18 +136,10 @@ export interface RateLimit {
 
 export const ConfigSchema = z.
 	object({
-		//
-		// General options
-		//
-
 		DOCSPACE_INTERNAL: z.
 			string().
 			default("0").
 			transform(morezod.envBoolean()),
-
-		//
-		// MCP options
-		//
 
 		DOCSPACE_TRANSPORT: z.
 			string().
@@ -174,10 +166,6 @@ export const ConfigSchema = z.
 			default("").
 			transform(morezod.envOptions([...availableTools])),
 
-		//
-		// MCP Session options
-		//
-
 		DOCSPACE_SESSION_TTL: z.
 			string().
 			default("28800000"). // 8 hours
@@ -190,18 +178,10 @@ export const ConfigSchema = z.
 			transform(morezod.envNumber()).
 			pipe(z.number().min(0)), // todo: change to 1
 
-		//
-		// API options
-		//
-
 		DOCSPACE_USER_AGENT: z.
 			string().
 			trim().
 			default(`${pack.name} v${pack.version}`),
-
-		//
-		// API Shared options
-		//
 
 		DOCSPACE_BASE_URL: z. // todo: use new URL
 			string().
@@ -229,18 +209,10 @@ export const ConfigSchema = z.
 			string().
 			default(""),
 
-		//
-		// API OAuth options
-		//
-
 		DOCSPACE_OAUTH_BASE_URL: z. // todo: check url
 			string().
 			trim().
 			default("https://oauth.onlyoffice.com/"),
-
-		//
-		// Oauth Resource options
-		//
 
 		DOCSPACE_OAUTH_SCOPES_SUPPORTED: z.
 			string().
@@ -256,10 +228,6 @@ export const ConfigSchema = z.
 			string().
 			trim().
 			default("https://github.com/onlyoffice/docspace-mcp/blob/main/README.md"),
-
-		//
-		// Oauth Client options
-		//
 
 		DOCSPACE_OAUTH_REDIRECT_URIS: z. // todo: check url
 			string().
@@ -296,10 +264,6 @@ export const ConfigSchema = z.
 			trim().
 			default(""),
 
-		//
-		// Server options
-		//
-
 		DOCSPACE_SERVER_BASE_URL: z. // todo: check url
 			string().
 			trim().
@@ -315,10 +279,6 @@ export const ConfigSchema = z.
 			default("8080").
 			transform(morezod.envNumber()).
 			pipe(z.number().min(1).max(65534)), // todo: change to 0-64535
-
-		//
-		// Server CORS options
-		//
 
 		DOCSPACE_SERVER_CORS_MCP_ORIGIN: z.
 			string().
@@ -352,10 +312,6 @@ export const ConfigSchema = z.
 			default("86400000"). // 1 day
 			transform(morezod.envNumber()).
 			pipe(z.number().min(0)),
-
-		//
-		// Server Rate Limits options
-		//
 
 		DOCSPACE_SERVER_RATE_LIMITS_MCP_CAPACITY: z.
 			string().
