@@ -131,7 +131,7 @@ export interface Cors {
 }
 
 export interface CorsItem {
-	origin: string
+	origin: string[]
 	maxAge: number
 }
 
@@ -182,49 +182,48 @@ export const ConfigSchema = z.
 			string().
 			default("28800000"). // 8 hours
 			transform(morezod.envNumber()).
-			pipe(z.number().min(0)), // todo: change to 1
+			pipe(z.number().min(0)),
 
 		DOCSPACE_SESSION_INTERVAL: z.
 			string().
 			default("240000"). // 4 minutes
 			transform(morezod.envNumber()).
-			pipe(z.number().min(0)), // todo: change to 1
+			pipe(z.number().min(0)),
 
 		DOCSPACE_USER_AGENT: z.
 			string().
 			trim().
 			default(`${pack.name} v${pack.version}`),
 
-		DOCSPACE_BASE_URL: z. // todo: use new URL
+		DOCSPACE_BASE_URL: z.
+			string().
+			default("").
+			transform(morezod.envBaseUrl()),
+
+		DOCSPACE_API_KEY: z.
 			string().
 			trim().
 			default(""),
 
-		DOCSPACE_ORIGIN: z. // todo: remove
+		DOCSPACE_AUTH_TOKEN: z.
 			string().
 			trim().
 			default(""),
 
-		DOCSPACE_API_KEY: z. // todo: trim
-			string().
-			default(""),
-
-		DOCSPACE_AUTH_TOKEN: z. // todo: trim
-			string().
-			default(""),
-
-		DOCSPACE_USERNAME: z. // todo: trim
-			string().
-			default(""),
-
-		DOCSPACE_PASSWORD: z. // todo: trim
-			string().
-			default(""),
-
-		DOCSPACE_OAUTH_BASE_URL: z. // todo: check url
+		DOCSPACE_USERNAME: z.
 			string().
 			trim().
-			default("https://oauth.onlyoffice.com/"),
+			default(""),
+
+		DOCSPACE_PASSWORD: z.
+			string().
+			trim().
+			default(""),
+
+		DOCSPACE_OAUTH_BASE_URL: z.
+			string().
+			default("https://oauth.onlyoffice.com/").
+			transform(morezod.envBaseUrl()),
 
 		DOCSPACE_OAUTH_SCOPES_SUPPORTED: z.
 			string().
@@ -236,15 +235,15 @@ export const ConfigSchema = z.
 			trim().
 			default(`${pack.name} v${pack.version}`),
 
-		DOCSPACE_OAUTH_RESOURCE_DOCUMENTATION: z. // todo: check url
+		DOCSPACE_OAUTH_RESOURCE_DOCUMENTATION: z.
 			string().
-			trim().
-			default("https://github.com/onlyoffice/docspace-mcp/blob/main/README.md"),
+			default(`https://github.com/onlyoffice/docspace-mcp/blob/v${pack.version}/README.md`).
+			transform(morezod.envUrl()),
 
-		DOCSPACE_OAUTH_REDIRECT_URIS: z. // todo: check url
+		DOCSPACE_OAUTH_REDIRECT_URIS: z.
 			string().
 			default("").
-			transform(morezod.envList()),
+			transform(morezod.envUrlList()),
 
 		DOCSPACE_OAUTH_CLIENT_ID: z.
 			string().
@@ -261,27 +260,27 @@ export const ConfigSchema = z.
 			default("").
 			transform(morezod.envList()),
 
-		DOCSPACE_OAUTH_TOS_URI: z. // todo: check url
+		DOCSPACE_OAUTH_TOS_URI: z.
 			string().
-			trim().
-			default(""),
+			default("").
+			transform(morezod.envUrl()),
 
-		DOCSPACE_OAUTH_POLICY_URI: z. // todo: check url
+		DOCSPACE_OAUTH_POLICY_URI: z.
 			string().
-			trim().
-			default(""),
+			default("").
+			transform(morezod.envUrl()),
 
 		DOCSPACE_OAUTH_CLIENT_SECRET: z.
 			string().
 			trim().
 			default(""),
 
-		DOCSPACE_SERVER_BASE_URL: z. // todo: check url
+		DOCSPACE_SERVER_BASE_URL: z.
 			string().
-			trim().
-			default(""),
+			default("").
+			transform(morezod.envBaseUrl()),
 
-		DOCSPACE_HOST: z. // todo: cannot be empty, see https://github.com/nodejs/node/blob/v24.5.0/lib/net.js#L299
+		DOCSPACE_HOST: z.
 			string().
 			trim().
 			default("127.0.0.1"),
@@ -290,12 +289,12 @@ export const ConfigSchema = z.
 			string().
 			default("8080").
 			transform(morezod.envNumber()).
-			pipe(z.number().min(1).max(65534)), // todo: change to 0-64535
+			pipe(z.number().min(0).max(65535)),
 
 		DOCSPACE_SERVER_CORS_MCP_ORIGIN: z.
 			string().
-			trim().
-			default("*"),
+			default("*").
+			transform(morezod.envList()),
 
 		DOCSPACE_SERVER_CORS_MCP_MAX_AGE: z.
 			string().
@@ -305,8 +304,8 @@ export const ConfigSchema = z.
 
 		DOCSPACE_SERVER_CORS_OAUTH_METADATA_ORIGIN: z.
 			string().
-			trim().
-			default("*"),
+			default("*").
+			transform(morezod.envList()),
 
 		DOCSPACE_SERVER_CORS_OAUTH_METADATA_MAX_AGE: z.
 			string().
@@ -316,8 +315,8 @@ export const ConfigSchema = z.
 
 		DOCSPACE_SERVER_CORS_OAUTH_REGISTER_ORIGIN: z.
 			string().
-			trim().
-			default("*"),
+			default("*").
+			transform(morezod.envList()),
 
 		DOCSPACE_SERVER_CORS_OAUTH_REGISTER_MAX_AGE: z.
 			string().
@@ -450,15 +449,6 @@ export const ConfigSchema = z.
 		c.mcp.toolsets = r[0]
 		c.mcp.tools = r[1]
 
-		// todo: check if not empty
-		c.api.shared.baseUrl = ensureTrailing(c.api.shared.baseUrl)
-
-		// todo: check if not empty
-		c.api.oauth.baseUrl = ensureTrailing(c.api.oauth.baseUrl)
-
-		// todo: check if not empty
-		c.server.baseUrl = ensureTrailing(c.server.baseUrl)
-
 		if (c.internal) {
 			c = {
 				internal: c.internal,
@@ -506,15 +496,15 @@ export const ConfigSchema = z.
 					port: c.server.port,
 					cors: {
 						mcp: {
-							origin: "",
+							origin: [],
 							maxAge: 0,
 						},
 						oauthMetadata: {
-							origin: "",
+							origin: [],
 							maxAge: 0,
 						},
 						oauthRegister: {
-							origin: "",
+							origin: [],
 							maxAge: 0,
 						},
 					},
@@ -569,15 +559,15 @@ export const ConfigSchema = z.
 					port: 0,
 					cors: {
 						mcp: {
-							origin: "",
+							origin: [],
 							maxAge: 0,
 						},
 						oauthMetadata: {
-							origin: "",
+							origin: [],
 							maxAge: 0,
 						},
 						oauthRegister: {
-							origin: "",
+							origin: [],
 							maxAge: 0,
 						},
 					},
@@ -617,13 +607,6 @@ export const ConfigSchema = z.
 		}
 
 		if (o.mcp.transport === "stdio") {
-			if (!o.api.shared.baseUrl) {
-				ctx.addIssue({
-					code: z.ZodIssueCode.custom,
-					message: "API base URL is required for stdio transport",
-				})
-			}
-
 			let a = Boolean(o.api.shared.apiKey)
 			let b = Boolean(o.api.shared.pat)
 			let c = Boolean(o.api.shared.username) && Boolean(o.api.shared.password)
@@ -642,40 +625,71 @@ export const ConfigSchema = z.
 					message: "Expected only one of API key, PAT, or (username and password) to be set for stdio transport",
 				})
 			}
+
+			if ((a || b || c) && !o.api.shared.baseUrl) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: "API base URL is required for stdio transport with API key, PAT, or (username and password)",
+				})
+			}
 		}
 
-		if (!o.internal && o.mcp.transport === "http") {
+		if (
+			o.mcp.transport === "sse" ||
+			o.mcp.transport === "streamable-http" ||
+			o.mcp.transport === "http"
+		) {
+			let t = ""
+			switch (o.mcp.transport) {
+			case "sse":
+				t = "SSE"
+				break
+			case "streamable-http":
+				t = "Streamable HTTP"
+				break
+			case "http":
+				t = "HTTP"
+				break
+			}
+
 			let a = Boolean(o.api.shared.apiKey)
 			let b = Boolean(o.api.shared.pat)
 			let c = Boolean(o.api.shared.username) && Boolean(o.api.shared.password)
 			let d = Boolean(o.oauth.client.clientId)
 			let u = Number(a) + Number(b) + Number(c) + Number(d)
 
-			if (u === 0) {
-				ctx.addIssue({
-					code: z.ZodIssueCode.custom,
-					message: "Expected at least one of API key, PAT, (username and password), or OAuth client ID to be set for HTTP transport",
-				})
-			}
-
 			if (u !== 1) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
-					message: "Expected only one of API key, PAT, (username and password), or OAuth client ID to be set for HTTP transport",
+					message: `Expected only one of API key, PAT, (username and password), or OAuth client ID to be set for ${t} transport`,
 				})
 			}
 
 			if ((a || b || c) && !o.api.shared.baseUrl) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
-					message: "API base URL is required for HTTP transport with API key, PAT, or (username and password)",
+					message: `API base URL is required for ${t} transport with API key, PAT, or (username and password)`,
+				})
+			}
+
+			if (d && !o.api.oauth.baseUrl) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: `OAuth base URL is required for ${t} transport with OAuth client ID`,
 				})
 			}
 
 			if (d && !o.server.baseUrl) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
-					message: "Server base URL is required for HTTP transport with OAuth client ID",
+					message: `Server base URL is required for ${t} transport with OAuth client ID`,
+				})
+			}
+
+			if (!o.server.host) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: `Server host is required for ${t} transport`,
 				})
 			}
 		}
@@ -782,13 +796,6 @@ function resolveToolsetsAndTools(toolsets: string[], enabledTools: string[], dis
 	}
 
 	return [x, y]
-}
-
-function ensureTrailing(u: string): string {
-	if (!u.endsWith("/")) {
-		u += "/"
-	}
-	return u
 }
 
 export function format(c: Config): object {

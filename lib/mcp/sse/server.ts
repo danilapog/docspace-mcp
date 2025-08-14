@@ -25,7 +25,7 @@ import * as moreerrors from "../../util/moreerrors.ts"
 import * as result from "../../util/result.ts"
 
 export interface Config {
-	corsOrigin: string
+	corsOrigin: string[]
 	corsMaxAge: number
 	corsAllowedHeaders: string[]
 	corsExposedHeaders: string[]
@@ -45,7 +45,7 @@ export interface Transports {
 }
 
 class Server {
-	private corsOrigin: string
+	private corsOrigin: string[]
 	private corsMaxAge: number
 	private corsAllowedHeaders: string[]
 	private corsExposedHeaders: string[]
@@ -66,7 +66,7 @@ class Server {
 	}
 
 	cors(): express.Handler {
-		if (!this.corsOrigin) {
+		if (this.corsOrigin.length !== 0) {
 			return (_, __, next) => {
 				next()
 			}

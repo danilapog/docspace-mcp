@@ -49,13 +49,13 @@ export class Sessions {
 
 	create(o: CreateOptions): result.Result<Session, Error> {
 		let createdAt = new Date()
-		if (Number.isNaN(createdAt.getTime())) {
-			return result.error(new Error("Creation date is invalid"))
-		}
 
-		let expiresAt = new Date(createdAt.getTime() + this.ttl)
-		if (Number.isNaN(expiresAt.getTime())) {
-			return result.error(new Error("Expiration date is invalid"))
+		let expiresAt: Date
+
+		if (this.ttl === 0) {
+			expiresAt = new Date(0)
+		} else {
+			expiresAt = new Date(createdAt.getTime() + this.ttl)
 		}
 
 		let s: Session = {
@@ -79,16 +79,10 @@ export class Sessions {
 		}
 
 		let a = new Date()
-		if (Number.isNaN(a.getTime())) {
-			return result.error(new Error("Current date is invalid"))
-		}
 
 		let b = s.expiresAt
-		if (Number.isNaN(b.getTime())) {
-			return result.error(new Error("Expiration date is invalid"))
-		}
 
-		if (a.getTime() >= b.getTime()) {
+		if (b.getTime() !== 0 && a.getTime() >= b.getTime()) {
 			return result.error(new Error(`Session ${s.id} has expired`))
 		}
 
@@ -159,6 +153,10 @@ export class Sessions {
 	async watch(sig: AbortSignal, interval: number): Promise<Error | undefined> {
 		if (sig.aborted) {
 			return new DOMException("Aborted", "AbortError")
+		}
+
+		if (interval === 0) {
+			return
 		}
 
 		return await new Promise((res) => {
