@@ -72,7 +72,8 @@ function format(v: object): Record<string, unknown> {
 		}
 
 		if (v instanceof Error) {
-			o[morestrings.camelCaseToSnakeCase(k)] = moreerrors.format(v)
+			let m = moreerrors.format(v)
+			o[morestrings.camelCaseToSnakeCase(k)] = morestrings.escapeWhitespace(m)
 			return
 		}
 
