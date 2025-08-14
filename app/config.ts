@@ -461,6 +461,147 @@ export const ConfigSchema = z.
 		// todo: check if not empty
 		c.server.baseUrl = ensureTrailing(c.server.baseUrl)
 
+		if (c.internal) {
+			c = {
+				internal: c.internal,
+				mcp: {
+					transport: "streamable-http",
+					dynamic: c.mcp.dynamic,
+					toolsets: c.mcp.toolsets,
+					tools: c.mcp.tools,
+					enabledTools: c.mcp.enabledTools,
+					disabledTools: c.mcp.disabledTools,
+					session: c.mcp.session,
+				},
+				api: {
+					userAgent: c.api.userAgent,
+					shared: {
+						baseUrl: "",
+						origin: "",
+						apiKey: "",
+						pat: "",
+						username: "",
+						password: "",
+					},
+					oauth: {
+						baseUrl: "",
+					},
+				},
+				oauth: {
+					resource: {
+						scopesSupported: [],
+						resourceName: "",
+						resourceDocumentation: "",
+					},
+					client: {
+						redirectUris: [],
+						clientId: "",
+						clientName: "",
+						scopes: [],
+						tosUri: "",
+						policyUri: "",
+						clientSecret: "",
+					},
+				},
+				server: {
+					baseUrl: "",
+					host: c.server.host,
+					port: c.server.port,
+					cors: {
+						mcp: {
+							origin: "",
+							maxAge: 0,
+						},
+						oauthMetadata: {
+							origin: "",
+							maxAge: 0,
+						},
+						oauthRegister: {
+							origin: "",
+							maxAge: 0,
+						},
+					},
+					rateLimits: {
+						mcp: {
+							capacity: 0,
+							window: 0,
+						},
+						oauthMetadata: {
+							capacity: 0,
+							window: 0,
+						},
+						oauthRegister: {
+							capacity: 0,
+							window: 0,
+						},
+					},
+				},
+			}
+		}
+
+		if (c.mcp.transport === "stdio") {
+			c = {
+				internal: c.internal,
+				mcp: c.mcp,
+				api: {
+					userAgent: c.api.userAgent,
+					shared: c.api.shared,
+					oauth: {
+						baseUrl: "",
+					},
+				},
+				oauth: {
+					resource: {
+						scopesSupported: [],
+						resourceName: "",
+						resourceDocumentation: "",
+					},
+					client: {
+						redirectUris: [],
+						clientId: "",
+						clientName: "",
+						scopes: [],
+						tosUri: "",
+						policyUri: "",
+						clientSecret: "",
+					},
+				},
+				server: {
+					baseUrl: "",
+					host: "",
+					port: 0,
+					cors: {
+						mcp: {
+							origin: "",
+							maxAge: 0,
+						},
+						oauthMetadata: {
+							origin: "",
+							maxAge: 0,
+						},
+						oauthRegister: {
+							origin: "",
+							maxAge: 0,
+						},
+					},
+					rateLimits: {
+						mcp: {
+							capacity: 0,
+							window: 0,
+						},
+						oauthMetadata: {
+							capacity: 0,
+							window: 0,
+						},
+						oauthRegister: {
+							capacity: 0,
+							window: 0,
+						},
+					},
+				},
+			}
+		}
+
 		return c
 	}).
 	superRefine((o, ctx) => {

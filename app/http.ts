@@ -236,30 +236,26 @@ function createComponents(config: config.Config, create: CreateServer): result.R
 		streamable: undefined,
 	}
 
-	if (config.internal) {
-		c.streamable = createStreamable(config, create)
-	} else {
-		if (config.oauth.client.clientId) {
-			let r = createOauth(config)
-			if (r.err) {
-				return result.error(new Error("Creating OAuth", {cause: r.err}))
-			}
-			c.oauth = r.v
+	if (config.oauth.client.clientId) {
+		let r = createOauth(config)
+		if (r.err) {
+			return result.error(new Error("Creating OAuth", {cause: r.err}))
 		}
+		c.oauth = r.v
+	}
 
-		switch (config.mcp.transport) {
-		case "sse":
-			c.sse = createSse(config, create)
-			break
-		case "streamable-http":
-			c.streamable = createStreamable(config, create)
-			break
-		case "http":
-			c.sse = createSse(config, create)
-			c.streamable = createStreamable(config, create)
-			break
-		// no default
-		}
+	switch (config.mcp.transport) {
+	case "sse":
+		c.sse = createSse(config, create)
+		break
+	case "streamable-http":
+		c.streamable = createStreamable(config, create)
+		break
+	case "http":
+		c.sse = createSse(config, create)
+		c.streamable = createStreamable(config, create)
+		break
+	// no default
 	}
 
 	return result.ok(c)
@@ -348,28 +344,21 @@ function createSse(config: config.Config, create: CreateServer): Mcp {
 	let t = new mcp.sse.transports.Transports(tc)
 
 	let rc: mcp.sse.server.Config = {
-		corsOrigin: "",
-		corsMaxAge: 0,
+		corsOrigin: config.server.cors.mcp.origin,
+		corsMaxAge: config.server.cors.mcp.maxAge,
 		corsAllowedHeaders: [],
 		corsExposedHeaders: [],
-		rateLimitCapacity: 0,
-		rateLimitWindow: 0,
+		rateLimitCapacity: config.server.rateLimits.mcp.capacity,
+		rateLimitWindow: config.server.rateLimits.mcp.window,
 		servers: {
 			create,
 		},
 		transports: t,
 	}
 
-	if (!config.internal) {
-		rc.corsOrigin = config.server.cors.mcp.origin
-		rc.corsMaxAge = config.server.cors.mcp.maxAge
-		rc.rateLimitCapacity = config.server.rateLimits.mcp.capacity
-		rc.rateLimitWindow = config.server.rateLimits.mcp.window
-
-		if (config.oauth.client.clientId) {
-			rc.corsAllowedHeaders.push("Authorization")
-			rc.corsExposedHeaders.push("WWW-Authenticate")
-		}
+	if (config.oauth.client.clientId) {
+		rc.corsAllowedHeaders.push("Authorization")
+		rc.corsExposedHeaders.push("WWW-Authenticate")
 	}
 
 	let r = mcp.sse.server.router(rc)
@@ -396,28 +385,21 @@ function createStreamable(config: config.Config, create: CreateServer): Mcp {
 	let t = new mcp.streamable.transports.Transports(tc)
 
 	let rc: mcp.streamable.server.Config = {
-		corsOrigin: "",
-		corsMaxAge: 0,
+		corsOrigin: config.server.cors.mcp.origin,
+		corsMaxAge: config.server.cors.mcp.maxAge,
 		corsAllowedHeaders: [],
 		corsExposedHeaders: [],
-		rateLimitCapacity: 0,
-		rateLimitWindow: 0,
+		rateLimitCapacity: config.server.rateLimits.mcp.capacity,
+		rateLimitWindow: config.server.rateLimits.mcp.window,
 		servers: {
 			create,
 		},
 		transports: t,
 	}
 
-	if (!config.internal) {
-		rc.corsOrigin = config.server.cors.mcp.origin
-		rc.corsMaxAge = config.server.cors.mcp.maxAge
-		rc.rateLimitCapacity = config.server.rateLimits.mcp.capacity
-		rc.rateLimitWindow = config.server.rateLimits.mcp.window
-
-		if (config.oauth.client.clientId) {
-			rc.corsAllowedHeaders.push("Authorization")
-			rc.corsExposedHeaders.push("WWW-Authenticate")
-		}
+	if (config.oauth.client.clientId) {
+		rc.corsAllowedHeaders.push("Authorization")
+		rc.corsExposedHeaders.push("WWW-Authenticate")
 	}
 
 	let r = mcp.streamable.server.router(rc)
