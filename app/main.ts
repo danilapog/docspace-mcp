@@ -93,11 +93,11 @@ function watch(cleanup: shared.Cleanup): void {
 				}
 
 				if (err) {
-					logger.error("Shuted down with an error", {err})
+					logger.error("Shut down with an error", {err})
 					process.exit(1)
 				}
 
-				logger.info("Shuted down successfully")
+				logger.info("Shut down successfully")
 				process.exit(0)
 			})()
 		})
