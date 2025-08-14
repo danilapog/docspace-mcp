@@ -104,9 +104,18 @@ function createCreateServerWithHeaders(config: config.Config): CreateServer {
 			return result.error(new Error("Referer header is required"))
 		}
 
+		let b = result.safeNew(URL, r)
+		if (b.err) {
+			return result.error(new Error("Creating base URL", {cause: b.err}))
+		}
+
+		if (!b.v.pathname.endsWith("/")) {
+			b.v.pathname += "/"
+		}
+
 		let cc: api.client.Config = {
 			userAgent: config.api.userAgent,
-			sharedBaseUrl: r,
+			sharedBaseUrl: b.v.toString(),
 			sharedFetch: morefetch.withLogger(globalThis.fetch),
 			oauthBaseUrl: "",
 			oauthFetch() {
