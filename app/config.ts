@@ -23,6 +23,13 @@ import * as morezod from "../lib/util/morezod.ts"
 import * as result from "../lib/util/result.ts"
 import pack from "../package.json" with {type: "json"}
 
+const availableTransports: McpTransport[] = [
+	"stdio",
+	"sse",
+	"streamable-http",
+	"http",
+]
+
 const availableToolsets = (() => {
 	let a: string[] = ["all"]
 	for (let s of base.data.regular.toolsets) {
@@ -50,7 +57,7 @@ export interface Config {
 }
 
 export interface Mcp {
-	transport: "stdio" | "http"
+	transport: McpTransport
 	dynamic: boolean
 	toolsets: string[]
 	tools: string[]
@@ -58,6 +65,12 @@ export interface Mcp {
 	disabledTools: string[]
 	session: McpSession
 }
+
+export type McpTransport =
+	"stdio" |
+	"sse" |
+	"streamable-http" |
+	"http"
 
 export interface McpSession {
 	ttl: number
@@ -152,7 +165,7 @@ export const ConfigSchema = z.
 		DOCSPACE_TRANSPORT: z.
 			string().
 			default("stdio").
-			transform(morezod.envUnion<"stdio" | "http">(["stdio", "http"])),
+			transform(morezod.envUnion([...availableTransports])),
 
 		DOCSPACE_DYNAMIC: z.
 			string().
