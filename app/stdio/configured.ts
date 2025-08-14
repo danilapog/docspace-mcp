@@ -18,36 +18,13 @@
 
 import * as stdio from "@modelcontextprotocol/sdk/server/stdio.js"
 import * as api from "../../lib/api.ts"
-import * as base from "../../lib/mcp/base.ts"
+import * as mcp from "../../lib/mcp.ts"
 import * as morefetch from "../../lib/util/morefetch.ts"
 import * as result from "../../lib/util/result.ts"
+import type * as config from "../config.ts"
 import type * as shared from "../shared.ts"
 
-export interface Config {
-	mcp: Mcp
-	api: Api
-}
-
-export interface Mcp {
-	dynamic: boolean
-	tools: string[]
-}
-
-export interface Api {
-	userAgent: string
-	shared: ApiShared
-}
-
-export interface ApiShared {
-	baseUrl: string
-	origin: string
-	apiKey: string
-	pat: string
-	username: string
-	password: string
-}
-
-export function start(config: Config): [shared.P, shared.Cleanup] {
+export function start(config: config.Config): [shared.P, shared.Cleanup] {
 	let cc: api.client.Config = {
 		userAgent: config.api.userAgent,
 		sharedBaseUrl: config.api.shared.baseUrl,
@@ -62,34 +39,34 @@ export function start(config: Config): [shared.P, shared.Cleanup] {
 		cc.sharedFetch = morefetch.withOrigin(cc.sharedFetch, config.api.shared.origin)
 	}
 
-	let cl = new api.client.Client(cc)
+	let c = new api.client.Client(cc)
 
 	if (config.api.shared.apiKey) {
-		cl = cl.withApiKey(config.api.shared.apiKey)
+		c = c.withApiKey(config.api.shared.apiKey)
 	}
 
 	if (config.api.shared.pat) {
-		cl = cl.withAuthToken(config.api.shared.pat)
+		c = c.withAuthToken(config.api.shared.pat)
 	}
 
 	if (config.api.shared.username && config.api.shared.password) {
-		cl = cl.withBasicAuth(config.api.shared.username, config.api.shared.password)
+		c = c.withBasicAuth(config.api.shared.username, config.api.shared.password)
 	}
 
-	let sc: base.configured.Config = {
-		client: cl,
-		resolver: new api.resolver.Resolver(cl),
-		uploader: new api.uploader.Uploader(cl),
+	let sc: mcp.base.configured.Config = {
+		client: c,
+		resolver: new api.resolver.Resolver(c),
+		uploader: new api.uploader.Uploader(c),
 		dynamic: config.mcp.dynamic,
 		tools: config.mcp.tools,
 	}
 
-	let s = base.configured.create(sc)
+	let s = mcp.base.configured.create(sc)
 
 	let t = new stdio.StdioServerTransport()
 
 	let cleanup: shared.Cleanup = async() => {
-		let r = await result.safeAsync(s.close.bind(s))
+		let r = await result.safeAsync(t.close.bind(s))
 		if (r.err) {
 			return new Error("Closing transport", {cause: r.err})
 		}

@@ -17,21 +17,21 @@
  */
 
 import * as stdio from "@modelcontextprotocol/sdk/server/stdio.js"
-import * as base from "../../lib/mcp/base.ts"
+import * as mcp from "../../lib/mcp.ts"
 import * as result from "../../lib/util/result.ts"
 import type * as shared from "../shared.ts"
 
 export function start(err: Error): [shared.P, shared.Cleanup] {
-	let c: base.misconfigured.Config = {
+	let sc: mcp.base.misconfigured.Config = {
 		err,
 	}
 
-	let s = base.misconfigured.create(c)
+	let s = mcp.base.misconfigured.create(sc)
 
 	let t = new stdio.StdioServerTransport()
 
 	let cleanup: shared.Cleanup = async() => {
-		let r = await result.safeAsync(s.close.bind(s))
+		let r = await result.safeAsync(t.close.bind(s))
 		if (r.err) {
 			return new Error("Closing transport", {cause: r.err})
 		}
