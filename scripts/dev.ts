@@ -40,7 +40,7 @@ let version: string | undefined
 
 try {
 	let p = await exec("mise version --json", {env: process.env})
-	let j = await JSON.parse(p.stdout)
+	let j = JSON.parse(p.stdout)
 	version = j.version.split(" ")[0]
 } catch {
 	version = "latest"
