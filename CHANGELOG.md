@@ -17,7 +17,8 @@ This document records all notable changes to the project, following the [Keep a 
 
 - In the internal Streamable HTTP transport, check `Authorization` and `Referer` headers only during the initialization request ([b6e33bf]);
 - Update `@modelcontextprotocol/sdk` to 1.17.0 ([8d3f3f3]);
-- Ignore the `DOCSPACE_TRANSPORT` option when the `DOCSPACE_INTERNAL` option is set ([d643a82]).
+- Ignore the `DOCSPACE_TRANSPORT` option when the `DOCSPACE_INTERNAL` option is set ([d643a82]);
+- **Breaking** Remove the `DOCSPACE_ORIGIN` option ([ac33ab6]).
 
 ### Fixed
 
@@ -167,6 +168,7 @@ This document records all notable changes to the project, following the [Keep a 
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[ac33ab6]: https://github.com/onlyoffice/docspace-mcp/commit/ac33ab651271affc2de6293ea5e12353cd2fa3d8/
 [d643a82]: https://github.com/onlyoffice/docspace-mcp/commit/d643a8289b3d3112a15a95c4da477113bcd4f750/
 [d63057b]: https://github.com/onlyoffice/docspace-mcp/commit/d63057b57193b7a1d927f56e0da7be1755cb5366/
 [ad70531]: https://github.com/onlyoffice/docspace-mcp/commit/ad70531288788dbdea452c71217384325734bcc2/
