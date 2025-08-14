@@ -18,6 +18,17 @@
 
 import * as z from "zod"
 
+// eslint-disable-next-line unicorn/custom-error-definition
+export class Errors extends Error {
+	name: "Errors"
+	cause: Error[] = []
+
+	constructor(options: ErrorOptions & {cause: Error[]}) {
+		super("Multiple errors", options)
+		this.name = "Errors"
+	}
+}
+
 export class JsonError extends Error {
 	name: "JsonError"
 
@@ -116,18 +127,14 @@ export function format(err: Error): string {
 
 	loop(err)
 
-	m = m.slice(0, -1)
+	if (m.length !== 0) {
+		m = m.slice(0, -1)
+	}
 
 	return m
 
 	function loop(err: unknown): void {
 		if (err instanceof z.ZodError) {
-			if (err.issues.length === 1) {
-				add(`${err.name}: ${err.issues.length} issue.`)
-			} else {
-				add(`${err.name}: ${err.issues.length} issues.`)
-			}
-
 			l += 1
 
 			for (let i of err.issues) {
@@ -153,19 +160,21 @@ export function format(err: Error): string {
 			}
 
 			l -= 1
+			return
+		}
 
+		if (err instanceof Errors) {
+			loop(err.cause)
 			return
 		}
 
 		if (err instanceof Error) {
-			add(`${err.name}: ${err.message}`)
-
+			add(err.message)
 			if (err.cause) {
 				l += 1
 				loop(err.cause)
 				l -= 1
 			}
-
 			return
 		}
 
@@ -173,7 +182,6 @@ export function format(err: Error): string {
 			for (let e of err) {
 				loop(e)
 			}
-
 			return
 		}
 	}

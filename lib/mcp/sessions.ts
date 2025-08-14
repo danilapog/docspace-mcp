@@ -16,6 +16,7 @@
  * @license
  */
 
+import * as moreerrors from "../util/moreerrors.ts"
 import * as result from "../util/result.ts"
 
 export interface Session {
@@ -151,7 +152,7 @@ export class Sessions {
 		}
 
 		if (errs.length !== 0) {
-			return new Error("Multiple errors", {cause: errs})
+			return new moreerrors.Errors({cause: errs})
 		}
 	}
 

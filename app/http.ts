@@ -536,7 +536,7 @@ function createCleanup(c: Components, a: App): shared.Cleanup {
 		}
 
 		if (errs.length !== 0) {
-			return new Error("Multiple errors", {cause: errs})
+			return new moreerrors.Errors({cause: errs})
 		}
 	}
 }
