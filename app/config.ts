@@ -85,7 +85,6 @@ export interface Api {
 
 export interface ApiShared {
 	baseUrl: string
-	origin: string
 	apiKey: string
 	pat: string
 	username: string
@@ -381,7 +380,6 @@ export const ConfigSchema = z.
 				userAgent: o.DOCSPACE_USER_AGENT,
 				shared: {
 					baseUrl: o.DOCSPACE_BASE_URL,
-					origin: o.DOCSPACE_ORIGIN,
 					apiKey: o.DOCSPACE_API_KEY,
 					pat: o.DOCSPACE_AUTH_TOKEN,
 					username: o.DOCSPACE_USERNAME,
@@ -477,7 +475,6 @@ export const ConfigSchema = z.
 					userAgent: c.api.userAgent,
 					shared: {
 						baseUrl: "",
-						origin: "",
 						apiKey: "",
 						pat: "",
 						username: "",
@@ -886,10 +883,6 @@ function formatApiShared(c: ApiShared): morets.RecursivePartial<ApiShared> {
 
 	if (c.baseUrl) {
 		o.baseUrl = c.baseUrl
-	}
-
-	if (c.origin) {
-		o.origin = c.origin
 	}
 
 	if (c.apiKey) {

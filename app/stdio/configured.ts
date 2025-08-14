@@ -19,7 +19,6 @@
 import * as stdio from "@modelcontextprotocol/sdk/server/stdio.js"
 import * as api from "../../lib/api.ts"
 import * as mcp from "../../lib/mcp.ts"
-import * as morefetch from "../../lib/util/morefetch.ts"
 import * as result from "../../lib/util/result.ts"
 import type * as config from "../config.ts"
 import type * as shared from "../shared.ts"
@@ -33,10 +32,6 @@ export function start(config: config.Config): [shared.P, shared.Cleanup] {
 		oauthFetch() {
 			throw new Error("Not implemented")
 		},
-	}
-
-	if (config.api.shared.origin) {
-		cc.sharedFetch = morefetch.withOrigin(cc.sharedFetch, config.api.shared.origin)
 	}
 
 	let c = new api.client.Client(cc)
