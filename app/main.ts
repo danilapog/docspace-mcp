@@ -51,20 +51,15 @@ async function main(): Promise<void> {
 			let [p, cleanup] = stdio.configured.start(c.v)
 			watch(cleanup)
 			await start(p, cleanup)
-			return
-		}
-
-		if (c.v.mcp.transport === "http") {
+		} else {
 			let [p, cleanup] = http.start(c.v)
 			watch(cleanup)
 			await start(p, cleanup)
-			return
 		}
 	} catch (err) {
 		logger.error("Executing main", {err})
+		process.exit(1)
 	}
-
-	process.exit(1)
 }
 
 async function start(p: shared.P, cleanup: shared.Cleanup): Promise<void> {

@@ -236,7 +236,9 @@ function createComponents(config: config.Config, create: CreateServer): result.R
 		streamable: undefined,
 	}
 
-	if (!config.internal) {
+	if (config.internal) {
+		c.streamable = createStreamable(config, create)
+	} else {
 		if (config.oauth.client.clientId) {
 			let r = createOauth(config)
 			if (r.err) {
@@ -245,10 +247,20 @@ function createComponents(config: config.Config, create: CreateServer): result.R
 			c.oauth = r.v
 		}
 
-		c.sse = createSse(config, create)
+		switch (config.mcp.transport) {
+		case "sse":
+			c.sse = createSse(config, create)
+			break
+		case "streamable-http":
+			c.streamable = createStreamable(config, create)
+			break
+		case "http":
+			c.sse = createSse(config, create)
+			c.streamable = createStreamable(config, create)
+			break
+		// no default
+		}
 	}
-
-	c.streamable = createStreamable(config, create)
 
 	return result.ok(c)
 }
