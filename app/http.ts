@@ -138,13 +138,18 @@ function createCreateServerWithOauth(config: config.Config): CreateServer {
 			return result.error(new Error("Decoding OAuth token", {cause: p.err}))
 		}
 
-		if (!p.v.aud.endsWith("/")) {
-			p.v.aud += "/"
+		let b = result.safeNew(URL, p.v.aud)
+		if (b.err) {
+			return result.error(new Error("Creating base URL", {cause: b.err}))
+		}
+
+		if (!b.v.pathname.endsWith("/")) {
+			b.v.pathname += "/"
 		}
 
 		let cc: api.client.Config = {
 			userAgent: config.api.userAgent,
-			sharedBaseUrl: p.v.aud,
+			sharedBaseUrl: b.v.toString(),
 			sharedFetch: morefetch.withLogger(globalThis.fetch),
 			oauthBaseUrl: "",
 			oauthFetch() {
