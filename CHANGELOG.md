@@ -15,13 +15,14 @@ This document records all notable changes to the project, following the [Keep a 
 
 ### Changed
 
-- In the internal streamable server, check `Authorization` and `Referer` headers only during the initialization request ([b6e33bf]);
+- In the internal Streamable HTTP transport, check `Authorization` and `Referer` headers only during the initialization request ([b6e33bf]);
 - Update `@modelcontextprotocol/sdk` to 1.17.0 ([8d3f3f3]).
 
 ### Fixed
 
 - Restore access to regular tools when using meta-tools ([eb84c1f]);
-- Prevent a disabled tool from being called when a regular tool is called ([eb84c1f]).
+- Prevent a disabled tool from being called when a regular tool is called ([eb84c1f]);
+- In the internal Streamable HTTP transport, allow the `Referer` header to be without a trailing slash ([ad70531]).
 
 ## [2.0.0] - 2025-07-23
 
@@ -165,6 +166,7 @@ This document records all notable changes to the project, following the [Keep a 
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[ad70531]: https://github.com/onlyoffice/docspace-mcp/commit/ad70531288788dbdea452c71217384325734bcc2/
 [2504af1]: https://github.com/onlyoffice/docspace-mcp/commit/2504af1459ce15980dc68366a8a9b3115a71948f/
 [9b3535c]: https://github.com/onlyoffice/docspace-mcp/commit/9b3535cba408919d66d36878d218b9e53a8fae4d/
 [b1fe294]: https://github.com/onlyoffice/docspace-mcp/commit/b1fe294f86506ab39d987057145142c7e66f76af/
