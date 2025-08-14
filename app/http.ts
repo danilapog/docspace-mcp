@@ -84,7 +84,12 @@ function createCreateServer(config: config.Config): CreateServer {
 	if (config.internal) {
 		return createCreateServerWithHeaders(config)
 	}
-	return createCreateServerWithOauth(config)
+
+	if (config.oauth.client.clientId) {
+		return createCreateServerWithOauth(config)
+	}
+
+	return createCreateServerWithAuth(config)
 }
 
 function createCreateServerWithHeaders(config: config.Config): CreateServer {
@@ -170,6 +175,46 @@ function createCreateServerWithOauth(config: config.Config): CreateServer {
 	}
 }
 
+function createCreateServerWithAuth(config: config.Config): CreateServer {
+	return () => {
+		let cc: api.client.Config = {
+			userAgent: config.api.userAgent,
+			sharedBaseUrl: config.api.shared.baseUrl,
+			sharedFetch: morefetch.withLogger(globalThis.fetch),
+			oauthBaseUrl: "",
+			oauthFetch() {
+				throw new Error("Not implemented")
+			},
+		}
+
+		let c = new api.client.Client(cc)
+
+		if (config.api.shared.apiKey) {
+			c = c.withApiKey(config.api.shared.apiKey)
+		}
+
+		if (config.api.shared.pat) {
+			c = c.withAuthToken(config.api.shared.pat)
+		}
+
+		if (config.api.shared.username && config.api.shared.password) {
+			c = c.withBasicAuth(config.api.shared.username, config.api.shared.password)
+		}
+
+		let sc: mcp.base.configured.Config = {
+			client: c,
+			resolver: new api.resolver.Resolver(c),
+			uploader: new api.uploader.Uploader(c),
+			dynamic: config.mcp.dynamic,
+			tools: config.mcp.tools,
+		}
+
+		let s = mcp.base.configured.create(sc)
+
+		return result.ok(s)
+	}
+}
+
 function createComponents(config: config.Config, create: CreateServer): result.Result<Components, Error> {
 	let c: Components = {
 		oauth: undefined,
@@ -178,11 +223,13 @@ function createComponents(config: config.Config, create: CreateServer): result.R
 	}
 
 	if (!config.internal) {
-		let r = createOauth(config)
-		if (r.err) {
-			return result.error(new Error("Creating OAuth", {cause: r.err}))
+		if (config.oauth.client.clientId) {
+			let r = createOauth(config)
+			if (r.err) {
+				return result.error(new Error("Creating OAuth", {cause: r.err}))
+			}
+			c.oauth = r.v
 		}
-		c.oauth = r.v
 
 		c.sse = createSse(config, create)
 	}
@@ -290,10 +337,13 @@ function createSse(config: config.Config, create: CreateServer): Mcp {
 	if (!config.internal) {
 		rc.corsOrigin = config.server.cors.mcp.origin
 		rc.corsMaxAge = config.server.cors.mcp.maxAge
-		rc.corsAllowedHeaders.push("Authorization")
-		rc.corsExposedHeaders.push("WWW-Authenticate")
 		rc.rateLimitCapacity = config.server.rateLimits.mcp.capacity
 		rc.rateLimitWindow = config.server.rateLimits.mcp.window
+
+		if (config.oauth.client.clientId) {
+			rc.corsAllowedHeaders.push("Authorization")
+			rc.corsExposedHeaders.push("WWW-Authenticate")
+		}
 	}
 
 	let r = mcp.sse.server.router(rc)
@@ -335,10 +385,13 @@ function createStreamable(config: config.Config, create: CreateServer): Mcp {
 	if (!config.internal) {
 		rc.corsOrigin = config.server.cors.mcp.origin
 		rc.corsMaxAge = config.server.cors.mcp.maxAge
-		rc.corsAllowedHeaders.push("Authorization")
-		rc.corsExposedHeaders.push("WWW-Authenticate")
 		rc.rateLimitCapacity = config.server.rateLimits.mcp.capacity
 		rc.rateLimitWindow = config.server.rateLimits.mcp.window
+
+		if (config.oauth.client.clientId) {
+			rc.corsAllowedHeaders.push("Authorization")
+			rc.corsExposedHeaders.push("WWW-Authenticate")
+		}
 	}
 
 	let r = mcp.streamable.server.router(rc)

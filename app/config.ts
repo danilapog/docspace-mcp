@@ -538,17 +538,37 @@ export const ConfigSchema = z.
 		}
 
 		if (!o.internal && o.mcp.transport === "http") {
-			if (!o.server.baseUrl) {
+			let a = Boolean(o.api.shared.apiKey)
+			let b = Boolean(o.api.shared.pat)
+			let c = Boolean(o.api.shared.username) && Boolean(o.api.shared.password)
+			let d = Boolean(o.oauth.client.clientId)
+			let u = Number(a) + Number(b) + Number(c) + Number(d)
+
+			if (u === 0) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
-					message: "Server base URL is required for HTTP transport",
+					message: "Expected at least one of API key, PAT, (username and password), or OAuth client ID to be set for HTTP transport",
 				})
 			}
 
-			if (!o.oauth.client.clientId) {
+			if (u !== 1) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
-					message: "OAuth client ID is required for HTTP transport",
+					message: "Expected only one of API key, PAT, (username and password), or OAuth client ID to be set for HTTP transport",
+				})
+			}
+
+			if ((a || b || c) && !o.api.shared.baseUrl) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: "API base URL is required for HTTP transport with API key, PAT, or (username and password)",
+				})
+			}
+
+			if (d && !o.server.baseUrl) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: "Server base URL is required for HTTP transport with OAuth client ID",
 				})
 			}
 		}
