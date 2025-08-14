@@ -9,8 +9,8 @@ This document records all notable changes to the project, following the [Keep a 
 ### Add
 
 - Add partial support for output schemas ([b50a7bc]);
-- Add the implementation of SSE transport ([9b3535c], [2504af1]);
-- Add the implementation of Streamable HTTP transport ([b1fe294], [2504af1]);
+- Add the implementation of SSE transport ([9b3535c], [2504af1], [d63057b]);
+- Add the implementation of Streamable HTTP transport ([b1fe294], [2504af1], [d63057b]);
 - Add the implementation of OAuth2 protocol ([b1fe294]).
 
 ### Changed
@@ -166,6 +166,7 @@ This document records all notable changes to the project, following the [Keep a 
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[d63057b]: https://github.com/onlyoffice/docspace-mcp/commit/d63057b57193b7a1d927f56e0da7be1755cb5366/
 [ad70531]: https://github.com/onlyoffice/docspace-mcp/commit/ad70531288788dbdea452c71217384325734bcc2/
 [2504af1]: https://github.com/onlyoffice/docspace-mcp/commit/2504af1459ce15980dc68366a8a9b3115a71948f/
 [9b3535c]: https://github.com/onlyoffice/docspace-mcp/commit/9b3535cba408919d66d36878d218b9e53a8fae4d/
