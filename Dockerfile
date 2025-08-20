@@ -3,7 +3,6 @@ WORKDIR /srv/onlyoffice-docspace-mcp
 COPY app app
 COPY lib lib
 COPY scripts scripts
-COPY util util
 COPY package.json package.json
 COPY pnpm-lock.yaml pnpm-lock.yaml
 COPY tsconfig.json tsconfig.json
