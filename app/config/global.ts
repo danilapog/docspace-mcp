@@ -36,6 +36,7 @@ export interface Config {
 	api: Api
 	oauth: Oauth
 	server: Server
+	request: Request
 }
 
 export interface Mcp {
@@ -126,6 +127,10 @@ export interface RateLimits {
 export interface RateLimit {
 	capacity: number
 	window: number
+}
+
+export interface Request {
+	headerPrefix: string
 }
 
 export const ConfigSchema = z.
@@ -341,6 +346,12 @@ export const ConfigSchema = z.
 			default("3600000"). // 1 hour
 			transform(morezod.envNumber()).
 			pipe(z.number().min(0)),
+
+		DOCSPACE_REQUEST_HEADER_PREFIX: z.
+			string().
+			trim().
+			toLowerCase().
+			default("x-mcp-"),
 	}).
 	transform((o) => {
 		let c: Config = {
@@ -418,6 +429,9 @@ export const ConfigSchema = z.
 						window: o.DOCSPACE_SERVER_RATE_LIMITS_OAUTH_REGISTER_WINDOW,
 					},
 				},
+			},
+			request: {
+				headerPrefix: o.DOCSPACE_REQUEST_HEADER_PREFIX,
 			},
 		}
 
@@ -505,6 +519,9 @@ export const ConfigSchema = z.
 						},
 					},
 				},
+				request: {
+					headerPrefix: "",
+				},
 			}
 		}
 
@@ -567,6 +584,9 @@ export const ConfigSchema = z.
 							window: 0,
 						},
 					},
+				},
+				request: {
+					headerPrefix: "",
 				},
 			}
 		}

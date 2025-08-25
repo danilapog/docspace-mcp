@@ -17,3 +17,4 @@
  */
 
 export * as global from "./config/global.ts"
+export * as request from "./config/request.ts"

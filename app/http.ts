@@ -27,7 +27,7 @@ import * as moreerrors from "../lib/util/moreerrors.ts"
 import * as moreexpress from "../lib/util/moreexpress.ts"
 import * as morefetch from "../lib/util/morefetch.ts"
 import * as result from "../lib/util/result.ts"
-import type * as config from "./config.ts"
+import * as config from "./config.ts"
 import type * as shared from "./shared.ts"
 
 type CreateServer = (req: express.Request) => result.Result<server.Server, Error>
@@ -161,6 +161,11 @@ function createCreateServerWithOauth(g: config.global.Config): CreateServer {
 			b.v.pathname += "/"
 		}
 
+		let m = config.request.parseMcp(g, req.headers)
+		if (m.err) {
+			return result.error(new Error("Parsing MCP config", {cause: m.err}))
+		}
+
 		let cc: api.client.Config = {
 			userAgent: g.api.userAgent,
 			sharedBaseUrl: b.v.toString(),
@@ -179,8 +184,8 @@ function createCreateServerWithOauth(g: config.global.Config): CreateServer {
 			client: c,
 			resolver: new api.resolver.Resolver(c),
 			uploader: new api.uploader.Uploader(c),
-			dynamic: g.mcp.dynamic,
-			tools: g.mcp.tools,
+			dynamic: m.v.dynamic,
+			tools: m.v.tools,
 		}
 
 		let s = mcp.base.configured.create(sc)
@@ -190,10 +195,20 @@ function createCreateServerWithOauth(g: config.global.Config): CreateServer {
 }
 
 function createCreateServerWithAuth(g: config.global.Config): CreateServer {
-	return () => {
+	return (req) => {
+		let a = config.request.parseApiShared(g, req.headers)
+		if (a.err) {
+			return result.error(new Error("Parsing API shared config", {cause: a.err}))
+		}
+
+		let m = config.request.parseMcp(g, req.headers)
+		if (m.err) {
+			return result.error(new Error("Parsing MCP config", {cause: m.err}))
+		}
+
 		let cc: api.client.Config = {
 			userAgent: g.api.userAgent,
-			sharedBaseUrl: g.api.shared.baseUrl,
+			sharedBaseUrl: a.v.baseUrl,
 			sharedFetch: morefetch.withLogger(globalThis.fetch),
 			oauthBaseUrl: "",
 			oauthFetch() {
@@ -203,24 +218,24 @@ function createCreateServerWithAuth(g: config.global.Config): CreateServer {
 
 		let c = new api.client.Client(cc)
 
-		if (g.api.shared.apiKey) {
-			c = c.withApiKey(g.api.shared.apiKey)
+		if (a.v.apiKey) {
+			c = c.withApiKey(a.v.apiKey)
 		}
 
-		if (g.api.shared.pat) {
-			c = c.withAuthToken(g.api.shared.pat)
+		if (a.v.pat) {
+			c = c.withAuthToken(a.v.pat)
 		}
 
-		if (g.api.shared.username && g.api.shared.password) {
-			c = c.withBasicAuth(g.api.shared.username, g.api.shared.password)
+		if (a.v.username && a.v.password) {
+			c = c.withBasicAuth(a.v.username, a.v.password)
 		}
 
 		let sc: mcp.base.configured.Config = {
 			client: c,
 			resolver: new api.resolver.Resolver(c),
 			uploader: new api.uploader.Uploader(c),
-			dynamic: g.mcp.dynamic,
-			tools: g.mcp.tools,
+			dynamic: m.v.dynamic,
+			tools: m.v.tools,
 		}
 
 		let s = mcp.base.configured.create(sc)
