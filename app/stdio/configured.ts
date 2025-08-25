@@ -23,10 +23,10 @@ import * as result from "../../lib/util/result.ts"
 import type * as config from "../config.ts"
 import type * as shared from "../shared.ts"
 
-export function start(config: config.Config): [shared.P, shared.Cleanup] {
+export function start(g: config.global.Config): [shared.P, shared.Cleanup] {
 	let cc: api.client.Config = {
-		userAgent: config.api.userAgent,
-		sharedBaseUrl: config.api.shared.baseUrl,
+		userAgent: g.api.userAgent,
+		sharedBaseUrl: g.api.shared.baseUrl,
 		sharedFetch: fetch,
 		oauthBaseUrl: "",
 		oauthFetch() {
@@ -36,24 +36,24 @@ export function start(config: config.Config): [shared.P, shared.Cleanup] {
 
 	let c = new api.client.Client(cc)
 
-	if (config.api.shared.apiKey) {
-		c = c.withApiKey(config.api.shared.apiKey)
+	if (g.api.shared.apiKey) {
+		c = c.withApiKey(g.api.shared.apiKey)
 	}
 
-	if (config.api.shared.pat) {
-		c = c.withAuthToken(config.api.shared.pat)
+	if (g.api.shared.pat) {
+		c = c.withAuthToken(g.api.shared.pat)
 	}
 
-	if (config.api.shared.username && config.api.shared.password) {
-		c = c.withBasicAuth(config.api.shared.username, config.api.shared.password)
+	if (g.api.shared.username && g.api.shared.password) {
+		c = c.withBasicAuth(g.api.shared.username, g.api.shared.password)
 	}
 
 	let sc: mcp.base.configured.Config = {
 		client: c,
 		resolver: new api.resolver.Resolver(c),
 		uploader: new api.uploader.Uploader(c),
-		dynamic: config.mcp.dynamic,
-		tools: config.mcp.tools,
+		dynamic: g.mcp.dynamic,
+		tools: g.mcp.tools,
 	}
 
 	let s = mcp.base.configured.create(sc)

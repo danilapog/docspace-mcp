@@ -60,10 +60,10 @@ interface Watchable {
 	promise: shared.P
 }
 
-export function start(config: config.Config): [shared.P, shared.Cleanup] {
-	let create = createCreateServer(config)
+export function start(g: config.global.Config): [shared.P, shared.Cleanup] {
+	let create = createCreateServer(g)
 
-	let c = createComponents(config, create)
+	let c = createComponents(g, create)
 	if (c.err) {
 		// eslint-disable-next-line typescript/require-await
 		return [Promise.resolve(c.err), async() => undefined]
@@ -71,28 +71,28 @@ export function start(config: config.Config): [shared.P, shared.Cleanup] {
 
 	let e = createExpress(c.v)
 
-	let a = createApp(config, c.v, e)
+	let a = createApp(g, c.v, e)
 
 	let cleanup = createCleanup(c.v, a)
 
-	let p = createPromise(config, a.server)
+	let p = createPromise(g, a.server)
 
 	return [p, cleanup]
 }
 
-function createCreateServer(config: config.Config): CreateServer {
-	if (config.internal) {
-		return createCreateServerWithHeaders(config)
+function createCreateServer(g: config.global.Config): CreateServer {
+	if (g.internal) {
+		return createInternalCreateServer(g)
 	}
 
-	if (config.oauth.client.clientId) {
-		return createCreateServerWithOauth(config)
+	if (g.oauth.client.clientId) {
+		return createCreateServerWithOauth(g)
 	}
 
-	return createCreateServerWithAuth(config)
+	return createCreateServerWithAuth(g)
 }
 
-function createCreateServerWithHeaders(config: config.Config): CreateServer {
+function createInternalCreateServer(g: config.global.Config): CreateServer {
 	return (req: express.Request): result.Result<server.Server, Error> => {
 		let a = req.headers.authorization
 		if (!a) {
@@ -114,7 +114,7 @@ function createCreateServerWithHeaders(config: config.Config): CreateServer {
 		}
 
 		let cc: api.client.Config = {
-			userAgent: config.api.userAgent,
+			userAgent: g.api.userAgent,
 			sharedBaseUrl: b.v.toString(),
 			sharedFetch: morefetch.withLogger(globalThis.fetch),
 			oauthBaseUrl: "",
@@ -131,8 +131,8 @@ function createCreateServerWithHeaders(config: config.Config): CreateServer {
 			client: c,
 			resolver: new api.resolver.Resolver(c),
 			uploader: new api.uploader.Uploader(c),
-			dynamic: config.mcp.dynamic,
-			tools: config.mcp.tools,
+			dynamic: g.mcp.dynamic,
+			tools: g.mcp.tools,
 		}
 
 		let s = mcp.base.configured.create(sc)
@@ -141,7 +141,7 @@ function createCreateServerWithHeaders(config: config.Config): CreateServer {
 	}
 }
 
-function createCreateServerWithOauth(config: config.Config): CreateServer {
+function createCreateServerWithOauth(g: config.global.Config): CreateServer {
 	return (req) => {
 		if (!req.auth) {
 			return result.error(new Error("OAuth middleware was not registered"))
@@ -162,7 +162,7 @@ function createCreateServerWithOauth(config: config.Config): CreateServer {
 		}
 
 		let cc: api.client.Config = {
-			userAgent: config.api.userAgent,
+			userAgent: g.api.userAgent,
 			sharedBaseUrl: b.v.toString(),
 			sharedFetch: morefetch.withLogger(globalThis.fetch),
 			oauthBaseUrl: "",
@@ -179,8 +179,8 @@ function createCreateServerWithOauth(config: config.Config): CreateServer {
 			client: c,
 			resolver: new api.resolver.Resolver(c),
 			uploader: new api.uploader.Uploader(c),
-			dynamic: config.mcp.dynamic,
-			tools: config.mcp.tools,
+			dynamic: g.mcp.dynamic,
+			tools: g.mcp.tools,
 		}
 
 		let s = mcp.base.configured.create(sc)
@@ -189,11 +189,11 @@ function createCreateServerWithOauth(config: config.Config): CreateServer {
 	}
 }
 
-function createCreateServerWithAuth(config: config.Config): CreateServer {
+function createCreateServerWithAuth(g: config.global.Config): CreateServer {
 	return () => {
 		let cc: api.client.Config = {
-			userAgent: config.api.userAgent,
-			sharedBaseUrl: config.api.shared.baseUrl,
+			userAgent: g.api.userAgent,
+			sharedBaseUrl: g.api.shared.baseUrl,
 			sharedFetch: morefetch.withLogger(globalThis.fetch),
 			oauthBaseUrl: "",
 			oauthFetch() {
@@ -203,24 +203,24 @@ function createCreateServerWithAuth(config: config.Config): CreateServer {
 
 		let c = new api.client.Client(cc)
 
-		if (config.api.shared.apiKey) {
-			c = c.withApiKey(config.api.shared.apiKey)
+		if (g.api.shared.apiKey) {
+			c = c.withApiKey(g.api.shared.apiKey)
 		}
 
-		if (config.api.shared.pat) {
-			c = c.withAuthToken(config.api.shared.pat)
+		if (g.api.shared.pat) {
+			c = c.withAuthToken(g.api.shared.pat)
 		}
 
-		if (config.api.shared.username && config.api.shared.password) {
-			c = c.withBasicAuth(config.api.shared.username, config.api.shared.password)
+		if (g.api.shared.username && g.api.shared.password) {
+			c = c.withBasicAuth(g.api.shared.username, g.api.shared.password)
 		}
 
 		let sc: mcp.base.configured.Config = {
 			client: c,
 			resolver: new api.resolver.Resolver(c),
 			uploader: new api.uploader.Uploader(c),
-			dynamic: config.mcp.dynamic,
-			tools: config.mcp.tools,
+			dynamic: g.mcp.dynamic,
+			tools: g.mcp.tools,
 		}
 
 		let s = mcp.base.configured.create(sc)
@@ -229,31 +229,31 @@ function createCreateServerWithAuth(config: config.Config): CreateServer {
 	}
 }
 
-function createComponents(config: config.Config, create: CreateServer): result.Result<Components, Error> {
+function createComponents(g: config.global.Config, create: CreateServer): result.Result<Components, Error> {
 	let c: Components = {
 		oauth: undefined,
 		sse: undefined,
 		streamable: undefined,
 	}
 
-	if (config.oauth.client.clientId) {
-		let r = createOauth(config)
+	if (g.oauth.client.clientId) {
+		let r = createOauth(g)
 		if (r.err) {
 			return result.error(new Error("Creating OAuth", {cause: r.err}))
 		}
 		c.oauth = r.v
 	}
 
-	switch (config.mcp.transport) {
+	switch (g.mcp.transport) {
 	case "sse":
-		c.sse = createSse(config, create)
+		c.sse = createSse(g, create)
 		break
 	case "streamable-http":
-		c.streamable = createStreamable(config, create)
+		c.streamable = createStreamable(g, create)
 		break
 	case "http":
-		c.sse = createSse(config, create)
-		c.streamable = createStreamable(config, create)
+		c.sse = createSse(g, create)
+		c.streamable = createStreamable(g, create)
 		break
 	// no default
 	}
@@ -261,58 +261,58 @@ function createComponents(config: config.Config, create: CreateServer): result.R
 	return result.ok(c)
 }
 
-function createOauth(config: config.Config): result.Result<Oauth, Error> {
+function createOauth(g: config.global.Config): result.Result<Oauth, Error> {
 	let cc: api.client.Config = {
-		userAgent: config.api.userAgent,
+		userAgent: g.api.userAgent,
 		sharedBaseUrl: "",
 		sharedFetch() {
 			throw new Error("Not implemented")
 		},
-		oauthBaseUrl: config.api.oauth.baseUrl,
+		oauthBaseUrl: g.api.oauth.baseUrl,
 		oauthFetch: morefetch.withLogger(globalThis.fetch),
 	}
 
 	let c = new api.client.Client(cc)
 
-	c = c.withApiKey(config.api.shared.apiKey)
+	c = c.withApiKey(g.api.shared.apiKey)
 
 	let rc: oauth.resource.Config = {
-		metadataCorsOrigin: config.server.cors.oauthMetadata.origin,
-		metadataCorsMaxAge: config.server.cors.oauthMetadata.maxAge,
-		metadataRateLimitCapacity: config.server.rateLimits.oauthMetadata.capacity,
-		metadataRateLimitWindow: config.server.rateLimits.oauthMetadata.window,
-		resourceBaseUrl: config.server.baseUrl,
-		scopesSupported: config.oauth.resource.scopesSupported,
-		resourceName: config.oauth.resource.resourceName,
-		resourceDocumentation: config.oauth.resource.resourceDocumentation,
+		metadataCorsOrigin: g.server.cors.oauthMetadata.origin,
+		metadataCorsMaxAge: g.server.cors.oauthMetadata.maxAge,
+		metadataRateLimitCapacity: g.server.rateLimits.oauthMetadata.capacity,
+		metadataRateLimitWindow: g.server.rateLimits.oauthMetadata.window,
+		resourceBaseUrl: g.server.baseUrl,
+		scopesSupported: g.oauth.resource.scopesSupported,
+		resourceName: g.oauth.resource.resourceName,
+		resourceDocumentation: g.oauth.resource.resourceDocumentation,
 	}
 
 	let r = oauth.resource.router(rc)
 
 	let sc: oauth.server.Config = {
-		serverBaseUrl: config.server.baseUrl,
-		metadataCorsOrigin: config.server.cors.oauthMetadata.origin,
-		metadataCorsMaxAge: config.server.cors.oauthMetadata.maxAge,
-		metadataRateLimitCapacity: config.server.rateLimits.oauthMetadata.capacity,
-		metadataRateLimitWindow: config.server.rateLimits.oauthMetadata.window,
-		registerCorsOrigin: config.server.cors.oauthRegister.origin,
-		registerCorsMaxAge: config.server.cors.oauthRegister.maxAge,
-		registerRateLimitCapacity: config.server.rateLimits.oauthRegister.capacity,
-		registerRateLimitWindow: config.server.rateLimits.oauthRegister.window,
-		redirectUris: config.oauth.client.redirectUris,
-		clientId: config.oauth.client.clientId,
-		clientName: config.oauth.client.clientName,
-		scopes: config.oauth.client.scopes,
-		tosUri: config.oauth.client.tosUri,
-		policyUri: config.oauth.client.policyUri,
-		clientSecret: config.oauth.client.clientSecret,
+		serverBaseUrl: g.server.baseUrl,
+		metadataCorsOrigin: g.server.cors.oauthMetadata.origin,
+		metadataCorsMaxAge: g.server.cors.oauthMetadata.maxAge,
+		metadataRateLimitCapacity: g.server.rateLimits.oauthMetadata.capacity,
+		metadataRateLimitWindow: g.server.rateLimits.oauthMetadata.window,
+		registerCorsOrigin: g.server.cors.oauthRegister.origin,
+		registerCorsMaxAge: g.server.cors.oauthRegister.maxAge,
+		registerRateLimitCapacity: g.server.rateLimits.oauthRegister.capacity,
+		registerRateLimitWindow: g.server.rateLimits.oauthRegister.window,
+		redirectUris: g.oauth.client.redirectUris,
+		clientId: g.oauth.client.clientId,
+		clientName: g.oauth.client.clientName,
+		scopes: g.oauth.client.scopes,
+		tosUri: g.oauth.client.tosUri,
+		policyUri: g.oauth.client.policyUri,
+		clientSecret: g.oauth.client.clientSecret,
 		client: c,
 	}
 
 	let s = oauth.server.router(sc)
 
 	let mc: oauth.middleware.Config = {
-		resourceBaseUrl: config.server.baseUrl,
+		resourceBaseUrl: g.server.baseUrl,
 		client: c,
 	}
 
@@ -330,9 +330,9 @@ function createOauth(config: config.Config): result.Result<Oauth, Error> {
 	return result.ok(o)
 }
 
-function createSse(config: config.Config, create: CreateServer): Mcp {
+function createSse(g: config.global.Config, create: CreateServer): Mcp {
 	let sc: mcp.sessions.Config = {
-		ttl: config.mcp.session.ttl,
+		ttl: g.mcp.session.ttl,
 	}
 
 	let s = new mcp.sessions.Sessions(sc)
@@ -344,19 +344,19 @@ function createSse(config: config.Config, create: CreateServer): Mcp {
 	let t = new mcp.sse.transports.Transports(tc)
 
 	let rc: mcp.sse.server.Config = {
-		corsOrigin: config.server.cors.mcp.origin,
-		corsMaxAge: config.server.cors.mcp.maxAge,
+		corsOrigin: g.server.cors.mcp.origin,
+		corsMaxAge: g.server.cors.mcp.maxAge,
 		corsAllowedHeaders: [],
 		corsExposedHeaders: [],
-		rateLimitCapacity: config.server.rateLimits.mcp.capacity,
-		rateLimitWindow: config.server.rateLimits.mcp.window,
+		rateLimitCapacity: g.server.rateLimits.mcp.capacity,
+		rateLimitWindow: g.server.rateLimits.mcp.window,
 		servers: {
 			create,
 		},
 		transports: t,
 	}
 
-	if (config.oauth.client.clientId) {
+	if (g.oauth.client.clientId) {
 		rc.corsAllowedHeaders.push("Authorization")
 		rc.corsExposedHeaders.push("WWW-Authenticate")
 	}
@@ -371,9 +371,9 @@ function createSse(config: config.Config, create: CreateServer): Mcp {
 	return m
 }
 
-function createStreamable(config: config.Config, create: CreateServer): Mcp {
+function createStreamable(g: config.global.Config, create: CreateServer): Mcp {
 	let sc: mcp.sessions.Config = {
-		ttl: config.mcp.session.ttl,
+		ttl: g.mcp.session.ttl,
 	}
 
 	let s = new mcp.sessions.Sessions(sc)
@@ -385,19 +385,19 @@ function createStreamable(config: config.Config, create: CreateServer): Mcp {
 	let t = new mcp.streamable.transports.Transports(tc)
 
 	let rc: mcp.streamable.server.Config = {
-		corsOrigin: config.server.cors.mcp.origin,
-		corsMaxAge: config.server.cors.mcp.maxAge,
+		corsOrigin: g.server.cors.mcp.origin,
+		corsMaxAge: g.server.cors.mcp.maxAge,
 		corsAllowedHeaders: [],
 		corsExposedHeaders: [],
-		rateLimitCapacity: config.server.rateLimits.mcp.capacity,
-		rateLimitWindow: config.server.rateLimits.mcp.window,
+		rateLimitCapacity: g.server.rateLimits.mcp.capacity,
+		rateLimitWindow: g.server.rateLimits.mcp.window,
 		servers: {
 			create,
 		},
 		transports: t,
 	}
 
-	if (config.oauth.client.clientId) {
+	if (g.oauth.client.clientId) {
 		rc.corsAllowedHeaders.push("Authorization")
 		rc.corsExposedHeaders.push("WWW-Authenticate")
 	}
@@ -453,12 +453,12 @@ function createExpress(c: Components): express.Express {
 	return e
 }
 
-function createApp(config: config.Config, c: Components, e: express.Express): App {
+function createApp(g: config.global.Config, c: Components, e: express.Express): App {
 	let sse: Watchable | undefined
 
 	if (c.sse) {
 		let a = new AbortController()
-		let w = c.sse.sessions.watch(a.signal, config.mcp.session.interval)
+		let w = c.sse.sessions.watch(a.signal, g.mcp.session.interval)
 		sse = {
 			controller: a,
 			promise: w,
@@ -469,14 +469,14 @@ function createApp(config: config.Config, c: Components, e: express.Express): Ap
 
 	if (c.streamable) {
 		let a = new AbortController()
-		let w = c.streamable.sessions.watch(a.signal, config.mcp.session.interval)
+		let w = c.streamable.sessions.watch(a.signal, g.mcp.session.interval)
 		streamable = {
 			controller: a,
 			promise: w,
 		}
 	}
 
-	let h = e.listen(config.server.port, config.server.host)
+	let h = e.listen(g.server.port, g.server.host)
 
 	let a: App = {
 		sse,
@@ -541,7 +541,7 @@ function createCleanup(c: Components, a: App): shared.Cleanup {
 	}
 }
 
-async function createPromise(config: config.Config, h: http.Server): shared.P {
+async function createPromise(g: config.global.Config, h: http.Server): shared.P {
 	return await new Promise((res) => {
 		h.once("error", onError)
 		h.once("listening", onListening)
@@ -552,8 +552,8 @@ async function createPromise(config: config.Config, h: http.Server): shared.P {
 
 		function onListening(): void {
 			let o: Record<string, unknown> = {
-				host: config.server.host,
-				port: config.server.port,
+				host: g.server.host,
+				port: g.server.port,
 			}
 			logger.info("Server started", o)
 			close()
