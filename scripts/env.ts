@@ -22,7 +22,7 @@ import * as config from "../app/config.ts"
 const envs = new Set<string>([
 	"HTTP_PROXY",
 	// eslint-disable-next-line no-underscore-dangle
-	...Object.keys(config.ConfigSchema._def.schema._def.schema._def.shape()),
+	...Object.keys(config.global.ConfigSchema._def.schema._def.schema._def.shape()),
 ])
 
 export function load(): void {

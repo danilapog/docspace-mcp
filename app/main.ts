@@ -28,7 +28,7 @@ const SIGNALS = ["SIGTERM", "SIGINT"]
 
 async function main(): Promise<void> {
 	try {
-		let c = config.load()
+		let c = config.global.load()
 
 		if (c.err || c.v.mcp.transport === "stdio") {
 			logger.mute()
@@ -37,7 +37,7 @@ async function main(): Promise<void> {
 		if (c.err) {
 			logger.error("Loading config", {err: c.err})
 		} else {
-			logger.info("Loaded config", config.format(c.v))
+			logger.info("Loaded config", config.global.format(c.v))
 		}
 
 		if (c.err) {
