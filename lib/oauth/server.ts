@@ -29,11 +29,11 @@ import * as result from "../util/result.ts"
 
 export interface Config {
 	serverBaseUrl: string
-	metadataCorsOrigin: string
+	metadataCorsOrigin: string[]
 	metadataCorsMaxAge: number
 	metadataRateLimitCapacity: number
 	metadataRateLimitWindow: number
-	registerCorsOrigin: string
+	registerCorsOrigin: string[]
 	registerCorsMaxAge: number
 	registerRateLimitCapacity: number
 	registerRateLimitWindow: number
@@ -57,11 +57,11 @@ export interface OauthService {
 
 class Server {
 	private serverBaseUrl: string
-	private metadataCorsOrigin: string
+	private metadataCorsOrigin: string[]
 	private metadataCorsMaxAge: number
 	private metadataRateLimitCapacity: number
 	private metadataRateLimitWindow: number
-	private registerCorsOrigin: string
+	private registerCorsOrigin: string[]
 	private registerCorsMaxAge: number
 	private registerRateLimitCapacity: number
 	private registerRateLimitWindow: number
@@ -95,7 +95,7 @@ class Server {
 	}
 
 	metadataCors(): express.Handler {
-		if (!this.metadataCorsOrigin) {
+		if (this.metadataCorsOrigin.length === 0) {
 			return (_, __, next) => {
 				next()
 			}
@@ -142,7 +142,7 @@ class Server {
 	}
 
 	registerCors(): express.Handler {
-		if (!this.registerCorsOrigin) {
+		if (this.registerCorsOrigin.length === 0) {
 			return (_, __, next) => {
 				next()
 			}

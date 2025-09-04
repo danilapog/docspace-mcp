@@ -19,6 +19,7 @@
 /* eslint-disable no-underscore-dangle */
 
 import * as z from "zod"
+import * as result from "./result.ts"
 
 export function wrapUnion<
 	A extends [z.ZodLiteral<string>, z.ZodLiteral<string>, ...z.ZodLiteral<string>[]],
@@ -101,6 +102,9 @@ export function numberUnionToEnum<
 export function envBoolean(): (v: string, c: z.RefinementCtx) => boolean | never {
 	return (v, c) => {
 		let t = v.trim().toLowerCase()
+		if (!t) {
+			return false
+		}
 
 		if (t === "yes" || t === "y" || t === "true" || t === "1") {
 			return true
@@ -122,8 +126,12 @@ export function envBoolean(): (v: string, c: z.RefinementCtx) => boolean | never
 
 export function envNumber(): (v: string, c: z.RefinementCtx) => number | never {
 	return (v, c) => {
-		let n = Number.parseInt(v.trim(), 10)
+		let t = v.trim()
+		if (!t) {
+			return 0
+		}
 
+		let n = Number.parseInt(t, 10)
 		if (Number.isNaN(n)) {
 			c.addIssue({
 				code: z.ZodIssueCode.custom,
@@ -137,13 +145,123 @@ export function envNumber(): (v: string, c: z.RefinementCtx) => number | never {
 	}
 }
 
+export function envUrl(): (v: string, c: z.RefinementCtx) => string | never {
+	return (v, c) => {
+		let t = v.trim()
+		if (!t) {
+			return ""
+		}
+
+		let r = result.safeNew(URL, t)
+		if (r.err) {
+			c.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: `Expected a valid URL, but got ${v}`,
+				fatal: true,
+			})
+			return z.NEVER
+		}
+
+		if (r.v.protocol !== "http:" && r.v.protocol !== "https:") {
+			c.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: `Expected a URL with http or https protocol, but got ${v}`,
+			})
+		}
+
+		return r.v.toString()
+	}
+}
+
+export function envBaseUrl(): (v: string, c: z.RefinementCtx) => string | never {
+	return (v, c) => {
+		let t = v.trim()
+		if (!t) {
+			return ""
+		}
+
+		let r = result.safeNew(URL, t)
+		if (r.err) {
+			c.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: `Expected a valid URL, but got ${v}`,
+				fatal: true,
+			})
+			return z.NEVER
+		}
+
+		if (r.v.protocol !== "http:" && r.v.protocol !== "https:") {
+			c.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: `Expected a URL with http or https protocol, but got ${v}`,
+			})
+		}
+
+		if (r.v.search) {
+			c.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: `Expected a URL without search parameters, but got ${v}`,
+			})
+		}
+
+		if (r.v.hash) {
+			c.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: `Expected a URL without hash, but got ${v}`,
+			})
+		}
+
+		if (!r.v.pathname.endsWith("/")) {
+			r.v.pathname += "/"
+		}
+
+		return r.v.toString()
+	}
+}
+
+export function envUrlList(): (v: string, c: z.RefinementCtx) => string[] | never {
+	return (v, c) => {
+		let a: string[] = []
+
+		for (let u of v.split(",")) {
+			let t = u.trim()
+			if (!t) {
+				continue
+			}
+
+			let r = result.safeNew(URL, t)
+			if (r.err) {
+				c.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: `Expected a valid URL, but got ${u}`,
+				})
+				continue
+			}
+
+			if (r.v.protocol !== "http:" && r.v.protocol !== "https:") {
+				c.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: `Expected a URL with http or https protocol, but got ${u}`,
+				})
+			}
+
+			let s = r.v.toString()
+			if (!a.includes(s)) {
+				a.push(s)
+			}
+		}
+
+		return a
+	}
+}
+
 export function envUnion<T extends string>(a: T[]): (v: string, c: z.RefinementCtx) => T | never {
 	return (v, c) => {
-		v = v.trim().toLowerCase()
+		let t = v.trim().toLowerCase()
 
-		for (let t of a) {
-			if (t === v) {
-				return t
+		for (let e of a) {
+			if (e === t) {
+				return e
 			}
 		}
 
@@ -159,33 +277,35 @@ export function envUnion<T extends string>(a: T[]): (v: string, c: z.RefinementC
 
 export function envOptions(a: string[]): (v: string, c: z.RefinementCtx) => string[] | never {
 	return (v, c) => {
-		let x: string[] = []
-		let y: string[] = []
+		let e: string[] = []
+		let f: string[] = []
+		let g: string[] = []
 
 		for (let u of v.split(",")) {
-			u = u.trim().toLowerCase()
-			if (u === "") {
+			let t = u.trim().toLowerCase()
+			if (!t) {
 				continue
 			}
 
 			let h = false
 			for (let n of a) {
-				if (n === u) {
+				if (n === t) {
 					h = true
 					break
 				}
 			}
 
-			if (!h && !y.includes(u)) {
-				y.push(u)
+			if (!h && !f.includes(t)) {
+				f.push(t)
+				g.push(u)
 			}
-			if (h && !x.includes(u)) {
-				x.push(u)
+			if (h && !e.includes(t)) {
+				e.push(t)
 			}
 		}
 
-		if (y.length !== 0) {
-			for (let u of y) {
+		if (g.length !== 0) {
+			for (let u of g) {
 				c.addIssue({
 					code: z.ZodIssueCode.custom,
 					message: `Unknown value: ${u}`,
@@ -194,7 +314,7 @@ export function envOptions(a: string[]): (v: string, c: z.RefinementCtx) => stri
 			return z.NEVER
 		}
 
-		return x
+		return e
 	}
 }
 
@@ -203,13 +323,13 @@ export function envList(): (v: string, c: z.RefinementCtx) => string[] {
 		let a: string[] = []
 
 		for (let u of v.split(",")) {
-			u = u.trim()
-			if (u === "") {
+			let t = u.trim()
+			if (!t) {
 				continue
 			}
 
-			if (!a.includes(u)) {
-				a.push(u)
+			if (!a.includes(t)) {
+				a.push(t)
 			}
 		}
 

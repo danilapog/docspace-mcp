@@ -24,7 +24,7 @@ import express from "express"
 import * as expressRateLimit from "express-rate-limit"
 
 export interface Config {
-	metadataCorsOrigin: string
+	metadataCorsOrigin: string[]
 	metadataCorsMaxAge: number
 	metadataRateLimitCapacity: number
 	metadataRateLimitWindow: number
@@ -35,7 +35,7 @@ export interface Config {
 }
 
 class Server {
-	private metadataCorsOrigin: string
+	private metadataCorsOrigin: string[]
 	private metadataCorsMaxAge: number
 	private metadataRateLimitCapacity: number
 	private metadataRateLimitWindow: number
@@ -56,7 +56,7 @@ class Server {
 	}
 
 	metadataCors(): express.Handler {
-		if (!this.metadataCorsOrigin) {
+		if (this.metadataCorsOrigin.length === 0) {
 			return (_, __, next) => {
 				next()
 			}

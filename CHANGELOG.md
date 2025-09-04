@@ -24,7 +24,17 @@ This document records all notable changes to the project, following the [Keep a 
 
 - Restore access to regular tools when using meta-tools ([eb84c1f]);
 - Prevent a disabled tool from being called when a regular tool is called ([eb84c1f]);
-- In the internal Streamable HTTP transport, allow the `Referer` header to be without a trailing slash ([ad70531]).
+- In the internal Streamable HTTP transport, allow the `Referer` header to be without a trailing slash ([ad70531]);
+- Require the `DOCSPACE_HOST` option to be present when the `DOCSPACE_TRANSPORT` is set to an HTTP-like transport ([428ee1c]);
+- When the `DOCSPACE_TRANSPORT` option is set to `stdio`, validate the `DOCSPACE_BASE_URL` only if `DOCSPACE_API_KEY`, `DOCSPACE_AUTH_TOKEN`, or `DOCSPACE_USERNAME`/`DOCSPACE_PASSWORD` is present ([428ee1c]);
+- Better validate the `DOCSPACE_BASE_URL` option ([428ee1c]);
+- The `DOCSPACE_SESSION_TTL` option with the `0` value prevents session expiration ([428ee1c]);
+- The `DOCSPACE_SESSION_INTERVAL` option with the `0` value disables session cleanup ([428ee1c]);
+- Make `DOCSPACE_API_KEY`, `DOCSPACE_AUTH_TOKEN`, and `DOCSPACE_USERNAME`/`DOCSPACE_PASSWORD` trimmable ([428ee1c]);
+- The `DOCSPACE_PORT` option with the `0` value selects a random port ([428ee1c]);
+- Allow the `65535` value for the `DOCSPACE_PORT` option ([428ee1c]);
+- For all options with the boolean type, the empty string value resolves to the `false` value ([428ee1c]);
+- For all options with the number type, the empty string value resolves to the `0` value ([428ee1c]).
 
 ## [2.0.0] - 2025-07-23
 
@@ -168,6 +178,7 @@ This document records all notable changes to the project, following the [Keep a 
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[428ee1c]: https://github.com/onlyoffice/docspace-mcp/commit/428ee1c39f62a0d2d6a93d350187b35c1578e762/
 [ac33ab6]: https://github.com/onlyoffice/docspace-mcp/commit/ac33ab651271affc2de6293ea5e12353cd2fa3d8/
 [d643a82]: https://github.com/onlyoffice/docspace-mcp/commit/d643a8289b3d3112a15a95c4da477113bcd4f750/
 [d63057b]: https://github.com/onlyoffice/docspace-mcp/commit/d63057b57193b7a1d927f56e0da7be1755cb5366/
