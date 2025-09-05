@@ -19,7 +19,8 @@ This document records all notable changes to the project, following the [Keep a 
 - In the internal Streamable HTTP transport, check `Authorization` and `Referer` headers only during the initialization request ([b6e33bf]);
 - Update `@modelcontextprotocol/sdk` to 1.17.0 ([8d3f3f3]);
 - Ignore the `DOCSPACE_TRANSPORT` option when the `DOCSPACE_INTERNAL` option is set ([d643a82]);
-- **Breaking** Remove the `DOCSPACE_ORIGIN` option ([ac33ab6]).
+- **Breaking** Remove the `DOCSPACE_ORIGIN` option ([ac33ab6]);
+- Downgrade the minimum required Node.js version to 18.0.0 ([6ac1d59]).
 
 ### Fixed
 
@@ -179,6 +180,7 @@ This document records all notable changes to the project, following the [Keep a 
 [0.1.1]: https://github.com/onlyoffice/docspace-mcp/compare/v0.1.0...v0.1.1/
 [0.1.0]: https://github.com/onlyoffice/docspace-mcp/releases/tag/v0.1.0/
 
+[6ac1d59]: https://github.com/onlyoffice/docspace-mcp/commit/6ac1d59639248efcbbffca1edb82328ba349fddb/
 [785f5dc]: https://github.com/onlyoffice/docspace-mcp/commit/785f5dc2dd435150ff7ce4309700d041aa0621a1/
 [428ee1c]: https://github.com/onlyoffice/docspace-mcp/commit/428ee1c39f62a0d2d6a93d350187b35c1578e762/
 [ac33ab6]: https://github.com/onlyoffice/docspace-mcp/commit/ac33ab651271affc2de6293ea5e12353cd2fa3d8/
