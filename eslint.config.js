@@ -24,6 +24,7 @@ export default [
 		files: ["app/main.ts"],
 		rules: {
 			"n/hashbang": "off",
+			"unicorn/prefer-top-level-await": "off",
 		},
 	},
 	{
@@ -31,6 +32,7 @@ export default [
 		rules: {
 			"new-cap": ["error", {capIsNew: false}],
 			"es-x/no-export-ns-from": "off",
+			"unicorn/import-style": "off",
 			"unicorn/prefer-add-event-listener": "off",
 		},
 	},

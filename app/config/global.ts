@@ -17,10 +17,10 @@
  */
 
 import * as z from "zod"
+import * as meta from "../../lib/meta.ts"
 import type * as morets from "../../lib/util/morets.ts"
 import * as morezod from "../../lib/util/morezod.ts"
 import * as result from "../../lib/util/result.ts"
-import pack from "../../package.json" with {type: "json"}
 import * as tools from "./tools.ts"
 
 const availableTransports: McpTransport[] = [
@@ -180,7 +180,7 @@ export const ConfigSchema = z.
 		DOCSPACE_USER_AGENT: z.
 			string().
 			trim().
-			default(`${pack.name} v${pack.version}`),
+			default(`${meta.name} v${meta.version}`),
 
 		DOCSPACE_BASE_URL: z.
 			string().
@@ -220,11 +220,11 @@ export const ConfigSchema = z.
 		DOCSPACE_OAUTH_RESOURCE_NAME: z.
 			string().
 			trim().
-			default(`${pack.name} v${pack.version}`),
+			default(`${meta.name} v${meta.version}`),
 
 		DOCSPACE_OAUTH_RESOURCE_DOCUMENTATION: z.
 			string().
-			default(`https://github.com/onlyoffice/docspace-mcp/blob/v${pack.version}/README.md`).
+			default(`https://github.com/onlyoffice/docspace-mcp/blob/v${meta.version}/README.md`).
 			transform(morezod.envUrl()),
 
 		DOCSPACE_OAUTH_REDIRECT_URIS: z.

@@ -16,7 +16,7 @@
  * @license
  */
 
-import {existsSync} from "node:fs"
+import * as fs from "node:fs"
 import * as config from "../app/config.ts"
 
 const envs = new Set<string>([
@@ -26,7 +26,7 @@ const envs = new Set<string>([
 ])
 
 export function load(): void {
-	if (existsSync(".env")) {
+	if (fs.existsSync(".env")) {
 		process.loadEnvFile(".env")
 	}
 

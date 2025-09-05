@@ -16,31 +16,22 @@
  * @license
  */
 
-import * as child from "node:child_process"
-import * as env from "./env.ts"
+import type * as moremcp from "../lib/util/moremcp.ts"
 
-function main(): void {
-	env.load()
-
-	let args: string[] = ["exec", "mcp-inspector"]
-
-	for (let e of env.environ()) {
-		args.push("-e", e)
-	}
-
-	args.push("--", "node")
-
-	if (process.env.HTTP_PROXY !== undefined) {
-		args.push("--require", "./util/proxy.ts")
-	}
-
-	args.push("app/main.ts")
-
-	child.spawn("pnpm", args, {
-		env: process.env,
-		stdio: "inherit",
-		shell: true,
+export function sortToolsets(toolsets: moremcp.Toolset[]): moremcp.Toolset[] {
+	toolsets = toolsets.sort((a, b) => {
+		return a.name.localeCompare(b.name)
 	})
+
+	for (let s of toolsets) {
+		s.tools = sortTools(s.tools)
+	}
+
+	return toolsets
 }
 
-main()
+export function sortTools<T extends moremcp.SimplifiedToolInfo>(tools: T[]): T[] {
+	return tools.sort((a, b) => {
+		return a.name.localeCompare(b.name)
+	})
+}

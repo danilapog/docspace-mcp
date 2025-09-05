@@ -19,8 +19,8 @@
 import * as server from "@modelcontextprotocol/sdk/server/index.js"
 import * as types from "@modelcontextprotocol/sdk/types.js"
 import type * as zodToJsonSchema from "zod-to-json-schema"
-import pack from "../../../package.json" with {type: "json"}
 import * as api from "../../api.ts"
+import * as meta from "../../meta.ts"
 import * as moreerrors from "../../util/moreerrors.ts"
 import type * as moremcp from "../../util/moremcp.ts"
 import * as result from "../../util/result.ts"
@@ -433,8 +433,8 @@ export function create(config: Config): server.Server {
 
 	let m = new server.Server(
 		{
-			name: pack.name,
-			version: pack.version,
+			name: meta.name,
+			version: meta.version,
 		},
 		{
 			capabilities: {

@@ -101,4 +101,4 @@ function watch(cleanup: shared.Cleanup): void {
 	}
 }
 
-await main()
+void main()

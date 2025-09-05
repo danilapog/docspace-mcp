@@ -17,6 +17,6 @@
 		"app",
 		"lib",
 		"scripts",
-		"eslint.config.js"
+		"*.js"
 	]
 }

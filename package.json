@@ -25,17 +25,17 @@
 	},
 	"type": "module",
 	"bin": {
-		"onlyoffice-docspace-mcp": "bin/onlyoffice-docspace-mcp"
+		"onlyoffice-docspace-mcp": "bin/onlyoffice-docspace-mcp.js"
 	},
 	"files": ["bin"],
 	"scripts": {
-		"build": "node scripts/build.ts",
+		"build-app": "node scripts/build-app.ts",
+		"build-docs": "node scripts/build-docs.ts",
+		"build-dxt": "node scripts/build-dxt.ts",
 		"check": "tsc",
 		"dev": "node scripts/dev.ts",
-		"dxt": "node scripts/dxt.ts",
-		"generate": "node scripts/generate.ts",
 		"inspect": "node scripts/inspect.ts",
-		"lint": "eslint .github app lib scripts c8.config.json CHANGELOG.md eslint.config.js mise.toml package.json README.md tsconfig.json",
+		"lint": "eslint --no-warn-ignored .github app docs lib scripts *.*",
 		"serve": "node scripts/serve.ts",
 		"test": "c8 --config c8.config.json node --test"
 	},
