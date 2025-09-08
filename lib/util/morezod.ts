@@ -99,6 +99,16 @@ export function numberUnionToEnum<
 	return e
 }
 
+// eslint-disable-next-line stylistic/max-len
+export function envOptionalBoolean(): (v: string | undefined, c: z.RefinementCtx) => boolean | undefined | never {
+	return (v, c) => {
+		if (v === undefined) {
+			return
+		}
+		return envBoolean()(v, c)
+	}
+}
+
 export function envBoolean(): (v: string, c: z.RefinementCtx) => boolean | never {
 	return (v, c) => {
 		let t = v.trim().toLowerCase()
@@ -170,6 +180,16 @@ export function envUrl(): (v: string, c: z.RefinementCtx) => string | never {
 		}
 
 		return r.v.toString()
+	}
+}
+
+// eslint-disable-next-line stylistic/max-len
+export function envOptionalBaseUrl(): (v: string | undefined, c: z.RefinementCtx) => string | undefined | never {
+	return (v, c) => {
+		if (v === undefined) {
+			return
+		}
+		return envBaseUrl()(v, c)
 	}
 }
 
@@ -272,6 +292,16 @@ export function envUnion<T extends string>(a: T[]): (v: string, c: z.RefinementC
 		})
 
 		return z.NEVER
+	}
+}
+
+// eslint-disable-next-line stylistic/max-len
+export function envOptionalOptions(a: string[]): (v: string | undefined, c: z.RefinementCtx) => string[] | undefined | never {
+	return (v, c) => {
+		if (v === undefined) {
+			return
+		}
+		return envOptions(a)(v, c)
 	}
 }
 

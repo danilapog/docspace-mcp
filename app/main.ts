@@ -47,6 +47,8 @@ async function main(): Promise<void> {
 			return
 		}
 
+		config.request.setup(c.v)
+
 		if (c.v.mcp.transport === "stdio") {
 			let [p, cleanup] = stdio.configured.start(c.v)
 			watch(cleanup)
