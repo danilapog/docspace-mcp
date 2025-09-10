@@ -17,33 +17,33 @@ system.
 
 1. Clone the repository from the company's Git server:
 
-    ```sh
-    git clone git@git.onlyoffice.com:ONLYOFFICE/docspace-mcp.git
-    ```
+  ```sh
+  git clone git@git.onlyoffice.com:ONLYOFFICE/docspace-mcp.git
+  ```
 
-    Alternatively, clone from the GitHub mirror:
+  Alternatively, clone from the GitHub mirror:
 
-    ```sh
-    git clone git@github.com:ONLYOFFICE/docspace-mcp.git
-    ```
+  ```sh
+  git clone git@github.com:ONLYOFFICE/docspace-mcp.git
+  ```
 
 2. Navigate to the project directory:
 
-    ```sh
-    cd docspace-mcp
-    ```
+  ```sh
+  cd docspace-mcp
+  ```
 
 3. Build the Docker image:
 
-    ```sh
-    docker build --tag onlyoffice/docspace-mcp .
-    ```
+  ```sh
+  docker build --tag onlyoffice/docspace-mcp .
+  ```
 
 4. Run the Docker container:
 
-    ```sh
-    docker run --interactive --rm onlyoffice/docspace-mcp
-    ```
+  ```sh
+  docker run --interactive --rm onlyoffice/docspace-mcp
+  ```
 
 ## Node.js Application
 
@@ -59,33 +59,33 @@ or similar, you will find this familiar.
 
 1. Clone the repository from the company's Git server:
 
-    ```sh
-    git clone git@git.onlyoffice.com:ONLYOFFICE/docspace-mcp.git
-    ```
+  ```sh
+  git clone git@git.onlyoffice.com:ONLYOFFICE/docspace-mcp.git
+  ```
 
-    Alternatively, clone from the GitHub mirror:
+  Alternatively, clone from the GitHub mirror:
 
-    ```sh
-    git clone git@github.com:ONLYOFFICE/docspace-mcp.git
-    ```
+  ```sh
+  git clone git@github.com:ONLYOFFICE/docspace-mcp.git
+  ```
 
 2. Navigate to the project directory:
 
-    ```sh
-    cd docspace-mcp
-    ```
+  ```sh
+  cd docspace-mcp
+  ```
 
 3. Build the Node.js application:
 
-    ```sh
-    pnpm build-app
-    ```
+  ```sh
+  pnpm build-app
+  ```
 
 4. Run the Node.js application:
 
-    ```sh
-    ./bin/onlyoffice-docspace-mcp
-    ```
+  ```sh
+  ./bin/onlyoffice-docspace-mcp
+  ```
 
 ## Desktop Extension
 
@@ -101,30 +101,30 @@ or similar, you will find this familiar.
 
 1. Clone the repository from the company's Git server:
 
-    ```sh
-    git clone git@git.onlyoffice.com:ONLYOFFICE/docspace-mcp.git
-    ```
+  ```sh
+  git clone git@git.onlyoffice.com:ONLYOFFICE/docspace-mcp.git
+  ```
 
-    Alternatively, clone from the GitHub mirror:
+  Alternatively, clone from the GitHub mirror:
 
-    ```sh
-    git clone git@github.com:ONLYOFFICE/docspace-mcp.git
-    ```
+  ```sh
+  git clone git@github.com:ONLYOFFICE/docspace-mcp.git
+  ```
 
 2. Navigate to the project directory:
 
-    ```sh
-    cd docspace-mcp
-    ```
+  ```sh
+  cd docspace-mcp
+  ```
 
 3. Build the Desktop Extension:
 
-    ```sh
-    pnpm build-dxt
-    ```
+  ```sh
+  pnpm build-dxt
+  ```
 
-4. Use the built `.dxt` file from the root of the project directory in your
-desktop application.
+6. Use the built `.dxt` file from the root of the project directory in your
+  desktop application.
 
 ## References
 

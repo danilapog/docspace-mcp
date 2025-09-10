@@ -14,21 +14,21 @@ Using the Docker image requires [Docker] to be installed on your system.
 
 1. Pull the latest DocSpace MCP server image from Docker Hub:
 
-    ```sh
-    docker pull onlyoffice/docspace-mcp
-    ```
+  ```sh
+  docker pull onlyoffice/docspace-mcp
+  ```
 
-    To pull a specific version:
+  To pull a specific version:
 
-    ```sh
-    docker pull onlyoffice/docspace-mcp:<version>
-    ```
+  ```sh
+  docker pull onlyoffice/docspace-mcp:<version>
+  ```
 
 2. Run the Docker container:
 
-    ```sh
-    docker run --interactive --rm onlyoffice/docspace-mcp
-    ```
+  ```sh
+  docker run --interactive --rm onlyoffice/docspace-mcp
+  ```
 
 ## References
 

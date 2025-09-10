@@ -14,19 +14,19 @@ Using the Docker MCP Toolkit requires [Docker Desktop] to be installed on your
 system and the [Docker MCP Toolkit] to be enabled. See the
 [Enable Docker MCP Toolkit] guide for how to enable the Docker MCP Toolkit.
 
-1. Install the DocSpace MCP server through the Docker Desktop interface using the
-[Install an MCP Server] guide, or by using the Docker CLI:
+1. Install the DocSpace MCP server through the Docker Desktop interface using
+  the [Install an MCP Server] guide, or by using the Docker CLI:
 
-    ```sh
-    docker mcp server enable onlyoffice-docspace
-    ```
+  ```sh
+  docker mcp server enable onlyoffice-docspace
+  ```
 
 2. Connect the DocSpace MCP server to an MCP client through the Docker Desktop
-interface using the [Install an MCP Client] guide, or by using the Docker CLI:
+  interface using the [Install an MCP Client] guide, or by using the Docker CLI:
 
-    ```sh
-    docker mcp client connect --global <client>
-    ```
+  ```sh
+  docker mcp client connect --global <client>
+  ```
 
 ## References
 

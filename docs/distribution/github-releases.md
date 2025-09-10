@@ -15,15 +15,15 @@ installed on your system.
 
 1. Download the latest release from GitHub:
 
-    ```sh
-    VERSION=2.0.0 curl --location --output docspace-mcp.dxt https://github.com/ONLYOFFICE/docspace-mcp/releases/v$VESION/download/onlyoffice-docspace-mcp-$VERSION.dxt
-    ```
+  ```sh
+  VERSION=2.0.0 curl --location --output docspace-mcp.dxt https://github.com/ONLYOFFICE/docspace-mcp/releases/v$VESION/download/onlyoffice-docspace-mcp-$VERSION.dxt
+  ```
 
-    To download a specific version:
+  To download a specific version:
 
-    ```sh
-    VERSION=<version> curl --location --output docspace-mcp.dxt https://github.com/ONLYOFFICE/docspace-mcp/releases/v$VESION/download/onlyoffice-docspace-mcp-$VERSION.dxt
-    ```
+  ```sh
+  VERSION=<version> curl --location --output docspace-mcp.dxt https://github.com/ONLYOFFICE/docspace-mcp/releases/v$VESION/download/onlyoffice-docspace-mcp-$VERSION.dxt
+  ```
 
 2. Use the downloaded `.dxt` file in your desktop application.
 
@@ -34,33 +34,33 @@ installed on your system.
 
 1. Download the latest release from GitHub:
 
-    ```sh
-    VERSION=2.0.0 curl --location --output docspace-mcp.tgz https://github.com/ONLYOFFICE/docspace-mcp/releases/v$VESION/download/onlyoffice-docspace-mcp-$VERSION.tgz
-    ```
+  ```sh
+  VERSION=2.0.0 curl --location --output docspace-mcp.tgz https://github.com/ONLYOFFICE/docspace-mcp/releases/v$VESION/download/onlyoffice-docspace-mcp-$VERSION.tgz
+  ```
 
-    To download a specific version:
+  To download a specific version:
 
-    ```sh
-    VERSION=<version> curl --location --output docspace-mcp.tgz https://github.com/ONLYOFFICE/docspace-mcp/releases/v$VERSION/download/onlyoffice-docspace-mcp-$VERSION.tgz
-    ```
+  ```sh
+  VERSION=<version> curl --location --output docspace-mcp.tgz https://github.com/ONLYOFFICE/docspace-mcp/releases/v$VERSION/download/onlyoffice-docspace-mcp-$VERSION.tgz
+  ```
 
 2. Extract the downloaded archive:
 
-    ```sh
-    tar --extract --gzip --file docspace-mcp.tgz
-    ```
+  ```sh
+  tar --extract --gzip --file docspace-mcp.tgz
+  ```
 
 3. Navigate to the extracted directory:
 
-    ```sh
-    cd docspace-mcp
-    ```
+  ```sh
+  cd docspace-mcp
+  ```
 
 4. Run the Node.js application:
 
-    ```sh
-    ./bin/onlyoffice-docspace-mcp
-    ```
+  ```sh
+  ./bin/onlyoffice-docspace-mcp
+  ```
 
 ## References
 

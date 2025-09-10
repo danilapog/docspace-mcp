@@ -62,10 +62,10 @@ system and the [Docker MCP Toolkit] to be enabled. See the
 [Enable Docker MCP Toolkit] guide for how to enable the Docker MCP Toolkit.
 
 1. Install the server through the Docker Desktop interface using the
-[Install an MCP Server] guide.
+  [Install an MCP Server] guide.
 
 2. Connect the server to a MCP client through the Docker Desktop interface using
-the [Install an MCP Client] guide.
+  the [Install an MCP Client] guide.
 
 3. Configure the server through the Docker Desktop interface.
 
@@ -77,7 +77,7 @@ installed on your system.
 1. Download the latest Desktop Extension from [GitHub Releases].
 
 2. Install the Desktop Extension in your desktop application by following the
-application's extension installation procedure.
+  application's extension installation procedure.
 
 3. Configure the extension through the application's interface.
 

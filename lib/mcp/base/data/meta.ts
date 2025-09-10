@@ -23,27 +23,27 @@ import * as meta from "../tools/meta.ts"
 export const tools: moremcp.ToolInfo[] = [
 	{
 		name: "list_toolsets",
-		description: "This is a meta-tool for listing available toolsets. Toolset is a set of available tools.",
+		description: "This is a meta tool for listing available toolsets. Toolset is a set of available tools.",
 		inputSchema: moremcp.toInputSchema(z.object({})),
 	},
 	{
 		name: "list_tools",
-		description: "This is a meta-tool for listing available tools of a specific toolset. The list of available toolsets can be obtained using the list_toolsets meta-tool.",
+		description: "This is a meta tool for listing available tools of a specific toolset. The list of available toolsets can be obtained using the list_toolsets meta tool.",
 		inputSchema: moremcp.toInputSchema(meta.ListToolsInputSchema),
 	},
 	{
 		name: "get_tool_input_schema",
-		description: "This is a meta-tool for getting an input schema for a specific tool. The list of available tools can be obtained using the list_tools meta-tool.",
+		description: "This is a meta tool for getting an input schema for a specific tool. The list of available tools can be obtained using the list_tools meta tool.",
 		inputSchema: moremcp.toInputSchema(meta.GetToolInputSchemaInputSchema),
 	},
 	{
 		name: "get_tool_output_schema",
-		description: "This is a meta-tool for getting an output schema for a specific tool. The list of available tools can be obtained using the list_tools meta-tool.",
+		description: "This is a meta tool for getting an output schema for a specific tool. The list of available tools can be obtained using the list_tools meta tool.",
 		inputSchema: moremcp.toInputSchema(meta.GetToolOutputSchemaInputSchema),
 	},
 	{
 		name: "call_tool",
-		description: "This is a meta-tool for calling a tool. The list of available tools can be obtained using the list_tools meta-tool. The input schema can be obtained using the get_tool_input_schema meta-tool.",
+		description: "This is a meta tool for calling a tool. The list of available tools can be obtained using the list_tools meta tool. The input schema can be obtained using the get_tool_input_schema meta tool.",
 		inputSchema: moremcp.toInputSchema(meta.CallToolInputSchema),
 	},
 ]
