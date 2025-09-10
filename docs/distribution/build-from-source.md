@@ -123,7 +123,7 @@ or similar, you will find this familiar.
   pnpm build-dxt
   ```
 
-6. Use the built `.dxt` file from the root of the project directory in your
+4. Use the built `.dxt` file from the root of the project directory in your
   desktop application.
 
 ## References
