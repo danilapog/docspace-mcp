@@ -621,7 +621,7 @@ export const ConfigSchema = z.
 				})
 			}
 
-			if (u !== 1) {
+			if (u !== 0 && u !== 1) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
 					message: "Expected only one of API key, PAT, or (username and password) to be set for stdio transport",
@@ -660,7 +660,7 @@ export const ConfigSchema = z.
 			let d = Boolean(o.oauth.client.clientId)
 			let u = Number(a) + Number(b) + Number(c) + Number(d)
 
-			if (u !== 1) {
+			if (u !== 0 && u !== 1) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
 					message: `Expected only one of API key, PAT, (username and password), or OAuth client ID to be set for ${t} transport`,
