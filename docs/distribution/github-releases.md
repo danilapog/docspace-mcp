@@ -13,54 +13,54 @@ GitHub releases.
 Running the Desktop Extension requires [Node.js] version 18 or higher to be
 installed on your system.
 
-Download the latest release from GitHub:
+1. Download the latest release from GitHub:
 
-```sh
-VERSION=2.0.0 curl --location --output docspace-mcp.dxt https://github.com/ONLYOFFICE/docspace-mcp/releases/v$VESION/download/onlyoffice-docspace-mcp-$VERSION.dxt
-```
+    ```sh
+    VERSION=2.0.0 curl --location --output docspace-mcp.dxt https://github.com/ONLYOFFICE/docspace-mcp/releases/v$VESION/download/onlyoffice-docspace-mcp-$VERSION.dxt
+    ```
 
-To download a specific version:
+    To download a specific version:
 
-```sh
-VERSION=<version> curl --location --output docspace-mcp.dxt https://github.com/ONLYOFFICE/docspace-mcp/releases/v$VESION/download/onlyoffice-docspace-mcp-$VERSION.dxt
-```
+    ```sh
+    VERSION=<version> curl --location --output docspace-mcp.dxt https://github.com/ONLYOFFICE/docspace-mcp/releases/v$VESION/download/onlyoffice-docspace-mcp-$VERSION.dxt
+    ```
 
-Use the downloaded `.dxt` file in your desktop application.
+2. Use the downloaded `.dxt` file in your desktop application.
 
 ## Node.js Application
 
 Running the Node.js application requires [Node.js] version 18 or higher to be
 installed on your system.
 
-Download the latest release from GitHub:
+1. Download the latest release from GitHub:
 
-```sh
-VERSION=2.0.0 curl --location --output docspace-mcp.tgz https://github.com/ONLYOFFICE/docspace-mcp/releases/v$VESION/download/onlyoffice-docspace-mcp-$VERSION.tgz
-```
+    ```sh
+    VERSION=2.0.0 curl --location --output docspace-mcp.tgz https://github.com/ONLYOFFICE/docspace-mcp/releases/v$VESION/download/onlyoffice-docspace-mcp-$VERSION.tgz
+    ```
 
-To download a specific version:
+    To download a specific version:
 
-```sh
-VERSION=<version> curl --location --output docspace-mcp.tgz https://github.com/ONLYOFFICE/docspace-mcp/releases/v$VERSION/download/onlyoffice-docspace-mcp-$VERSION.tgz
-```
+    ```sh
+    VERSION=<version> curl --location --output docspace-mcp.tgz https://github.com/ONLYOFFICE/docspace-mcp/releases/v$VERSION/download/onlyoffice-docspace-mcp-$VERSION.tgz
+    ```
 
-Extract the downloaded archive:
+2. Extract the downloaded archive:
 
-```sh
-tar --extract --gzip --file docspace-mcp.tgz
-```
+    ```sh
+    tar --extract --gzip --file docspace-mcp.tgz
+    ```
 
-Navigate to the extracted directory:
+3. Navigate to the extracted directory:
 
-```sh
-cd docspace-mcp
-```
+    ```sh
+    cd docspace-mcp
+    ```
 
-Run the Node.js application:
+4. Run the Node.js application:
 
-```sh
-./bin/onlyoffice-docspace-mcp
-```
+    ```sh
+    ./bin/onlyoffice-docspace-mcp
+    ```
 
 ## References
 

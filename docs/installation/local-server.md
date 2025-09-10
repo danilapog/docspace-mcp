@@ -61,25 +61,25 @@ Using the Docker MCP Toolkit requires [Docker Desktop] to be installed on your
 system and the [Docker MCP Toolkit] to be enabled. See the
 [Enable Docker MCP Toolkit] guide for how to enable the Docker MCP Toolkit.
 
-Install the server through the Docker Desktop interface using the
+1. Install the server through the Docker Desktop interface using the
 [Install an MCP Server] guide.
 
-Connect the server to a MCP client through the Docker Desktop interface using
+2. Connect the server to a MCP client through the Docker Desktop interface using
 the [Install an MCP Client] guide.
 
-Configure the server with through the Docker Desktop interface.
+3. Configure the server through the Docker Desktop interface.
 
 ## Desktop Extension
 
 Running the Desktop Extension requires [Node.js] version 18 or higher to be
 installed on your system.
 
-Download the latest Desktop Extension from [GitHub Releases].
+1. Download the latest Desktop Extension from [GitHub Releases].
 
-Install the Desktop Extension in your desktop application by following the
+2. Install the Desktop Extension in your desktop application by following the
 application's extension installation procedure.
 
-Configure the extension through the application's interface.
+3. Configure the extension through the application's interface.
 
 ## Node.js Application
 

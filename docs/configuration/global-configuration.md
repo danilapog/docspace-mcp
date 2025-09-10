@@ -8,56 +8,56 @@ are organized by their functional area.
 
 - [Options](#options)
 	- [MCP General Options](#mcp-general-options)
-		- [DOCSPACE_TRANSPORT](#DOCSPACE_TRANSPORT)
-		- [DOCSPACE_DYNAMIC](#DOCSPACE_DYNAMIC)
-		- [DOCSPACE_TOOLSETS](#DOCSPACE_TOOLSETS)
-		- [DOCSPACE_ENABLED_TOOLS](#DOCSPACE_ENABLED_TOOLS)
-		- [DOCSPACE_DISABLED_TOOLS](#DOCSPACE_DISABLED_TOOLS)
+		- [DOCSPACE_TRANSPORT](#docspace_transport)
+		- [DOCSPACE_DYNAMIC](#docspace_dynamic)
+		- [DOCSPACE_TOOLSETS](#docspace_toolsets)
+		- [DOCSPACE_ENABLED_TOOLS](#docspace_enabled_tools)
+		- [DOCSPACE_DISABLED_TOOLS](#docspace_disabled_tools)
 	- [MCP Session Options](#mcp-session-options)
-		- [DOCSPACE_SESSION_TTL](#DOCSPACE_SESSION_TTL)
-		- [DOCSPACE_SESSION_INTERVAL](#DOCSPACE_SESSION_INTERVAL)
+		- [DOCSPACE_SESSION_TTL](#docspace_session_ttl)
+		- [DOCSPACE_SESSION_INTERVAL](#docspace_session_interval)
 	- [API General Options](#api-general-options)
-		- [DOCSPACE_USER_AGENT](#DOCSPACE_USER_AGENT)
+		- [DOCSPACE_USER_AGENT](#docspace_user_agent)
 	- [API Shared Options](#api-shared-options)
-		- [DOCSPACE_BASE_URL](#DOCSPACE_BASE_URL)
-		- [DOCSPACE_API_KEY](#DOCSPACE_API_KEY)
-		- [DOCSPACE_AUTH_TOKEN](#DOCSPACE_AUTH_TOKEN)
-		- [DOCSPACE_USERNAME](#DOCSPACE_USERNAME)
-		- [DOCSPACE_PASSWORD](#DOCSPACE_PASSWORD)
+		- [DOCSPACE_BASE_URL](#docspace_base_url)
+		- [DOCSPACE_API_KEY](#docspace_api_key)
+		- [DOCSPACE_AUTH_TOKEN](#docspace_auth_token)
+		- [DOCSPACE_USERNAME](#docspace_username))
+		- [DOCSPACE_PASSWORD](#docspace_password)
 	- [API OAuth Options](#api-oauth-options)
-		- [DOCSPACE_OAUTH_BASE_URL](#DOCSPACE_OAUTH_BASE_URL)
+		- [DOCSPACE_OAUTH_BASE_URL](#docspace_oauth_base_url)
 	- [OAuth Protected Resource Options](#oauth-protected-resource-options)
-		- [DOCSPACE_OAUTH_SCOPES_SUPPORTED](#DOCSPACE_OAUTH_SCOPES_SUPPORTED)
-		- [DOCSPACE_OAUTH_RESOURCE_NAME](#DOCSPACE_OAUTH_RESOURCE_NAME)
-		- [DOCSPACE_OAUTH_RESOURCE_DOCUMENTATION](#DOCSPACE_OAUTH_RESOURCE_DOCUMENTATION)
+		- [DOCSPACE_OAUTH_SCOPES_SUPPORTED](#docspace_oauth_scopes_supported)
+		- [DOCSPACE_OAUTH_RESOURCE_NAME](#docspace_oauth_resource_name)
+		- [DOCSPACE_OAUTH_RESOURCE_DOCUMENTATION](#docspace_oauth_resource_documentation)
 	- [OAuth Client Options](#oauth-client-options)
-		- [DOCSPACE_OAUTH_REDIRECT_URIS](#DOCSPACE_OAUTH_REDIRECT_URIS)
-		- [DOCSPACE_OAUTH_CLIENT_ID](#DOCSPACE_OAUTH_CLIENT_ID)
-		- [DOCSPACE_OAUTH_CLIENT_NAME](#DOCSPACE_OAUTH_CLIENT_NAME)
-		- [DOCSPACE_OAUTH_SCOPES](#DOCSPACE_OAUTH_SCOPES)
-		- [DOCSPACE_OAUTH_TOS_URI](#DOCSPACE_OAUTH_TOS_URI)
-		- [DOCSPACE_OAUTH_POLICY_URI](#DOCSPACE_OAUTH_POLICY_URI)
-		- [DOCSPACE_OAUTH_CLIENT_SECRET](#DOCSPACE_OAUTH_CLIENT_SECRET)
+		- [DOCSPACE_OAUTH_REDIRECT_URIS](#docspace_oauth_redirect_uris)
+		- [DOCSPACE_OAUTH_CLIENT_ID](#docspace_oauth_client_id)
+		- [DOCSPACE_OAUTH_CLIENT_NAME](#docspace_oauth_client_name)
+		- [DOCSPACE_OAUTH_SCOPES](#docspace_oauth_scopes)
+		- [DOCSPACE_OAUTH_TOS_URI](#docspace_oauth_tos_uri)
+		- [DOCSPACE_OAUTH_POLICY_URI](#docspace_oauth_policy_uri)
+		- [DOCSPACE_OAUTH_CLIENT_SECRET](#docspace_oauth_client_secret)
 	- [Server General Options](#server-general-options)
-		- [DOCSPACE_SERVER_BASE_URL](#DOCSPACE_SERVER_BASE_URL)
-		- [DOCSPACE_HOST](#DOCSPACE_HOST)
-		- [DOCSPACE_PORT](#DOCSPACE_PORT)
+		- [DOCSPACE_SERVER_BASE_URL](#docspace_server_base_url)
+		- [DOCSPACE_HOST](#docspace_host)
+		- [DOCSPACE_PORT](#docspace_port)
 	- [Server CORS Options](#server-cors-options)
-		- [DOCSPACE_SERVER_CORS_MCP_ORIGIN](#DOCSPACE_SERVER_CORS_MCP_ORIGIN)
-		- [DOCSPACE_SERVER_CORS_MCP_MAX_AGE](#DOCSPACE_SERVER_CORS_MCP_MAX_AGE)
-		- [DOCSPACE_SERVER_CORS_OAUTH_METADATA_ORIGIN](#DOCSPACE_SERVER_CORS_OAUTH_METADATA_ORIGIN)
-		- [DOCSPACE_SERVER_CORS_OAUTH_METADATA_MAX_AGE](#DOCSPACE_SERVER_CORS_OAUTH_METADATA_MAX_AGE)
-		- [DOCSPACE_SERVER_CORS_OAUTH_REGISTER_ORIGIN](#DOCSPACE_SERVER_CORS_OAUTH_REGISTER_ORIGIN)
-		- [DOCSPACE_SERVER_CORS_OAUTH_REGISTER_MAX_AGE](#DOCSPACE_SERVER_CORS_OAUTH_REGISTER_MAX_AGE)
+		- [DOCSPACE_SERVER_CORS_MCP_ORIGIN](#docspace_server_cors_mcp_origin)
+		- [DOCSPACE_SERVER_CORS_MCP_MAX\_AGE](#docspace_server_cors_mcp_max_age)
+		- [DOCSPACE_SERVER_CORS_OAUTH_METADATA_ORIGIN](#docspace_server_cors_oauth_metadata_origin)
+		- [DOCSPACE_SERVER_CORS_OAUTH_METADATA_MAX_AGE](#docspace_server_cors_oauth_metadata_max_age)
+		- [DOCSPACE_SERVER_CORS_OAUTH_REGISTER_ORIGIN](#docspace_server_cors_oauth_register_origin)
+		- [DOCSPACE_SERVER_CORS_OAUTH_REGISTER_MAX_AGE](#docspace_server_cors_oauth_register_max_age)
 	- [Server Rate Limits Options](#server-rate-limits-options)
-		- [DOCSPACE_SERVER_RATE_LIMITS_MCP_CAPACITY](#DOCSPACE_SERVER_RATE_LIMITS_MCP_CAPACITY)
-		- [DOCSPACE_SERVER_RATE_LIMITS_MCP_WINDOW](#DOCSPACE_SERVER_RATE_LIMITS_MCP_WINDOW)
-		- [DOCSPACE_SERVER_RATE_LIMITS_OAUTH_METADATA_CAPACITY](#DOCSPACE_SERVER_RATE_LIMITS_OAUTH_METADATA_CAPACITY)
-		- [DOCSPACE_SERVER_RATE_LIMITS_OAUTH_METADATA_WINDOW](#DOCSPACE_SERVER_RATE_LIMITS_OAUTH_METADATA_WINDOW)
-		- [DOCSPACE_SERVER_RATE_LIMITS_OAUTH_REGISTER_CAPACITY](#DOCSPACE_SERVER_RATE_LIMITS_OAUTH_REGISTER_CAPACITY)
-		- [DOCSPACE_SERVER_RATE_LIMITS_OAUTH_REGISTER_WINDOW](#DOCSPACE_SERVER_RATE_LIMITS_OAUTH_REGISTER_WINDOW)
+		- [DOCSPACE_SERVER_RATE_LIMITS_MCP_CAPACITY](#docspace_server_rate_limits_mcp_capacity)
+		- [DOCSPACE_SERVER_RATE_LIMITS_MCP_WINDOW](#docspace_server_rate_limits_mcp_window)
+		- [DOCSPACE_SERVER_RATE_LIMITS_OAUTH_METADATA_CAPACITY](#docspace_server_rate_limits_oauth_metadata_capacity)
+		- [DOCSPACE_SERVER_RATE_LIMITS_OAUTH_METADATA_WINDOW](#docspace_server_rate_limits_oauth_metadata_window)
+		- [DOCSPACE_SERVER_RATE_LIMITS_OAUTH_REGISTER_CAPACITY](#docspace_server_rate_limits_oauth_register_capacity)
+		- [DOCSPACE_SERVER_RATE_LIMITS_OAUTH_REGISTER_WINDOW](#docspace_server_rate_limits_oauth_register_window)
 	- [Request General Options](#request-general-options)
-		- [DOCSPACE_REQUEST_HEADER_PREFIX](#DOCSPACE_REQUEST_HEADER_PREFIX)
+		- [DOCSPACE_REQUEST_HEADER_PREFIX](#docspace_request_header_prefix)
 - [Examples](#examples)
 	- [stdio with API key](#stdio-with-api-key)
 	- [stdio with Custom Tool Selection](#stdio-with-custom-tool-selection)
@@ -621,7 +621,7 @@ header for CORS requests to MCP endpoints (e.g., `/sse`, `/messages`, `/mcp`).
 
 #### DOCSPACE_SERVER_CORS_MCP_MAX_AGE
 
-The maximum in milliseconds age to include in the `Access-Control-Max-Age`
+The maximum age in milliseconds to include in the `Access-Control-Max-Age`
 header for CORS requests to MCP endpoints (e.g., `/sse`, `/messages`, `/mcp`).
 
 The value `0` is a special value that omits the `Access-Control-Max-Age` header
@@ -660,7 +660,7 @@ header for CORS requests to OAuth metadata endpoints (e.g.,
 
 #### DOCSPACE_SERVER_CORS_OAUTH_METADATA_MAX_AGE
 
-The maximum in milliseconds age to include in the `Access-Control-Max-Age`
+The maximum age in milliseconds to include in the `Access-Control-Max-Age`
 header for CORS requests to OAuth metadata endpoints (e.g.,
 `/.well-known/oauth-protected-resource`,
 `/.well-known/oauth-authorization-server`).
@@ -700,7 +700,7 @@ header for CORS requests to the OAuth client registration endpoint (e.g.,
 
 #### DOCSPACE_SERVER_CORS_OAUTH_REGISTER_MAX_AGE
 
-The maximum in milliseconds age to include in the `Access-Control-Max-Age`
+The maximum age in milliseconds to include in the `Access-Control-Max-Age`
 header for CORS requests to the OAuth client registration endpoint (e.g.,
 `/register`).
 
@@ -981,12 +981,12 @@ DOCSPACE_SERVER_RATE_LIMITS_OAUTH_REGISTER_WINDOW=7200000 # 2 hours
 [DocSpace MCP: Authentication Resolution]: ./authentication-resolution.md
 [DocSpace MCP: Tools Resolution]: ./tools-resolution.md
 
-[`DOCSPACE_TRANSPORT`]: #DOCSPACE_TRANSPORT
-[`DOCSPACE_TOOLSETS`]: #DOCSPACE_TOOLSETS
-[`DOCSPACE_ENABLED_TOOLS`]: #DOCSPACE_ENABLED_TOOLS
-[`DOCSPACE_DISABLED_TOOLS`]: #DOCSPACE_DISABLED_TOOLS
-[`DOCSPACE_API_KEY`]: #DOCSPACE_API_KEY
-[`DOCSPACE_AUTH_TOKEN`]: #DOCSPACE_AUTH_TOKEN
-[`DOCSPACE_USERNAME`]: #DOCSPACE_USERNAME
-[`DOCSPACE_PASSWORD`]: #DOCSPACE_PASSWORD
-[`DOCSPACE_OAUTH_CLIENT_ID`]: #DOCSPACE_OAUTH_CLIENT_ID
+[`DOCSPACE_TRANSPORT`]: #docspace_transport
+[`DOCSPACE_TOOLSETS`]: #docspace_toolsets
+[`DOCSPACE_ENABLED_TOOLS`]: #docspace_enabled_tools
+[`DOCSPACE_DISABLED_TOOLS`]: #docspace_disabled_tools
+[`DOCSPACE_API_KEY`]: #docspace_api_key
+[`DOCSPACE_AUTH_TOKEN`]: #docspace_auth_token
+[`DOCSPACE_USERNAME`]: #docspace_username
+[`DOCSPACE_PASSWORD`]: #docspace_password
+[`DOCSPACE_OAUTH_CLIENT_ID`]: #docspace_oauth_client_id

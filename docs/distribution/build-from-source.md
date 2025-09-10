@@ -15,35 +15,35 @@ different formats.
 Building and using the Docker image requires [Docker] to be installed on your
 system.
 
-Clone the repository from the company's Git server:
+1. Clone the repository from the company's Git server:
 
-```sh
-git clone git@git.onlyoffice.com:ONLYOFFICE/docspace-mcp.git
-```
+    ```sh
+    git clone git@git.onlyoffice.com:ONLYOFFICE/docspace-mcp.git
+    ```
 
-Alternatively, clone from the GitHub mirror:
+    Alternatively, clone from the GitHub mirror:
 
-```sh
-git clone git@github.com:ONLYOFFICE/docspace-mcp.git
-```
+    ```sh
+    git clone git@github.com:ONLYOFFICE/docspace-mcp.git
+    ```
 
-Navigate to the project directory:
+2. Navigate to the project directory:
 
-```sh
-cd docspace-mcp
-```
+    ```sh
+    cd docspace-mcp
+    ```
 
-Build the Docker image:
+3. Build the Docker image:
 
-```sh
-docker build --tag onlyoffice/docspace-mcp .
-```
+    ```sh
+    docker build --tag onlyoffice/docspace-mcp .
+    ```
 
-Run the Docker container:
+4. Run the Docker container:
 
-```sh
-docker run --interactive --rm onlyoffice/docspace-mcp
-```
+    ```sh
+    docker run --interactive --rm onlyoffice/docspace-mcp
+    ```
 
 ## Node.js Application
 
@@ -57,35 +57,35 @@ This project uses [mise], a polyglot tool version manager, to manage development
 tool versions. If you have experience with tools like [asdf], [nvm], [nodenv],
 or similar, you will find this familiar.
 
-Clone the repository from the company's Git server:
+1. Clone the repository from the company's Git server:
 
-```sh
-git clone git@git.onlyoffice.com:ONLYOFFICE/docspace-mcp.git
-```
+    ```sh
+    git clone git@git.onlyoffice.com:ONLYOFFICE/docspace-mcp.git
+    ```
 
-Alternatively, clone from the GitHub mirror:
+    Alternatively, clone from the GitHub mirror:
 
-```sh
-git clone git@github.com:ONLYOFFICE/docspace-mcp.git
-```
+    ```sh
+    git clone git@github.com:ONLYOFFICE/docspace-mcp.git
+    ```
 
-Navigate to the project directory:
+2. Navigate to the project directory:
 
-```sh
-cd docspace-mcp
-```
+    ```sh
+    cd docspace-mcp
+    ```
 
-Build the Node.js application:
+3. Build the Node.js application:
 
-```sh
-pnpm build-app
-```
+    ```sh
+    pnpm build-app
+    ```
 
-Run the Node.js application:
+4. Run the Node.js application:
 
-```sh
-./bin/onlyoffice-docspace-mcp
-```
+    ```sh
+    ./bin/onlyoffice-docspace-mcp
+    ```
 
 ## Desktop Extension
 
@@ -99,31 +99,31 @@ This project uses [mise], a polyglot tool version manager, to manage development
 tool versions. If you have experience with tools like [asdf], [nvm], [nodenv],
 or similar, you will find this familiar.
 
-Clone the repository from the company's Git server:
+1. Clone the repository from the company's Git server:
 
-```sh
-git clone git@git.onlyoffice.com:ONLYOFFICE/docspace-mcp.git
-```
+    ```sh
+    git clone git@git.onlyoffice.com:ONLYOFFICE/docspace-mcp.git
+    ```
 
-Alternatively, clone from the GitHub mirror:
+    Alternatively, clone from the GitHub mirror:
 
-```sh
-git clone git@github.com:ONLYOFFICE/docspace-mcp.git
-```
+    ```sh
+    git clone git@github.com:ONLYOFFICE/docspace-mcp.git
+    ```
 
-Navigate to the project directory:
+2. Navigate to the project directory:
 
-```sh
-cd docspace-mcp
-```
+    ```sh
+    cd docspace-mcp
+    ```
 
-Build the Desktop Extension:
+3. Build the Desktop Extension:
 
-```sh
-pnpm build-dxt
-```
+    ```sh
+    pnpm build-dxt
+    ```
 
-Use the built `.dxt` file from the root of the project directory in your
+4. Use the built `.dxt` file from the root of the project directory in your
 desktop application.
 
 ## References
