@@ -12,7 +12,7 @@
 		"url": "https://onlyoffice.com/"
 	},
 	"homepage": "https://github.com/onlyoffice/docspace-mcp/",
-	"documentation": "https://github.com/onlyoffice/docspace-mcp/",
+	"documentation": "https://github.com/onlyoffice/docspace-mcp/blob/v2.0.0/README.md",
 	"support": "https://github.com/onlyoffice/docspace-mcp/issues/",
 	"icon": "docs/icon.png",
 	"server": {
@@ -22,23 +22,16 @@
 			"command": "node",
 			"args": ["${__dirname}/bin/onlyoffice-docspace-mcp"],
 			"env": {
-				"DOCSPACE_INTERNAL": "${user_config.internal}",
-				"DOCSPACE_TRANSPORT": "${user_config.transport}",
-				"DOCSPACE_USER_AGENT": "${user_config.user_agent}",
 				"DOCSPACE_DYNAMIC": "${user_config.dynamic}",
 				"DOCSPACE_TOOLSETS": "${user_config.toolsets}",
 				"DOCSPACE_ENABLED_TOOLS": "${user_config.enabled_tools}",
 				"DOCSPACE_DISABLED_TOOLS": "${user_config.disabled_tools}",
+				"DOCSPACE_USER_AGENT": "${user_config.user_agent}",
 				"DOCSPACE_BASE_URL": "${user_config.base_url}",
-				"DOCSPACE_ORIGIN": "${user_config.origin}",
 				"DOCSPACE_API_KEY": "${user_config.api_key}",
 				"DOCSPACE_AUTH_TOKEN": "${user_config.auth_token}",
 				"DOCSPACE_USERNAME": "${user_config.username}",
-				"DOCSPACE_PASSWORD": "${user_config.password}",
-				"DOCSPACE_HOST": "${user_config.host}",
-				"DOCSPACE_PORT": "${user_config.port}",
-				"DOCSPACE_SESSION_TTL": "${user_config.session_ttl}",
-				"DOCSPACE_SESSION_INTERVAL": "${user_config.session_interval}"
+				"DOCSPACE_PASSWORD": "${user_config.password}"
 			}
 		}
 	},
@@ -49,23 +42,37 @@
 			"linux"
 		],
 		"runtimes": {
-			"node": ">=22.0.0"
+			"node": ">=18.0.0"
 		}
 	},
 	"user_config": {
-		"internal": {
+		"dynamic": {
 			"type": "boolean",
-			"title": "Internal Mode",
-			"description": "Whether to run the DocSpace MCP server in internal mode.",
+			"title": "Meta Tools",
+			"description": "The flag that indicates whether the DocSpace MCP server should use meta tools.",
 			"required": false,
 			"default": false
 		},
-		"transport": {
+		"toolsets": {
 			"type": "string",
-			"title": "Transport Protocol",
-			"description": "The transport protocol to use for communication with the DocSpace MCP server. The HTTP transport is only available in internal mode for now.",
+			"title": "Toolsets",
+			"description": "The list of toolsets to enable for the DocSpace MCP server.",
 			"required": false,
-			"default": "stdio"
+			"default": "all"
+		},
+		"enabled_tools": {
+			"type": "string",
+			"title": "Enabled Tools",
+			"description": "The list of tools to enable for the DocSpace MCP server.",
+			"required": false,
+			"default": ""
+		},
+		"disabled_tools": {
+			"type": "string",
+			"title": "Disabled Tools",
+			"description": "The list of tools to disable for the DocSpace MCP server.",
+			"required": false,
+			"default": ""
 		},
 		"user_agent": {
 			"type": "string",
@@ -74,45 +81,10 @@
 			"required": false,
 			"default": "@onlyoffice/docspace-mcp v2.0.0"
 		},
-		"dynamic": {
-			"type": "boolean",
-			"title": "Dynamic Tools",
-			"description": "Whether to enable dynamic tools. Navigate to the documentation for more details about how dynamic tools work.",
-			"required": false,
-			"default": false
-		},
-		"toolsets": {
-			"type": "string",
-			"title": "Toolsets",
-			"description": "The comma-separated list of toolsets to use or 'all' to use all available toolsets. Navigate to the documentation for more details about how toolsets work.",
-			"required": false,
-			"default": "all"
-		},
-		"enabled_tools": {
-			"type": "string",
-			"title": "Enabled Tools",
-			"description": "The comma-separated list of tools to enable. Navigate to the documentation for more details about how enabled tools work.",
-			"required": false,
-			"default": ""
-		},
-		"disabled_tools": {
-			"type": "string",
-			"title": "Disabled Tools",
-			"description": "The comma-separated list of tools to disable. Navigate to the documentation for more details about how disabled tools work.",
-			"required": false,
-			"default": ""
-		},
 		"base_url": {
 			"type": "string",
 			"title": "Base URL",
 			"description": "The base URL of the DocSpace instance for API requests.",
-			"required": false,
-			"default": ""
-		},
-		"origin": {
-			"type": "string",
-			"title": "Origin URL",
-			"description": "The origin URL to include in the Origin header for DocSpace API requests.",
 			"required": false,
 			"default": ""
 		},
@@ -126,7 +98,7 @@
 		},
 		"auth_token": {
 			"type": "string",
-			"title": "Auth Token",
+			"title": "Personal Access Token",
 			"description": "The Personal Access Token (PAT) for accessing the DocSpace API.",
 			"required": false,
 			"sensitive": true,
@@ -147,41 +119,11 @@
 			"required": false,
 			"sensitive": true,
 			"default": ""
-		},
-		"host": {
-			"type": "string",
-			"title": "Host",
-			"description": "The host to listen on for incoming HTTP requests.",
-			"required": false,
-			"default": "127.0.0.1"
-		},
-		"port": {
-			"type": "number",
-			"title": "Port",
-			"description": "The port to listen on for incoming HTTP requests.",
-			"required": false,
-			"default": 8080
-		},
-		"session_ttl": {
-			"type": "number",
-			"title": "Session TTL",
-			"description": "The time-to-live (TTL) for HTTP sessions in milliseconds.",
-			"required": false,
-			"default": 28800000
-		},
-		"session_interval": {
-			"type": "number",
-			"title": "Session Interval",
-			"description": "The interval for checking HTTP sessions for expiration in milliseconds.",
-			"required": false,
-			"default": 240000
 		}
 	},
 	"keywords": [
 		"onlyoffice",
-		"docspace",
-		"modelcontextprotocol",
-		"mcp"
+		"docspace"
 	],
 	"license": "Apache-2.0",
 	"repository": {
