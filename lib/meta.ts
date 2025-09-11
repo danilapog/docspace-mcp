@@ -16,5 +16,9 @@
  * @license
  */
 
+/**
+ * @module meta
+ */
+
 export const name = "@onlyoffice/docspace-mcp"
 export const version = "2.0.0"

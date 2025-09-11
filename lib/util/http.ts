@@ -17,23 +17,23 @@
  */
 
 /**
- * @module util/context
+ * @module util/http
  */
 
-import * as asyncHooks from "node:async_hooks"
+export function isContentTypeJson(h: string): boolean {
+	if (!h) {
+		return false
+	}
 
-export interface Context {
-	sessionId?: string
-}
+	let a = h.split(";")
+	if (a.length === 0) {
+		return false
+	}
 
-const s = new asyncHooks.AsyncLocalStorage<Context>({
-	name: "context",
-})
+	let t = a[0].trim().toLowerCase()
+	if (!t) {
+		return false
+	}
 
-export function run(c: Context, cb: () => void): void {
-	s.run(c, cb)
-}
-
-export function get(): Context | undefined {
-	return s.getStore()
+	return t === "application/json"
 }

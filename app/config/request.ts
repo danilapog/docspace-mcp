@@ -18,9 +18,9 @@
 
 import type * as http from "node:http"
 import * as z from "zod"
-import * as moreerrors from "../../lib/util/moreerrors.ts"
-import * as morezod from "../../lib/util/morezod.ts"
+import * as errors from "../../lib/util/errors.ts"
 import * as result from "../../lib/util/result.ts"
+import * as zod from "../../lib/util/zod.ts"
 import type * as global from "./global.ts"
 import * as tools from "./tools.ts"
 
@@ -63,22 +63,22 @@ function createMcp(g: global.Config) {
 			[keyDynamic]: z.
 				string().
 				optional().
-				transform(morezod.envOptionalBoolean()),
+				transform(zod.envOptionalBoolean()),
 
 			[keyToolsets]: z.
 				string().
 				optional().
-				transform(morezod.envOptionalOptions([...g.mcp.toolsets])),
+				transform(zod.envOptionalOptions([...g.mcp.toolsets])),
 
 			[keyEnabledTools]: z.
 				string().
 				optional().
-				transform(morezod.envOptionalOptions([...g.mcp.tools])),
+				transform(zod.envOptionalOptions([...g.mcp.tools])),
 
 			[keyDisabledTools]: z.
 				string().
 				optional().
-				transform(morezod.envOptionalOptions([...g.mcp.tools])),
+				transform(zod.envOptionalOptions([...g.mcp.tools])),
 		}).
 		transform((o) => ({
 			dynamic: o[keyDynamic] as boolean | undefined,
@@ -179,7 +179,7 @@ function validateMcp(o: Mcp): Error | undefined {
 	}
 
 	if (errs.length !== 0) {
-		return new moreerrors.Errors({cause: errs})
+		return new errors.Errors({cause: errs})
 	}
 }
 
@@ -196,7 +196,7 @@ function createApiShared(g: global.Config) {
 			[keyBaseUrl]: z.
 				string().
 				optional().
-				transform(morezod.envOptionalBaseUrl()),
+				transform(zod.envOptionalBaseUrl()),
 
 			[keyApiKey]: z.
 				string().
@@ -328,7 +328,7 @@ function validateApiShared(o: ApiShared): Error | undefined {
 	}
 
 	if (errs.length !== 0) {
-		return new moreerrors.Errors({cause: errs})
+		return new errors.Errors({cause: errs})
 	}
 
 	return

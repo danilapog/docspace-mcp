@@ -19,7 +19,7 @@
 import child from "node:child_process"
 import fs from "node:fs/promises"
 import util from "node:util"
-import * as base from "../lib/mcp/base.ts"
+import * as mcp from "../lib/mcp.ts"
 import * as meta from "../lib/meta.ts"
 import * as tools from "./tools.ts"
 
@@ -42,7 +42,7 @@ async function main(): Promise<void> {
 
 	m.tools = []
 
-	let toolsets = tools.sortToolsets(base.data.regular.toolsets)
+	let toolsets = tools.sortToolsets(mcp.toolsetInfos)
 
 	for (let s of toolsets) {
 		for (let t of s.tools) {

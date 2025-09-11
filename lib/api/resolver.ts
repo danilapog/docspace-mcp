@@ -20,8 +20,8 @@ import {setTimeout} from "node:timers/promises"
 import type * as z from "zod"
 import type {Result} from "../util/result.ts"
 import {error, ok, safeAsync} from "../util/result.ts"
-import type {FileOperationDtoSchema} from "./client/internal/schemas.ts"
-import type {Response as ClientResponse} from "./client.ts"
+import type {Response} from "./client.ts"
+import type {FileOperationDtoSchema} from "./schemas.ts"
 
 export type Operation = z.output<typeof FileOperationDtoSchema>
 
@@ -31,25 +31,25 @@ class State {
 	done = false
 }
 
-export interface Client {
-	files: FilesService
+export interface ResolverClient {
+	files: ResolverFilesService
 }
 
-export interface FilesService {
-	getOperationStatuses(s: AbortSignal): Promise<Result<[Operation[], ClientResponse], Error>>
+export interface ResolverFilesService {
+	getOperationStatuses(s: AbortSignal): Promise<Result<[Operation[], Response], Error>>
 }
 
 export class Resolver {
 	limit = 20
 	delay = 100
 
-	private client: Client
+	private client: ResolverClient
 
-	constructor(client: Client) {
+	constructor(client: ResolverClient) {
 		this.client = client
 	}
 
-	async resolve(signal: AbortSignal, ...ops: Operation[]): Promise<Result<Response, Error>> {
+	async resolve(signal: AbortSignal, ...ops: Operation[]): Promise<Result<ResolverResponse, Error>> {
 		if (ops.length === 0) {
 			return error(new Error("No operations to sync."))
 		}
@@ -68,7 +68,7 @@ export class Resolver {
 		let limit = this.limit
 		let delay = this.delay
 
-		let responses: ClientResponse[] = []
+		let responses: Response[] = []
 		let operations: Operation[] = []
 
 		let err: Error | undefined
@@ -138,7 +138,7 @@ export class Resolver {
 			}
 		}
 
-		let s = new Response()
+		let s = new ResolverResponse()
 		s.responses = responses
 		s.operations = operations
 
@@ -155,7 +155,7 @@ export class Resolver {
 		}
 
 		if (err) {
-			let e = new ErrorResponse("Resolving operations.", {cause: err})
+			let e = new ResolverErrorResponse("Resolving operations.", {cause: err})
 			e.response = s
 			e.unresolved = u
 			return error(e)
@@ -163,7 +163,7 @@ export class Resolver {
 
 		if (u.length !== 0) {
 			let m = `${u.length} out of ${ops.length} operations are unresolved.`
-			let e = new ErrorResponse(m)
+			let e = new ResolverErrorResponse(m)
 			e.response = s
 			e.unresolved = u
 			return error(e)
@@ -173,19 +173,19 @@ export class Resolver {
 	}
 }
 
-export class Response {
-	responses: ClientResponse[] = []
+export class ResolverResponse {
+	responses: Response[] = []
 	operations: Operation[] = []
 }
 
 // eslint-disable-next-line unicorn/custom-error-definition
-export class ErrorResponse extends Error {
-	response = new Response()
+export class ResolverErrorResponse extends Error {
+	response = new ResolverResponse()
 	unresolved: string[] = []
 
 	constructor(message: string, options?: ErrorOptions) {
 		super(message, options)
-		this.name = "ErrorResponse"
+		this.name = "ResolverErrorResponse"
 	}
 }
 

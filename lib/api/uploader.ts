@@ -16,24 +16,29 @@
  * @license
  */
 
+/**
+ * @module
+ * @mergeModuleWith api
+ */
+
 import type {Result} from "../util/result.ts"
 import {error, ok} from "../util/result.ts"
 import type {Response} from "./client.ts"
 
 const maxChunkSize = 10 * 1024 * 1024 // 10mb
 
-export interface Client {
-	files: FilesService
+export interface UploaderClient {
+	files: UploaderFilesService
 }
 
-export interface FilesService {
+export interface UploaderFilesService {
 	uploadChunk(s: AbortSignal, id: string, chunk: Blob): Promise<Result<[unknown, Response], Error>>
 }
 
 export class Uploader {
-	private client: Client
+	private client: UploaderClient
 
-	constructor(client: Client) {
+	constructor(client: UploaderClient) {
 		this.client = client
 	}
 

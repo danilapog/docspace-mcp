@@ -17,23 +17,28 @@
  */
 
 /**
- * @module util/context
+ * @module
+ * @mergeModuleWith util/express
  */
 
-import * as asyncHooks from "node:async_hooks"
+import type express from "express"
+import type * as utilContext from "../context.ts"
 
-export interface Context {
-	sessionId?: string
+export interface ContextRunner {
+	run(c: utilContext.Context, cb: () => void): void
 }
 
-const s = new asyncHooks.AsyncLocalStorage<Context>({
-	name: "context",
-})
+export function context(p: ContextRunner): express.Handler {
+	return (req, _, next) => {
+		let c: utilContext.Context = {}
 
-export function run(c: Context, cb: () => void): void {
-	s.run(c, cb)
-}
+		let id = req.headers["mcp-session-id"]
+		if (id !== undefined && id !== "" && !Array.isArray(id)) {
+			c.sessionId = id
+		}
 
-export function get(): Context | undefined {
-	return s.getStore()
+		p.run({}, () => {
+			next()
+		})
+	}
 }

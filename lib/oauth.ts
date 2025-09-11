@@ -16,6 +16,10 @@
  * @license
  */
 
-export * as middleware from "./oauth/middleware.ts"
-export * as resource from "./oauth/resource.ts"
-export * as server from "./oauth/server.ts"
+/**
+ * @module oauth
+ */
+
+export * from "./oauth/auth-server.ts"
+export * from "./oauth/middleware.ts"
+export * from "./oauth/resource-server.ts"

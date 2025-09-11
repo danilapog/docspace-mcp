@@ -16,11 +16,11 @@
  * @license
  */
 
-import * as base from "../../lib/mcp/base.ts"
+import * as mcp from "../../lib/mcp.ts"
 
 export const availableToolsets = (() => {
 	let a: string[] = ["all"]
-	for (let s of base.data.regular.toolsets) {
+	for (let s of mcp.toolsetInfos) {
 		a.push(s.name)
 	}
 	return a
@@ -28,7 +28,7 @@ export const availableToolsets = (() => {
 
 export const availableTools = (() => {
 	let a: string[] = []
-	for (let s of base.data.regular.toolsets) {
+	for (let s of mcp.toolsetInfos) {
 		for (let t of s.tools) {
 			a.push(t.name)
 		}
@@ -62,7 +62,7 @@ export function resolveToolsetsAndTools(
 	for (let n of toolsets) {
 		x.push(n)
 
-		for (let s of base.data.regular.toolsets) {
+		for (let s of mcp.toolsetInfos) {
 			if (s.name === n) {
 				for (let t of s.tools) {
 					y.push(t.name)
@@ -73,7 +73,7 @@ export function resolveToolsetsAndTools(
 	}
 
 	for (let n of enabledTools) {
-		for (let s of base.data.regular.toolsets) {
+		for (let s of mcp.toolsetInfos) {
 			let h = false
 			for (let t of s.tools) {
 				if (t.name === n) {
@@ -103,7 +103,7 @@ export function resolveToolsetsAndTools(
 	}
 
 	for (let sn of x) {
-		for (let s of base.data.regular.toolsets) {
+		for (let s of mcp.toolsetInfos) {
 			if (s.name === sn) {
 				let h = false
 

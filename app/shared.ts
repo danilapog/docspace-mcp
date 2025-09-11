@@ -16,6 +16,16 @@
  * @license
  */
 
+import * as server from "@modelcontextprotocol/sdk/server/index.js"
+import * as meta from "../lib/meta.ts"
+
 export type P = Promise<Error | undefined>
 
 export type Cleanup = () => P
+
+export function createServer(): server.Server {
+	return new server.Server({
+		name: meta.name,
+		version: meta.version,
+	})
+}

@@ -17,23 +17,7 @@
  */
 
 /**
- * @module util/context
+ * @module util/fetch
  */
 
-import * as asyncHooks from "node:async_hooks"
-
-export interface Context {
-	sessionId?: string
-}
-
-const s = new asyncHooks.AsyncLocalStorage<Context>({
-	name: "context",
-})
-
-export function run(c: Context, cb: () => void): void {
-	s.run(c, cb)
-}
-
-export function get(): Context | undefined {
-	return s.getStore()
-}
+export * from "./fetch/logger.ts"

@@ -19,12 +19,15 @@
 import * as stdio from "@modelcontextprotocol/sdk/server/stdio.js"
 import * as api from "../../lib/api.ts"
 import * as mcp from "../../lib/mcp.ts"
+import * as utilMcp from "../../lib/util/mcp.ts"
 import * as result from "../../lib/util/result.ts"
 import type * as config from "../config.ts"
-import type * as shared from "../shared.ts"
+import * as shared from "../shared.ts"
 
 export function start(g: config.global.Config): [shared.P, shared.Cleanup] {
-	let cc: api.client.Config = {
+	let s = shared.createServer()
+
+	let cc: api.ClientConfig = {
 		userAgent: g.api.userAgent,
 		sharedBaseUrl: g.api.shared.baseUrl,
 		sharedFetch: fetch,
@@ -34,7 +37,7 @@ export function start(g: config.global.Config): [shared.P, shared.Cleanup] {
 		},
 	}
 
-	let c = new api.client.Client(cc)
+	let c = new api.Client(cc)
 
 	if (g.api.shared.apiKey) {
 		c = c.withApiKey(g.api.shared.apiKey)
@@ -48,15 +51,17 @@ export function start(g: config.global.Config): [shared.P, shared.Cleanup] {
 		c = c.withBasicAuth(g.api.shared.username, g.api.shared.password)
 	}
 
-	let sc: mcp.base.configured.Config = {
+	let sc: mcp.ConfiguredServerConfig = {
 		client: c,
-		resolver: new api.resolver.Resolver(c),
-		uploader: new api.uploader.Uploader(c),
+		resolver: new api.Resolver(c),
+		uploader: new api.Uploader(c),
 		dynamic: g.mcp.dynamic,
 		tools: g.mcp.tools,
 	}
 
-	let s = mcp.base.configured.create(sc)
+	let defs = mcp.configuredServer(sc)
+
+	utilMcp.register(s, defs)
 
 	let t = new stdio.StdioServerTransport()
 

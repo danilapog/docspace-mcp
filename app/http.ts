@@ -22,13 +22,15 @@ import express from "express"
 import * as api from "../lib/api.ts"
 import * as mcp from "../lib/mcp.ts"
 import * as oauth from "../lib/oauth.ts"
-import * as logger from "../lib/util/logger.ts"
-import * as moreerrors from "../lib/util/moreerrors.ts"
-import * as moreexpress from "../lib/util/moreexpress.ts"
-import * as morefetch from "../lib/util/morefetch.ts"
+import * as context from "../lib/util/context.ts"
+import * as errors from "../lib/util/errors.ts"
+import * as utilExpress from "../lib/util/express.ts"
+import * as utilFetch from "../lib/util/fetch.ts"
+import type * as logger from "../lib/util/logger.ts"
+import * as utilMcp from "../lib/util/mcp.ts"
 import * as result from "../lib/util/result.ts"
 import * as config from "./config.ts"
-import type * as shared from "./shared.ts"
+import * as shared from "./shared.ts"
 
 type CreateServer = (req: express.Request) => result.Result<server.Server, Error>
 
@@ -45,7 +47,7 @@ interface Oauth {
 }
 
 interface Mcp {
-	sessions: mcp.sessions.Sessions
+	sessions: mcp.Sessions
 	server: express.Router
 }
 
@@ -60,39 +62,48 @@ interface Watchable {
 	promise: shared.P
 }
 
-export function start(g: config.global.Config): [shared.P, shared.Cleanup] {
-	let create = createCreateServer(g)
+export function start(
+	g: config.global.Config,
+	l: logger.VanillaLogger,
+): [shared.P, shared.Cleanup] {
+	let create = createCreateServer(g, l)
 
-	let c = createComponents(g, create)
+	let c = createComponents(g, l, create)
 	if (c.err) {
 		// eslint-disable-next-line typescript/require-await
 		return [Promise.resolve(c.err), async() => undefined]
 	}
 
-	let e = createExpress(c.v)
+	let e = createExpress(l, c.v)
 
 	let a = createApp(g, c.v, e)
 
 	let cleanup = createCleanup(c.v, a)
 
-	let p = createPromise(g, a.server)
+	let p = createPromise(g, l, a.server)
 
 	return [p, cleanup]
 }
 
-function createCreateServer(g: config.global.Config): CreateServer {
+function createCreateServer(
+	g: config.global.Config,
+	l: logger.VanillaLogger,
+): CreateServer {
 	if (g.internal) {
-		return createInternalCreateServer(g)
+		return createInternalCreateServer(g, l)
 	}
 
 	if (g.oauth.client.clientId) {
-		return createCreateServerWithOauth(g)
+		return createCreateServerWithOauth(g, l)
 	}
 
-	return createCreateServerWithAuth(g)
+	return createCreateServerWithAuth(g, l)
 }
 
-function createInternalCreateServer(g: config.global.Config): CreateServer {
+function createInternalCreateServer(
+	g: config.global.Config,
+	l: logger.VanillaLogger,
+): CreateServer {
 	return (req: express.Request): result.Result<server.Server, Error> => {
 		let a = req.headers.authorization
 		if (!a) {
@@ -113,41 +124,48 @@ function createInternalCreateServer(g: config.global.Config): CreateServer {
 			b.v.pathname += "/"
 		}
 
-		let cc: api.client.Config = {
+		let s = shared.createServer()
+
+		let cc: api.ClientConfig = {
 			userAgent: g.api.userAgent,
 			sharedBaseUrl: b.v.toString(),
-			sharedFetch: morefetch.withLogger(globalThis.fetch),
+			sharedFetch: utilFetch.withLogger(context, l, fetch),
 			oauthBaseUrl: "",
 			oauthFetch() {
 				throw new Error("Not implemented")
 			},
 		}
 
-		let c = new api.client.Client(cc)
+		let c = new api.Client(cc)
 
 		c = c.withAuthToken(a)
 
-		let sc: mcp.base.configured.Config = {
+		let sc: mcp.ConfiguredServerConfig = {
 			client: c,
-			resolver: new api.resolver.Resolver(c),
-			uploader: new api.uploader.Uploader(c),
+			resolver: new api.Resolver(c),
+			uploader: new api.Uploader(c),
 			dynamic: g.mcp.dynamic,
 			tools: g.mcp.tools,
 		}
 
-		let s = mcp.base.configured.create(sc)
+		let defs = mcp.configuredServer(sc)
+
+		utilMcp.register(s, defs)
 
 		return result.ok(s)
 	}
 }
 
-function createCreateServerWithOauth(g: config.global.Config): CreateServer {
+function createCreateServerWithOauth(
+	g: config.global.Config,
+	l: logger.VanillaLogger,
+): CreateServer {
 	return (req) => {
 		if (!req.auth) {
 			return result.error(new Error("OAuth middleware was not registered"))
 		}
 
-		let p = api.client.decodeOauthTokenPayload(req.auth.token)
+		let p = api.decodeOauthTokenPayload(req.auth.token)
 		if (p.err) {
 			return result.error(new Error("Decoding OAuth token", {cause: p.err}))
 		}
@@ -166,35 +184,42 @@ function createCreateServerWithOauth(g: config.global.Config): CreateServer {
 			return result.error(new Error("Parsing MCP config", {cause: m.err}))
 		}
 
-		let cc: api.client.Config = {
+		let s = shared.createServer()
+
+		let cc: api.ClientConfig = {
 			userAgent: g.api.userAgent,
 			sharedBaseUrl: b.v.toString(),
-			sharedFetch: morefetch.withLogger(globalThis.fetch),
+			sharedFetch: utilFetch.withLogger(context, l, fetch),
 			oauthBaseUrl: "",
 			oauthFetch() {
 				throw new Error("Not implemented")
 			},
 		}
 
-		let c = new api.client.Client(cc)
+		let c = new api.Client(cc)
 
 		c = c.withBearerAuth(req.auth.token)
 
-		let sc: mcp.base.configured.Config = {
+		let sc: mcp.ConfiguredServerConfig = {
 			client: c,
-			resolver: new api.resolver.Resolver(c),
-			uploader: new api.uploader.Uploader(c),
+			resolver: new api.Resolver(c),
+			uploader: new api.Uploader(c),
 			dynamic: m.v.dynamic,
 			tools: m.v.tools,
 		}
 
-		let s = mcp.base.configured.create(sc)
+		let defs = mcp.configuredServer(sc)
+
+		utilMcp.register(s, defs)
 
 		return result.ok(s)
 	}
 }
 
-function createCreateServerWithAuth(g: config.global.Config): CreateServer {
+function createCreateServerWithAuth(
+	g: config.global.Config,
+	l: logger.VanillaLogger,
+): CreateServer {
 	return (req) => {
 		let a = config.request.parseApiShared(g, req.headers)
 		if (a.err) {
@@ -206,17 +231,19 @@ function createCreateServerWithAuth(g: config.global.Config): CreateServer {
 			return result.error(new Error("Parsing MCP config", {cause: m.err}))
 		}
 
-		let cc: api.client.Config = {
+		let s = shared.createServer()
+
+		let cc: api.ClientConfig = {
 			userAgent: g.api.userAgent,
 			sharedBaseUrl: a.v.baseUrl,
-			sharedFetch: morefetch.withLogger(globalThis.fetch),
+			sharedFetch: utilFetch.withLogger(context, l, fetch),
 			oauthBaseUrl: "",
 			oauthFetch() {
 				throw new Error("Not implemented")
 			},
 		}
 
-		let c = new api.client.Client(cc)
+		let c = new api.Client(cc)
 
 		if (a.v.apiKey) {
 			c = c.withApiKey(a.v.apiKey)
@@ -230,21 +257,27 @@ function createCreateServerWithAuth(g: config.global.Config): CreateServer {
 			c = c.withBasicAuth(a.v.username, a.v.password)
 		}
 
-		let sc: mcp.base.configured.Config = {
+		let sc: mcp.ConfiguredServerConfig = {
 			client: c,
-			resolver: new api.resolver.Resolver(c),
-			uploader: new api.uploader.Uploader(c),
+			resolver: new api.Resolver(c),
+			uploader: new api.Uploader(c),
 			dynamic: m.v.dynamic,
 			tools: m.v.tools,
 		}
 
-		let s = mcp.base.configured.create(sc)
+		let defs = mcp.configuredServer(sc)
+
+		utilMcp.register(s, defs)
 
 		return result.ok(s)
 	}
 }
 
-function createComponents(g: config.global.Config, create: CreateServer): result.Result<Components, Error> {
+function createComponents(
+	g: config.global.Config,
+	l: logger.VanillaLogger,
+	create: CreateServer,
+): result.Result<Components, Error> {
 	let c: Components = {
 		oauth: undefined,
 		sse: undefined,
@@ -252,7 +285,7 @@ function createComponents(g: config.global.Config, create: CreateServer): result
 	}
 
 	if (g.oauth.client.clientId) {
-		let r = createOauth(g)
+		let r = createOauth(g, l)
 		if (r.err) {
 			return result.error(new Error("Creating OAuth", {cause: r.err}))
 		}
@@ -261,14 +294,14 @@ function createComponents(g: config.global.Config, create: CreateServer): result
 
 	switch (g.mcp.transport) {
 	case "sse":
-		c.sse = createSse(g, create)
+		c.sse = createSse(g, l, create)
 		break
 	case "streamable-http":
-		c.streamable = createStreamable(g, create)
+		c.streamable = createStreamable(g, l, create)
 		break
 	case "http":
-		c.sse = createSse(g, create)
-		c.streamable = createStreamable(g, create)
+		c.sse = createSse(g, l, create)
+		c.streamable = createStreamable(g, l, create)
 		break
 	// no default
 	}
@@ -276,22 +309,25 @@ function createComponents(g: config.global.Config, create: CreateServer): result
 	return result.ok(c)
 }
 
-function createOauth(g: config.global.Config): result.Result<Oauth, Error> {
-	let cc: api.client.Config = {
+function createOauth(
+	g: config.global.Config,
+	l: logger.VanillaLogger,
+): result.Result<Oauth, Error> {
+	let cc: api.ClientConfig = {
 		userAgent: g.api.userAgent,
 		sharedBaseUrl: "",
 		sharedFetch() {
 			throw new Error("Not implemented")
 		},
 		oauthBaseUrl: g.api.oauth.baseUrl,
-		oauthFetch: morefetch.withLogger(globalThis.fetch),
+		oauthFetch: utilFetch.withLogger(context, l, fetch),
 	}
 
-	let c = new api.client.Client(cc)
+	let c = new api.Client(cc)
 
 	c = c.withApiKey(g.api.shared.apiKey)
 
-	let rc: oauth.resource.Config = {
+	let rc: oauth.ResourceServerConfig = {
 		metadataCorsOrigin: g.server.cors.oauthMetadata.origin,
 		metadataCorsMaxAge: g.server.cors.oauthMetadata.maxAge,
 		metadataRateLimitCapacity: g.server.rateLimits.oauthMetadata.capacity,
@@ -302,9 +338,9 @@ function createOauth(g: config.global.Config): result.Result<Oauth, Error> {
 		resourceDocumentation: g.oauth.resource.resourceDocumentation,
 	}
 
-	let r = oauth.resource.router(rc)
+	let r = oauth.resourceServer(rc)
 
-	let sc: oauth.server.Config = {
+	let sc: oauth.AuthServerConfig = {
 		serverBaseUrl: g.server.baseUrl,
 		metadataCorsOrigin: g.server.cors.oauthMetadata.origin,
 		metadataCorsMaxAge: g.server.cors.oauthMetadata.maxAge,
@@ -324,14 +360,14 @@ function createOauth(g: config.global.Config): result.Result<Oauth, Error> {
 		client: c,
 	}
 
-	let s = oauth.server.router(sc)
+	let s = oauth.authServer(sc)
 
-	let mc: oauth.middleware.Config = {
+	let mc: oauth.MiddlewareConfig = {
 		resourceBaseUrl: g.server.baseUrl,
 		client: c,
 	}
 
-	let m = oauth.middleware.handler(mc)
+	let m = oauth.middleware(mc)
 	if (m.err) {
 		return result.error(new Error("Creating OAuth middleware", {cause: m.err}))
 	}
@@ -345,20 +381,25 @@ function createOauth(g: config.global.Config): result.Result<Oauth, Error> {
 	return result.ok(o)
 }
 
-function createSse(g: config.global.Config, create: CreateServer): Mcp {
-	let sc: mcp.sessions.Config = {
+function createSse(
+	g: config.global.Config,
+	l: logger.VanillaLogger,
+	create: CreateServer,
+): Mcp {
+	let sc: mcp.SessionsConfig = {
 		ttl: g.mcp.session.ttl,
 	}
 
-	let s = new mcp.sessions.Sessions(sc)
+	let s = new mcp.Sessions(sc)
 
-	let tc: mcp.sse.transports.Config = {
+	let tc: mcp.SseTransportsConfig = {
+		logger: l,
 		sessions: s,
 	}
 
-	let t = new mcp.sse.transports.Transports(tc)
+	let t = new mcp.SseTransports(tc)
 
-	let rc: mcp.sse.server.Config = {
+	let rc: mcp.SseServerConfig = {
 		corsOrigin: g.server.cors.mcp.origin,
 		corsMaxAge: g.server.cors.mcp.maxAge,
 		corsAllowedHeaders: [],
@@ -376,7 +417,7 @@ function createSse(g: config.global.Config, create: CreateServer): Mcp {
 		rc.corsExposedHeaders.push("WWW-Authenticate")
 	}
 
-	let r = mcp.sse.server.router(rc)
+	let r = mcp.sseServer(rc)
 
 	let m: Mcp = {
 		sessions: s,
@@ -386,20 +427,25 @@ function createSse(g: config.global.Config, create: CreateServer): Mcp {
 	return m
 }
 
-function createStreamable(g: config.global.Config, create: CreateServer): Mcp {
-	let sc: mcp.sessions.Config = {
+function createStreamable(
+	g: config.global.Config,
+	l: logger.VanillaLogger,
+	create: CreateServer,
+): Mcp {
+	let sc: mcp.SessionsConfig = {
 		ttl: g.mcp.session.ttl,
 	}
 
-	let s = new mcp.sessions.Sessions(sc)
+	let s = new mcp.Sessions(sc)
 
-	let tc: mcp.streamable.transports.Config = {
+	let tc: mcp.StreamableTransportsConfig = {
+		logger: l,
 		sessions: s,
 	}
 
-	let t = new mcp.streamable.transports.Transports(tc)
+	let t = new mcp.StreamableTransports(tc)
 
-	let rc: mcp.streamable.server.Config = {
+	let rc: mcp.StreamableServerConfig = {
 		corsOrigin: g.server.cors.mcp.origin,
 		corsMaxAge: g.server.cors.mcp.maxAge,
 		corsAllowedHeaders: [],
@@ -417,7 +463,7 @@ function createStreamable(g: config.global.Config, create: CreateServer): Mcp {
 		rc.corsExposedHeaders.push("WWW-Authenticate")
 	}
 
-	let r = mcp.streamable.server.router(rc)
+	let r = mcp.streamableServer(rc)
 
 	let m: Mcp = {
 		sessions: s,
@@ -427,15 +473,18 @@ function createStreamable(g: config.global.Config, create: CreateServer): Mcp {
 	return m
 }
 
-function createExpress(c: Components): express.Express {
+function createExpress(
+	l: logger.VanillaLogger,
+	c: Components,
+): express.Express {
 	let e = express()
 
 	e.disable("x-powered-by")
 	e.disable("etag")
 	e.set("json spaces", 2)
 
-	e.use(moreexpress.context())
-	e.use(moreexpress.logger())
+	e.use(utilExpress.context(context))
+	e.use(utilExpress.logger(context, l))
 
 	if (c.oauth) {
 		e.use(c.oauth.resource)
@@ -463,7 +512,7 @@ function createExpress(c: Components): express.Express {
 		}
 	}
 
-	e.use(moreexpress.notFound())
+	e.use(notFound())
 
 	return e
 }
@@ -510,7 +559,7 @@ function createCleanup(c: Components, a: App): shared.Cleanup {
 			a.sse.controller.abort("Cleaning up")
 
 			let err = await a.sse.promise
-			if (err && !moreerrors.isAborted(err)) {
+			if (err && !errors.isAborted(err)) {
 				errs.push(new Error("Stopping sse sessions watcher", {cause: err}))
 			}
 
@@ -524,7 +573,7 @@ function createCleanup(c: Components, a: App): shared.Cleanup {
 			a.streamable.controller.abort("Cleaning up")
 
 			let err = await a.streamable.promise
-			if (err && !moreerrors.isAborted(err)) {
+			if (err && !errors.isAborted(err)) {
 				errs.push(new Error("Stopping streamable sessions watcher", {cause: err}))
 			}
 
@@ -551,12 +600,16 @@ function createCleanup(c: Components, a: App): shared.Cleanup {
 		}
 
 		if (errs.length !== 0) {
-			return new moreerrors.Errors({cause: errs})
+			return new errors.Errors({cause: errs})
 		}
 	}
 }
 
-async function createPromise(g: config.global.Config, h: http.Server): shared.P {
+async function createPromise(
+	g: config.global.Config,
+	l: logger.VanillaLogger,
+	h: http.Server,
+): shared.P {
 	return await new Promise((res) => {
 		h.once("error", onError)
 		h.once("listening", onListening)
@@ -570,7 +623,7 @@ async function createPromise(g: config.global.Config, h: http.Server): shared.P 
 				host: g.server.host,
 				port: g.server.port,
 			}
-			logger.info("Server started", o)
+			l.info("Server started", o)
 			close()
 		}
 
@@ -580,4 +633,12 @@ async function createPromise(g: config.global.Config, h: http.Server): shared.P 
 			res(err)
 		}
 	})
+}
+
+function notFound(): express.Handler {
+	return (_, res) => {
+		let err = new errors.JsonError("Not Found")
+		res.status(404)
+		res.json(err.toObject())
+	}
 }
