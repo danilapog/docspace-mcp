@@ -41,9 +41,9 @@ export interface ContextProvider {
 }
 
 export interface Logger {
-	info(msg: string, o?: object): void
-	warn(msg: string, o?: object): void
-	error(msg: string, o?: object): void
+	info(msg: string, o?: object): void | Promise<void>
+	warn(msg: string, o?: object): void | Promise<void>
+	error(msg: string, o?: object): void | Promise<void>
 }
 
 export function withLogger(
@@ -65,7 +65,7 @@ export function withLogger(
 		}
 
 		try {
-			l.info(incoming, o)
+			await l.info(incoming, o)
 
 			let s = Date.now()
 
@@ -80,13 +80,13 @@ export function withLogger(
 				o.duration = `${Math.round(d / 1000)}s`
 			}
 
-			l.info(outgoing, o)
+			await l.info(outgoing, o)
 
 			return r
 		} catch (err) {
 			o.err = err
 
-			l.error(error, o)
+			await l.error(error, o)
 
 			throw err
 		}

@@ -26,7 +26,7 @@ import * as context from "../lib/util/context.ts"
 import * as errors from "../lib/util/errors.ts"
 import * as utilExpress from "../lib/util/express.ts"
 import * as utilFetch from "../lib/util/fetch.ts"
-import type * as logger from "../lib/util/logger.ts"
+import * as logger from "../lib/util/logger.ts"
 import * as utilMcp from "../lib/util/mcp.ts"
 import * as result from "../lib/util/result.ts"
 import * as config from "./config.ts"
@@ -126,10 +126,18 @@ function createInternalCreateServer(
 
 		let s = shared.createServer()
 
+		let e = new logger.ServerLogger(context, s)
+
+		s.registerCapabilities({logging: {}})
+
+		let f = utilFetch.withLogger(context, e, fetch)
+
+		f = utilFetch.withLogger(context, l, f)
+
 		let cc: api.ClientConfig = {
 			userAgent: g.api.userAgent,
 			sharedBaseUrl: b.v.toString(),
-			sharedFetch: utilFetch.withLogger(context, l, fetch),
+			sharedFetch: f,
 			oauthBaseUrl: "",
 			oauthFetch() {
 				throw new Error("Not implemented")
@@ -186,10 +194,18 @@ function createCreateServerWithOauth(
 
 		let s = shared.createServer()
 
+		let e = new logger.ServerLogger(context, s)
+
+		s.registerCapabilities({logging: {}})
+
+		let f = utilFetch.withLogger(context, e, fetch)
+
+		f = utilFetch.withLogger(context, l, f)
+
 		let cc: api.ClientConfig = {
 			userAgent: g.api.userAgent,
 			sharedBaseUrl: b.v.toString(),
-			sharedFetch: utilFetch.withLogger(context, l, fetch),
+			sharedFetch: f,
 			oauthBaseUrl: "",
 			oauthFetch() {
 				throw new Error("Not implemented")
@@ -233,10 +249,18 @@ function createCreateServerWithAuth(
 
 		let s = shared.createServer()
 
+		let e = new logger.ServerLogger(context, s)
+
+		s.registerCapabilities({logging: {}})
+
+		let f = utilFetch.withLogger(context, e, fetch)
+
+		f = utilFetch.withLogger(context, l, f)
+
 		let cc: api.ClientConfig = {
 			userAgent: g.api.userAgent,
 			sharedBaseUrl: a.v.baseUrl,
-			sharedFetch: utilFetch.withLogger(context, l, fetch),
+			sharedFetch: f,
 			oauthBaseUrl: "",
 			oauthFetch() {
 				throw new Error("Not implemented")

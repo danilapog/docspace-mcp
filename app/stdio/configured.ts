@@ -19,18 +19,33 @@
 import * as stdio from "@modelcontextprotocol/sdk/server/stdio.js"
 import * as api from "../../lib/api.ts"
 import * as mcp from "../../lib/mcp.ts"
+import * as utilFetch from "../../lib/util/fetch.ts"
+import * as logger from "../../lib/util/logger.ts"
 import * as utilMcp from "../../lib/util/mcp.ts"
 import * as result from "../../lib/util/result.ts"
 import type * as config from "../config.ts"
 import * as shared from "../shared.ts"
 
 export function start(g: config.global.Config): [shared.P, shared.Cleanup] {
+	let x: logger.ContextProvider = {
+		get() {
+			// eslint-disable-next-line unicorn/no-useless-undefined
+			return undefined
+		},
+	}
+
 	let s = shared.createServer()
+
+	let e = new logger.ServerLogger(x, s)
+
+	s.registerCapabilities({logging: {}})
+
+	let f = utilFetch.withLogger(x, e, fetch)
 
 	let cc: api.ClientConfig = {
 		userAgent: g.api.userAgent,
 		sharedBaseUrl: g.api.shared.baseUrl,
-		sharedFetch: fetch,
+		sharedFetch: f,
 		oauthBaseUrl: "",
 		oauthFetch() {
 			throw new Error("Not implemented")
