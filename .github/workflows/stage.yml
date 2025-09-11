@@ -20,19 +20,19 @@ jobs:
     - name: Install Dependencies
       run: pnpm install --frozen-lockfile
 
-    - name: Build Package
-      run: pnpm build
+    - name: Build Application
+      run: pnpm build-app
 
-    - name: Create Tarball
+    - name: Archive Package
       run: pnpm pack
 
-    - name: Create Desktop Extension
-      run: pnpm dxt
+    - name: Archive Desktop Extension
+      run: pnpm build-dxt
 
-    - name: Upload Tarball
+    - name: Upload Package
       uses: actions/upload-artifact@v4
       with:
-        name: tarball
+        name: package
         path: "*.tgz"
         if-no-files-found: error
 
