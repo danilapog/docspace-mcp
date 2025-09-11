@@ -16,30 +16,35 @@
  * @license
  */
 
+/**
+ * @module
+ * @mergeModuleWith oauth
+ */
+
 import * as bearerAuth from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js"
 import type * as types from "@modelcontextprotocol/sdk/server/auth/types.js"
 import type express from "express"
-import type * as client from "../api/client.ts"
+import type * as api from "../api.ts"
 import * as result from "../util/result.ts"
 
-export interface Config {
+export interface MiddlewareConfig {
 	resourceBaseUrl: string
-	client: Client
+	client: MiddlewareClient
 }
 
-export interface Client {
-	oauth: OauthService
+export interface MiddlewareClient {
+	oauth: MiddlewareOauthService
 }
 
-export interface OauthService {
-	introspect(s: AbortSignal, o: client.OauthIntrospectOptions): Promise<result.Result<[client.OauthIntrospectResponse, client.Response], Error>>
+export interface MiddlewareOauthService {
+	introspect(s: AbortSignal, o: api.OauthIntrospectOptions): Promise<result.Result<[api.OauthIntrospectResponse, api.Response], Error>>
 }
 
 class Middleware {
 	private resourceBaseUrl: string
-	private client: Client
+	private client: MiddlewareClient
 
-	constructor(config: Config) {
+	constructor(config: MiddlewareConfig) {
 		this.resourceBaseUrl = config.resourceBaseUrl
 		this.client = config.client
 	}
@@ -69,7 +74,7 @@ class Middleware {
 	private async verify(t: string): Promise<result.Result<types.AuthInfo, Error>> {
 		let c = new AbortController()
 
-		let o: client.OauthIntrospectOptions = {
+		let o: api.OauthIntrospectOptions = {
 			token: t,
 		}
 
@@ -103,6 +108,6 @@ class Middleware {
 	}
 }
 
-export function handler(config: Config): result.Result<express.RequestHandler, Error> {
+export function middleware(config: MiddlewareConfig): result.Result<express.RequestHandler, Error> {
 	return new Middleware(config).handler()
 }

@@ -19,8 +19,8 @@
 /* eslint-disable typescript/consistent-type-definitions */
 
 import * as fs from "node:fs/promises"
-import * as base from "../lib/mcp/base.ts"
-import type * as moremcp from "../lib/util/moremcp.ts"
+import * as mcp from "../lib/mcp.ts"
+import type * as utilMcp from "../lib/util/mcp.ts"
 import * as tools from "./tools.ts"
 
 /**
@@ -72,8 +72,8 @@ async function main(): Promise<void> {
 async function updateTools(f: string): Promise<void> {
 	let s = await fs.readFile(f, "utf8")
 
-	let toolsets = tools.sortToolsets(base.data.regular.toolsets)
-	let metaTools = tools.sortTools(base.data.meta.tools)
+	let toolsets = tools.sortToolsets(mcp.toolsetInfos)
+	let metaTools = tools.sortTools(mcp.metaToolInfos)
 
 	let o = createToolsetsTable(toolsets)
 	s = insert("toolsets", s, o)
@@ -286,7 +286,7 @@ function createNpxConfig(e: ConfigEnv): Config {
 	}
 }
 
-function createToolsetsTable(toolsets: moremcp.Toolset[]): string {
+function createToolsetsTable(toolsets: utilMcp.ToolsetInfo[]): string {
 	let c = ""
 
 	for (let [i, t] of toolsets.entries()) {
@@ -308,7 +308,7 @@ function createToolsetsTable(toolsets: moremcp.Toolset[]): string {
 	return c
 }
 
-function createToolsTable(toolsets: moremcp.Toolset[]): string {
+function createToolsTable(toolsets: utilMcp.ToolsetInfo[]): string {
 	let c = ""
 
 	let i = 0
@@ -355,7 +355,7 @@ function createToolsTable(toolsets: moremcp.Toolset[]): string {
 	return c
 }
 
-function createMetaToolsTable(tools: moremcp.SimplifiedToolInfo[]): string {
+function createMetaToolsTable(tools: utilMcp.Summary[]): string {
 	let c = ""
 
 	for (let [i, t] of tools.entries()) {

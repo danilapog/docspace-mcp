@@ -17,23 +17,8 @@
  */
 
 /**
- * @module util/context
+ * @module util/mcp
  */
 
-import * as asyncHooks from "node:async_hooks"
-
-export interface Context {
-	sessionId?: string
-}
-
-const s = new asyncHooks.AsyncLocalStorage<Context>({
-	name: "context",
-})
-
-export function run(c: Context, cb: () => void): void {
-	s.run(c, cb)
-}
-
-export function get(): Context | undefined {
-	return s.getStore()
-}
+export * from "./mcp/data.ts"
+export * from "./mcp/request.ts"

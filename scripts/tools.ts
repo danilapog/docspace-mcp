@@ -16,9 +16,9 @@
  * @license
  */
 
-import type * as moremcp from "../lib/util/moremcp.ts"
+import type * as mcp from "../lib/util/mcp.ts"
 
-export function sortToolsets(toolsets: moremcp.Toolset[]): moremcp.Toolset[] {
+export function sortToolsets(toolsets: mcp.ToolsetInfo[]): mcp.ToolsetInfo[] {
 	toolsets = toolsets.sort((a, b) => {
 		return a.name.localeCompare(b.name)
 	})
@@ -30,7 +30,7 @@ export function sortToolsets(toolsets: moremcp.Toolset[]): moremcp.Toolset[] {
 	return toolsets
 }
 
-export function sortTools<T extends moremcp.SimplifiedToolInfo>(tools: T[]): T[] {
+export function sortTools<T extends mcp.Summary>(tools: T[]): T[] {
 	return tools.sort((a, b) => {
 		return a.name.localeCompare(b.name)
 	})

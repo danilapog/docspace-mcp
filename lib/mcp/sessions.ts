@@ -16,38 +16,43 @@
  * @license
  */
 
-import * as moreerrors from "../util/moreerrors.ts"
+/**
+ * @module
+ * @mergeModuleWith mcp
+ */
+
+import * as errors from "../util/errors.ts"
 import * as result from "../util/result.ts"
 
 export interface Session {
 	id: string
-	transport: Transport
+	transport: SessionTransport
 	createdAt: Date
 	expiresAt: Date
 }
 
-export interface Transport {
+export interface SessionTransport {
 	close(): Promise<void>
 }
 
-export interface Config {
+export interface SessionsConfig {
 	ttl: number
 }
 
-export interface CreateOptions {
+export interface SessionsCreateOptions {
 	id: string
-	transport: Transport
+	transport: SessionTransport
 }
 
 export class Sessions {
 	private ttl: number
 	private m = new Map<string, Session>()
 
-	constructor(config: Config) {
+	constructor(config: SessionsConfig) {
 		this.ttl = config.ttl
 	}
 
-	create(o: CreateOptions): result.Result<Session, Error> {
+	create(o: SessionsCreateOptions): result.Result<Session, Error> {
 		let createdAt = new Date()
 
 		let expiresAt: Date
@@ -146,7 +151,7 @@ export class Sessions {
 		}
 
 		if (errs.length !== 0) {
-			return new moreerrors.Errors({cause: errs})
+			return new errors.Errors({cause: errs})
 		}
 	}
 

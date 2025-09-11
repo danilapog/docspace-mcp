@@ -32,6 +32,7 @@ export default [
 		rules: {
 			"new-cap": ["error", {capIsNew: false}],
 			"es-x/no-export-ns-from": "off",
+			"jsdoc/check-tag-names": ["error", {definedTags: ["mergeModuleWith"]}],
 			"unicorn/import-style": "off",
 			"unicorn/prefer-add-event-listener": "off",
 		},

@@ -18,9 +18,9 @@
 
 import * as z from "zod"
 import * as meta from "../../lib/meta.ts"
-import type * as morets from "../../lib/util/morets.ts"
-import * as morezod from "../../lib/util/morezod.ts"
 import * as result from "../../lib/util/result.ts"
+import type * as types from "../../lib/util/types.ts"
+import * as zod from "../../lib/util/zod.ts"
 import * as tools from "./tools.ts"
 
 const availableTransports: McpTransport[] = [
@@ -138,43 +138,43 @@ export const ConfigSchema = z.
 		DOCSPACE_INTERNAL: z.
 			string().
 			default("0").
-			transform(morezod.envBoolean()),
+			transform(zod.envBoolean()),
 
 		DOCSPACE_TRANSPORT: z.
 			string().
 			default("stdio").
-			transform(morezod.envUnion([...availableTransports])),
+			transform(zod.envUnion([...availableTransports])),
 
 		DOCSPACE_DYNAMIC: z.
 			string().
 			default("0").
-			transform(morezod.envBoolean()),
+			transform(zod.envBoolean()),
 
 		DOCSPACE_TOOLSETS: z.
 			string().
 			default("all").
-			transform(morezod.envOptions([...tools.availableToolsets])),
+			transform(zod.envOptions([...tools.availableToolsets])),
 
 		DOCSPACE_ENABLED_TOOLS: z.
 			string().
 			default("").
-			transform(morezod.envOptions([...tools.availableTools])),
+			transform(zod.envOptions([...tools.availableTools])),
 
 		DOCSPACE_DISABLED_TOOLS: z.
 			string().
 			default("").
-			transform(morezod.envOptions([...tools.availableTools])),
+			transform(zod.envOptions([...tools.availableTools])),
 
 		DOCSPACE_SESSION_TTL: z.
 			string().
 			default("28800000"). // 8 hours
-			transform(morezod.envNumber()).
+			transform(zod.envNumber()).
 			pipe(z.number().min(0)),
 
 		DOCSPACE_SESSION_INTERVAL: z.
 			string().
 			default("240000"). // 4 minutes
-			transform(morezod.envNumber()).
+			transform(zod.envNumber()).
 			pipe(z.number().min(0)),
 
 		DOCSPACE_USER_AGENT: z.
@@ -185,7 +185,7 @@ export const ConfigSchema = z.
 		DOCSPACE_BASE_URL: z.
 			string().
 			default("").
-			transform(morezod.envBaseUrl()),
+			transform(zod.envBaseUrl()),
 
 		DOCSPACE_API_KEY: z.
 			string().
@@ -210,12 +210,12 @@ export const ConfigSchema = z.
 		DOCSPACE_OAUTH_BASE_URL: z.
 			string().
 			default("https://oauth.onlyoffice.com/").
-			transform(morezod.envBaseUrl()),
+			transform(zod.envBaseUrl()),
 
 		DOCSPACE_OAUTH_SCOPES_SUPPORTED: z.
 			string().
 			default("").
-			transform(morezod.envList()),
+			transform(zod.envList()),
 
 		DOCSPACE_OAUTH_RESOURCE_NAME: z.
 			string().
@@ -225,12 +225,12 @@ export const ConfigSchema = z.
 		DOCSPACE_OAUTH_RESOURCE_DOCUMENTATION: z.
 			string().
 			default(`https://github.com/onlyoffice/docspace-mcp/blob/v${meta.version}/README.md`).
-			transform(morezod.envUrl()),
+			transform(zod.envUrl()),
 
 		DOCSPACE_OAUTH_REDIRECT_URIS: z.
 			string().
 			default("").
-			transform(morezod.envUrlList()),
+			transform(zod.envUrlList()),
 
 		DOCSPACE_OAUTH_CLIENT_ID: z.
 			string().
@@ -245,17 +245,17 @@ export const ConfigSchema = z.
 		DOCSPACE_OAUTH_SCOPES: z.
 			string().
 			default("").
-			transform(morezod.envList()),
+			transform(zod.envList()),
 
 		DOCSPACE_OAUTH_TOS_URI: z.
 			string().
 			default("").
-			transform(morezod.envUrl()),
+			transform(zod.envUrl()),
 
 		DOCSPACE_OAUTH_POLICY_URI: z.
 			string().
 			default("").
-			transform(morezod.envUrl()),
+			transform(zod.envUrl()),
 
 		DOCSPACE_OAUTH_CLIENT_SECRET: z.
 			string().
@@ -265,7 +265,7 @@ export const ConfigSchema = z.
 		DOCSPACE_SERVER_BASE_URL: z.
 			string().
 			default("").
-			transform(morezod.envBaseUrl()),
+			transform(zod.envBaseUrl()),
 
 		DOCSPACE_HOST: z.
 			string().
@@ -275,76 +275,76 @@ export const ConfigSchema = z.
 		DOCSPACE_PORT: z.
 			string().
 			default("8080").
-			transform(morezod.envNumber()).
+			transform(zod.envNumber()).
 			pipe(z.number().min(0).max(65535)),
 
 		DOCSPACE_SERVER_CORS_MCP_ORIGIN: z.
 			string().
 			default("*").
-			transform(morezod.envList()),
+			transform(zod.envList()),
 
 		DOCSPACE_SERVER_CORS_MCP_MAX_AGE: z.
 			string().
 			default("86400000"). // 1 day
-			transform(morezod.envNumber()).
+			transform(zod.envNumber()).
 			pipe(z.number().min(0)),
 
 		DOCSPACE_SERVER_CORS_OAUTH_METADATA_ORIGIN: z.
 			string().
 			default("*").
-			transform(morezod.envList()),
+			transform(zod.envList()),
 
 		DOCSPACE_SERVER_CORS_OAUTH_METADATA_MAX_AGE: z.
 			string().
 			default("86400000"). // 1 day
-			transform(morezod.envNumber()).
+			transform(zod.envNumber()).
 			pipe(z.number().min(0)),
 
 		DOCSPACE_SERVER_CORS_OAUTH_REGISTER_ORIGIN: z.
 			string().
 			default("*").
-			transform(morezod.envList()),
+			transform(zod.envList()),
 
 		DOCSPACE_SERVER_CORS_OAUTH_REGISTER_MAX_AGE: z.
 			string().
 			default("86400000"). // 1 day
-			transform(morezod.envNumber()).
+			transform(zod.envNumber()).
 			pipe(z.number().min(0)),
 
 		DOCSPACE_SERVER_RATE_LIMITS_MCP_CAPACITY: z.
 			string().
 			default("1000").
-			transform(morezod.envNumber()).
+			transform(zod.envNumber()).
 			pipe(z.number().min(0)),
 
 		DOCSPACE_SERVER_RATE_LIMITS_MCP_WINDOW: z.
 			string().
 			default("1000"). // 1 second
-			transform(morezod.envNumber()).
+			transform(zod.envNumber()).
 			pipe(z.number().min(0)),
 
 		DOCSPACE_SERVER_RATE_LIMITS_OAUTH_METADATA_CAPACITY: z.
 			string().
 			default("200").
-			transform(morezod.envNumber()).
+			transform(zod.envNumber()).
 			pipe(z.number().min(0)),
 
 		DOCSPACE_SERVER_RATE_LIMITS_OAUTH_METADATA_WINDOW: z.
 			string().
 			default("1000"). // 1 second
-			transform(morezod.envNumber()).
+			transform(zod.envNumber()).
 			pipe(z.number().min(0)),
 
 		DOCSPACE_SERVER_RATE_LIMITS_OAUTH_REGISTER_CAPACITY: z.
 			string().
 			default("20").
-			transform(morezod.envNumber()).
+			transform(zod.envNumber()).
 			pipe(z.number().min(0)),
 
 		DOCSPACE_SERVER_RATE_LIMITS_OAUTH_REGISTER_WINDOW: z.
 			string().
 			default("3600000"). // 1 hour
-			transform(morezod.envNumber()).
+			transform(zod.envNumber()).
 			pipe(z.number().min(0)),
 
 		DOCSPACE_REQUEST_HEADER_PREFIX: z.
@@ -706,7 +706,7 @@ export function load(): result.Result<Config, Error> {
 }
 
 export function format(c: Config): object {
-	let o: morets.RecursivePartial<Config> = {}
+	let o: types.RecursivePartial<Config> = {}
 
 	let mcp = formatMcp(c.mcp)
 	if (Object.keys(mcp).length !== 0) {
@@ -731,8 +731,8 @@ export function format(c: Config): object {
 	return o
 }
 
-function formatMcp(c: Mcp): morets.RecursivePartial<Mcp> {
-	let o: morets.RecursivePartial<Mcp> = {}
+function formatMcp(c: Mcp): types.RecursivePartial<Mcp> {
+	let o: types.RecursivePartial<Mcp> = {}
 
 	if (c.transport) {
 		o.transport = c.transport
@@ -758,8 +758,8 @@ function formatMcp(c: Mcp): morets.RecursivePartial<Mcp> {
 	return o
 }
 
-function formatMcpSession(c: McpSession): morets.RecursivePartial<McpSession> {
-	let o: morets.RecursivePartial<McpSession> = {}
+function formatMcpSession(c: McpSession): types.RecursivePartial<McpSession> {
+	let o: types.RecursivePartial<McpSession> = {}
 
 	if (c.ttl) {
 		o.ttl = c.ttl
@@ -772,8 +772,8 @@ function formatMcpSession(c: McpSession): morets.RecursivePartial<McpSession> {
 	return o
 }
 
-function formatApi(c: Api): morets.RecursivePartial<Api> {
-	let o: morets.RecursivePartial<Api> = {}
+function formatApi(c: Api): types.RecursivePartial<Api> {
+	let o: types.RecursivePartial<Api> = {}
 
 	if (c.userAgent) {
 		o.userAgent = c.userAgent
@@ -792,8 +792,8 @@ function formatApi(c: Api): morets.RecursivePartial<Api> {
 	return o
 }
 
-function formatApiShared(c: ApiShared): morets.RecursivePartial<ApiShared> {
-	let o: morets.RecursivePartial<ApiShared> = {}
+function formatApiShared(c: ApiShared): types.RecursivePartial<ApiShared> {
+	let o: types.RecursivePartial<ApiShared> = {}
 
 	if (c.baseUrl) {
 		o.baseUrl = c.baseUrl
@@ -818,8 +818,8 @@ function formatApiShared(c: ApiShared): morets.RecursivePartial<ApiShared> {
 	return o
 }
 
-function formatApiOauth(c: ApiOauth): morets.RecursivePartial<ApiOauth> {
-	let o: morets.RecursivePartial<ApiOauth> = {}
+function formatApiOauth(c: ApiOauth): types.RecursivePartial<ApiOauth> {
+	let o: types.RecursivePartial<ApiOauth> = {}
 
 	if (c.baseUrl) {
 		o.baseUrl = c.baseUrl
@@ -828,8 +828,8 @@ function formatApiOauth(c: ApiOauth): morets.RecursivePartial<ApiOauth> {
 	return o
 }
 
-function formatOauth(c: Oauth): morets.RecursivePartial<Oauth> {
-	let o: morets.RecursivePartial<Oauth> = {}
+function formatOauth(c: Oauth): types.RecursivePartial<Oauth> {
+	let o: types.RecursivePartial<Oauth> = {}
 
 	let resource = formatOauthResource(c.resource)
 	if (Object.keys(resource).length !== 0) {
@@ -844,8 +844,8 @@ function formatOauth(c: Oauth): morets.RecursivePartial<Oauth> {
 	return o
 }
 
-function formatOauthResource(c: OauthResource): morets.RecursivePartial<OauthResource> {
-	let o: morets.RecursivePartial<OauthResource> = {}
+function formatOauthResource(c: OauthResource): types.RecursivePartial<OauthResource> {
+	let o: types.RecursivePartial<OauthResource> = {}
 
 	if (c.scopesSupported.length !== 0) {
 		o.scopesSupported = c.scopesSupported
@@ -862,8 +862,8 @@ function formatOauthResource(c: OauthResource): morets.RecursivePartial<OauthRes
 	return o
 }
 
-function formatOauthClient(c: OauthClient): morets.RecursivePartial<OauthClient> {
-	let o: morets.RecursivePartial<OauthClient> = {}
+function formatOauthClient(c: OauthClient): types.RecursivePartial<OauthClient> {
+	let o: types.RecursivePartial<OauthClient> = {}
 
 	if (c.redirectUris.length !== 0) {
 		o.redirectUris = c.redirectUris
@@ -896,8 +896,8 @@ function formatOauthClient(c: OauthClient): morets.RecursivePartial<OauthClient>
 	return o
 }
 
-function formatServer(c: Server): morets.RecursivePartial<Server> {
-	let o: morets.RecursivePartial<Server> = {}
+function formatServer(c: Server): types.RecursivePartial<Server> {
+	let o: types.RecursivePartial<Server> = {}
 
 	if (c.baseUrl) {
 		o.baseUrl = c.baseUrl
@@ -924,8 +924,8 @@ function formatServer(c: Server): morets.RecursivePartial<Server> {
 	return o
 }
 
-function formatCors(c: Cors): morets.RecursivePartial<Cors> {
-	let o: morets.RecursivePartial<Cors> = {}
+function formatCors(c: Cors): types.RecursivePartial<Cors> {
+	let o: types.RecursivePartial<Cors> = {}
 
 	let mcp = formatCorsItem(c.mcp)
 	if (Object.keys(mcp).length !== 0) {
@@ -945,8 +945,8 @@ function formatCors(c: Cors): morets.RecursivePartial<Cors> {
 	return o
 }
 
-function formatCorsItem(c: CorsItem): morets.RecursivePartial<CorsItem> {
-	let o: morets.RecursivePartial<CorsItem> = {}
+function formatCorsItem(c: CorsItem): types.RecursivePartial<CorsItem> {
+	let o: types.RecursivePartial<CorsItem> = {}
 
 	if (c.origin) {
 		o.origin = c.origin
@@ -959,8 +959,8 @@ function formatCorsItem(c: CorsItem): morets.RecursivePartial<CorsItem> {
 	return o
 }
 
-function formatRateLimits(c: RateLimits): morets.RecursivePartial<RateLimits> {
-	let o: morets.RecursivePartial<RateLimits> = {}
+function formatRateLimits(c: RateLimits): types.RecursivePartial<RateLimits> {
+	let o: types.RecursivePartial<RateLimits> = {}
 
 	let mcp = formatRateLimit(c.mcp)
 	if (Object.keys(mcp).length !== 0) {
@@ -980,8 +980,8 @@ function formatRateLimits(c: RateLimits): morets.RecursivePartial<RateLimits> {
 	return o
 }
 
-function formatRateLimit(c: RateLimit): morets.RecursivePartial<RateLimit> {
-	let o: morets.RecursivePartial<RateLimit> = {}
+function formatRateLimit(c: RateLimit): types.RecursivePartial<RateLimit> {
+	let o: types.RecursivePartial<RateLimit> = {}
 
 	if (c.capacity) {
 		o.capacity = c.capacity

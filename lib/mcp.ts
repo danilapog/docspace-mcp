@@ -16,7 +16,17 @@
  * @license
  */
 
-export * as base from "./mcp/base.ts"
-export * as sessions from "./mcp/sessions.ts"
-export * as sse from "./mcp/sse.ts"
-export * as streamable from "./mcp/streamable.ts"
+/**
+ * @module mcp
+ */
+
+export * from "./mcp/configured-server.ts"
+export * from "./mcp/data.ts"
+export * from "./mcp/meta-tools.ts"
+export * from "./mcp/misconfigured-server.ts"
+export * from "./mcp/regular-tools.ts"
+export * from "./mcp/sessions.ts"
+export * from "./mcp/sse-server.ts"
+export * from "./mcp/sse-transports.ts"
+export * from "./mcp/streamable-server.ts"
+export * from "./mcp/streamable-transports.ts"

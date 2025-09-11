@@ -16,29 +16,36 @@
  * @license
  */
 
+/**
+ * @module
+ * @mergeModuleWith api
+ */
+
+import * as z from "zod"
+import * as http from "../util/http.ts"
 import type {Result} from "../util/result.ts"
 import {error, ok, safeAsync, safeNew, safeSync} from "../util/result.ts"
-import {AuthService} from "./client/auth.ts"
-import {FilesService} from "./client/files.ts"
-import {injectAuthKey, injectAuthToken, injectBasicAuth, injectBearerAuth} from "./client/internal/auth.ts"
-import type {Response} from "./client/internal/response.ts"
+import {AuthService} from "./auth-service.ts"
+import {FilesService} from "./files-service.ts"
+import {OauthAnyErrorSchema, OauthService} from "./oauth-service.ts"
+import {PeopleService} from "./people-service.ts"
 import {
-	checkOauthResponse,
-	checkSharedResponse,
-	parseOauthResponse,
-	parseSharedResponse,
-} from "./client/internal/response.ts"
-import {OauthService} from "./client/oauth.ts"
-import {PeopleService} from "./client/people.ts"
+	ErrorApiResponseSchema,
+	SuccessApiResponseSchema,
+	UploadChunkErrorResponseSchema,
+	UploadChunkSuccessResponseSchema,
+	UploadSessionObjectSchema,
+} from "./schemas.ts"
 
-export {ErrorResponse, Response} from "./client/internal/response.ts"
+const headerApiKey = "Authorization"
+const headerAuthToken = "Authorization"
+const headerBasicAuth = "Authorization"
+const schemaApiKey = "Bearer"
+const schemaBasicAuth = "Basic"
+const schemaBearerAuth = "Bearer"
+const cookieAuthToken = "asc_auth_key"
 
-export * from "./client/auth.ts"
-export * from "./client/files.ts"
-export * from "./client/oauth.ts"
-export * from "./client/people.ts"
-
-export interface Config {
+export interface ClientConfig {
 	userAgent: string
 	sharedBaseUrl: string
 	sharedFetch: typeof globalThis.fetch
@@ -58,7 +65,7 @@ export class Client {
 	oauth: OauthService
 	people: PeopleService
 
-	constructor(config: Config) {
+	constructor(config: ClientConfig) {
 		this.userAgent = config.userAgent
 		this.sharedBaseUrl = config.sharedBaseUrl
 		this.sharedBaseFetch = config.sharedFetch
@@ -164,7 +171,7 @@ export class Client {
 	}
 
 	copy(): Client {
-		let config: Config = {
+		let config: ClientConfig = {
 			userAgent: this.userAgent,
 			sharedBaseUrl: this.sharedBaseUrl,
 			sharedFetch: this.sharedBaseFetch,
@@ -371,4 +378,252 @@ export class Client {
 
 		return ok(f.v)
 	}
+}
+
+function injectAuthKey(input: Request, k: string): Error | undefined {
+	let h = safeSync(input.headers.set.bind(input.headers), headerApiKey, `${schemaApiKey} ${k}`)
+	if (h.err) {
+		return new Error("Setting header.", {cause: h.err})
+	}
+}
+
+function injectAuthToken(input: Request, t: string): Error | undefined {
+	let h = safeSync(input.headers.set.bind(input.headers), headerAuthToken, t)
+	if (h.err) {
+		return new Error("Setting header.", {cause: h.err})
+	}
+
+	let p = `${cookieAuthToken}=${t}`
+
+	let c = input.headers.get("Cookie")
+
+	if (c === null) {
+		c = p
+	} else {
+		c = `${c}; ${p}`
+	}
+
+	h = safeSync(input.headers.set.bind(input.headers), "Cookie", c)
+	if (h.err) {
+		return new Error("Setting header.", {cause: h.err})
+	}
+}
+
+function injectBasicAuth(input: Request, u: string, p: string): Error | undefined {
+	let v = Buffer.from(`${u}:${p}`, "utf8").toString("base64")
+
+	let h = safeSync(input.headers.set.bind(input.headers), headerBasicAuth, `${schemaBasicAuth} ${v}`)
+	if (h.err) {
+		return new Error("Setting header.", {cause: h.err})
+	}
+}
+
+function injectBearerAuth(input: Request, t: string): Error | undefined {
+	let h = safeSync(input.headers.set.bind(input.headers), headerAuthToken, `${schemaBearerAuth} ${t}`)
+	if (h.err) {
+		return new Error("Setting header.", {cause: h.err})
+	}
+}
+
+export class Response {
+	request: Request
+	response: globalThis.Response
+
+	constructor(request: Request, response: globalThis.Response) {
+		this.request = request
+		this.response = response
+	}
+}
+
+// eslint-disable-next-line unicorn/custom-error-definition
+export class ErrorResponse extends Error {
+	response: Response
+
+	constructor(response: Response, message: string) {
+		super(message)
+		this.name = "ErrorResponse"
+		this.response = response
+	}
+}
+
+const SuccessResponseSchema = z.
+	union([
+		SuccessApiResponseSchema,
+		UploadChunkSuccessResponseSchema,
+	]).
+	transform((o) => {
+		let t: {
+			data: unknown
+		} = {
+			data: undefined,
+		}
+
+		switch (true) {
+		case "response" in o:
+			let u = UploadSessionObjectSchema.safeParse(o.response)
+			if (u.success) {
+				t.data = u.data.data
+			} else {
+				t.data = o.response
+			}
+			break
+
+		case "data" in o:
+			t.data = o.data
+			break
+
+		// no default
+		}
+
+		return t
+	})
+
+const ErrorResponseSchema = z.
+	union([
+		ErrorApiResponseSchema,
+		UploadChunkErrorResponseSchema,
+	]).
+	transform((o) => {
+		let t: {
+			message: string
+		} = {
+			message: "",
+		}
+
+		switch (true) {
+		case "error" in o:
+			t.message = o.error.message
+			break
+
+		case "message" in o:
+			t.message = o.message
+			break
+
+		// no default
+		}
+
+		return t
+	})
+
+export async function checkSharedResponse(req: Request, res: globalThis.Response): Promise<Error | undefined> {
+	// DocSpace does not always respect HTTP status codes. Even when it returns
+	// HTTP 2xx, it may still include an error in the response body. Therefore,
+	// try to first parse the response body for errors before checking the status
+	// codes.
+
+	let err = await (async(): Promise<Error> => {
+		let c = safeSync(res.clone.bind(res))
+		if (c.err) {
+			return new Error("Cloning response.", {cause: c.err})
+		}
+
+		let b = await safeAsync(c.v.json.bind(c.v))
+		if (b.err) {
+			return new Error("Parsing response body.", {cause: b.err})
+		}
+
+		let s = ErrorResponseSchema.safeParse(b.v)
+		if (!s.success) {
+			return new Error("Parsing error response.", {cause: s.error})
+		}
+
+		let r = new Response(req, res)
+		let m = `${req.method} ${req.url}: ${res.status} ${s.data.message}`
+		let e = new ErrorResponse(r, m)
+
+		return e
+	})()
+
+	if (err instanceof ErrorResponse) {
+		return err
+	}
+
+	if (res.status >= 200 && res.status <= 299) {
+		return
+	}
+
+	let r = new Response(req, res)
+	let m = `${req.method} ${req.url}: ${res.status} ${res.statusText}`
+	let e = new ErrorResponse(r, m)
+
+	return e
+}
+
+export async function parseSharedResponse(req: Request, res: globalThis.Response): Promise<Result<[unknown, Response], Error>> {
+	let c = safeSync(res.clone.bind(res))
+	if (c.err) {
+		return error(new Error("Cloning response.", {cause: c.err}))
+	}
+
+	let b = await safeAsync(c.v.json.bind(c.v))
+	if (b.err) {
+		return error(new Error("Parsing response body.", {cause: b.err}))
+	}
+
+	let s = SuccessResponseSchema.safeParse(b.v)
+	if (!s.success) {
+		return error(new Error("Parsing success response.", {cause: s.error}))
+	}
+
+	let r = new Response(req, res)
+	return ok([s.data.data, r])
+}
+
+export async function checkOauthResponse(req: Request, res: globalThis.Response): Promise<Error | undefined> {
+	if (res.status >= 200 && res.status <= 299) {
+		return
+	}
+
+	let r = new Response(req, res)
+
+	let m = `${req.method} ${req.url}: ${res.status}`
+
+	let h = res.headers.get("Content-Type")
+	if (h && http.isContentTypeJson(h)) {
+		let c = safeSync(res.clone.bind(res))
+		if (c.err) {
+			return new Error("Cloning response.", {cause: c.err})
+		}
+
+		let b = await safeAsync(c.v.json.bind(c.v))
+		if (b.err) {
+			return new Error("Parsing response body.", {cause: b.err})
+		}
+
+		let s = OauthAnyErrorSchema.safeParse(b.v)
+		if (!s.success) {
+			return new Error("Parsing OAuth error.", {cause: s.error})
+		}
+
+		switch (true) {
+		case "error" in s.data:
+			m += ` ${s.data.error} (${s.data.error_description})`
+			break
+
+		case "reason" in s.data:
+			m += ` ${s.data.reason}`
+			break
+
+		// no default
+		}
+	}
+
+	let e = new ErrorResponse(r, m)
+
+	return e
+}
+
+export async function parseOauthResponse(req: Request, res: globalThis.Response): Promise<Result<[unknown, Response], Error>> {
+	let c = safeSync(res.clone.bind(res))
+	if (c.err) {
+		return error(new Error("Cloning response.", {cause: c.err}))
+	}
+
+	let b = await safeAsync(c.v.json.bind(c.v))
+	if (b.err) {
+		return error(new Error("Parsing response body.", {cause: b.err}))
+	}
+
+	let r = new Response(req, res)
+	return ok([b.v, r])
 }

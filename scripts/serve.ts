@@ -22,15 +22,15 @@ import * as env from "./env.ts"
 function main(): void {
 	env.load()
 
-	let args: string[] = ["node"]
+	let args: string[] = []
 
 	if (process.env.HTTP_PROXY !== undefined) {
-		args.push("--require", "./util/proxy.ts")
+		args.push("--require", "./scripts/proxy.ts")
 	}
 
 	args.push("app/main.ts")
 
-	child.spawn("pnpm", args, {
+	child.spawn("node", args, {
 		env: process.env,
 		stdio: "inherit",
 		shell: true,

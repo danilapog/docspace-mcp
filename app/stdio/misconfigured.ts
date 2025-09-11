@@ -18,15 +18,16 @@
 
 import * as stdio from "@modelcontextprotocol/sdk/server/stdio.js"
 import * as mcp from "../../lib/mcp.ts"
+import * as utilMcp from "../../lib/util/mcp.ts"
 import * as result from "../../lib/util/result.ts"
-import type * as shared from "../shared.ts"
+import * as shared from "../shared.ts"
 
 export function start(err: Error): [shared.P, shared.Cleanup] {
-	let sc: mcp.base.misconfigured.Config = {
-		err,
-	}
+	let s = shared.createServer()
 
-	let s = mcp.base.misconfigured.create(sc)
+	let defs = mcp.misconfiguredServer(err)
+
+	utilMcp.register(s, defs)
 
 	let t = new stdio.StdioServerTransport()
 

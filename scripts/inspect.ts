@@ -31,7 +31,7 @@ function main(): void {
 	args.push("--", "node")
 
 	if (process.env.HTTP_PROXY !== undefined) {
-		args.push("--require", "./util/proxy.ts")
+		args.push("--require", "./scripts/proxy.ts")
 	}
 
 	args.push("app/main.ts")

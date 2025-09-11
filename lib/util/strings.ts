@@ -17,23 +17,13 @@
  */
 
 /**
- * @module util/context
+ * @module util/strings
  */
 
-import * as asyncHooks from "node:async_hooks"
-
-export interface Context {
-	sessionId?: string
+export function escapeWhitespace(s: string): string {
+	return s.replaceAll("\n", String.raw`\n`).replaceAll("\t", String.raw`\t`)
 }
 
-const s = new asyncHooks.AsyncLocalStorage<Context>({
-	name: "context",
-})
-
-export function run(c: Context, cb: () => void): void {
-	s.run(c, cb)
-}
-
-export function get(): Context | undefined {
-	return s.getStore()
+export function camelCaseToSnakeCase(s: string): string {
+	return s.replaceAll(/(?<=[a-z])(?=[A-Z])/g, "_").toLowerCase()
 }

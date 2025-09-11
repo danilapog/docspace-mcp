@@ -27,23 +27,27 @@ import * as stdio from "./stdio.ts"
 const SIGNALS = ["SIGTERM", "SIGINT"]
 
 async function main(): Promise<void> {
+	let l: logger.VanillaLogger | undefined
+
 	try {
 		let c = config.global.load()
 
+		l = new logger.VanillaLogger(process.stdout)
+
 		if (c.err || c.v.mcp.transport === "stdio") {
-			logger.mute()
+			l.mute()
 		}
 
 		if (c.err) {
-			logger.error("Loading config", {err: c.err})
+			l.error("Loading config", {err: c.err})
 		} else {
-			logger.info("Loaded config", config.global.format(c.v))
+			l.info("Loaded config", config.global.format(c.v))
 		}
 
 		if (c.err) {
 			let [p, cleanup] = stdio.misconfigured.start(c.err)
-			watch(cleanup)
-			await start(p, cleanup)
+			watch(l, cleanup)
+			await start(l, p, cleanup)
 			return
 		}
 
@@ -51,50 +55,56 @@ async function main(): Promise<void> {
 
 		if (c.v.mcp.transport === "stdio") {
 			let [p, cleanup] = stdio.configured.start(c.v)
-			watch(cleanup)
-			await start(p, cleanup)
+			watch(l, cleanup)
+			await start(l, p, cleanup)
 		} else {
-			let [p, cleanup] = http.start(c.v)
-			watch(cleanup)
-			await start(p, cleanup)
+			let [p, cleanup] = http.start(c.v, l)
+			watch(l, cleanup)
+			await start(l, p, cleanup)
 		}
 	} catch (err) {
-		logger.error("Executing main", {err})
+		if (l) {
+			l.error("Executing main", {err})
+		}
 		process.exit(1)
 	}
 }
 
-async function start(p: shared.P, cleanup: shared.Cleanup): Promise<void> {
+async function start(
+	l: logger.VanillaLogger,
+	p: shared.P,
+	cleanup: shared.Cleanup,
+): Promise<void> {
 	let err = await p
 	if (err) {
-		logger.error("Server failed to start", {err})
+		l.error("Server failed to start", {err})
 
 		err = await cleanup()
 		if (err) {
-			logger.error("Cleaning up", {err})
+			l.error("Cleaning up", {err})
 		}
 
 		process.exit(1)
 	}
 }
 
-function watch(cleanup: shared.Cleanup): void {
+function watch(l: logger.VanillaLogger, cleanup: shared.Cleanup): void {
 	for (let s of SIGNALS) {
 		process.on(s, () => {
 			void (async() => {
-				logger.info(`Received ${s}, shutting down`)
+				l.info(`Received ${s}, shutting down`)
 
 				let err = await cleanup()
 				if (err) {
-					logger.error("Cleaning up", {err})
+					l.error("Cleaning up", {err})
 				}
 
 				if (err) {
-					logger.error("Shut down with an error", {err})
+					l.error("Shut down with an error", {err})
 					process.exit(1)
 				}
 
-				logger.info("Shut down successfully")
+				l.info("Shut down successfully")
 				process.exit(0)
 			})()
 		})
