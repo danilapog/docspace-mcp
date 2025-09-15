@@ -1,6 +1,6 @@
 {
-	"$schema": "node_modules/@anthropic-ai/dxt/dist/dxt-manifest.schema.json",
-	"dxt_version": "0.1",
+	"$schema": "node_modules/@anthropic-ai/mcpb/dist/mcpb-manifest.schema.json",
+	"manifest_version": "0.1",
 	"name": "onlyoffice-docspace",
 	"display_name": "ONLYOFFICE DocSpace",
 	"version": "2.0.0",
@@ -17,10 +17,10 @@
 	"icon": "docs/icon.png",
 	"server": {
 		"type": "node",
-		"entry_point": "bin/onlyoffice-docspace-mcp",
+		"entry_point": "bin/onlyoffice-docspace-mcp.js",
 		"mcp_config": {
 			"command": "node",
-			"args": ["${__dirname}/bin/onlyoffice-docspace-mcp"],
+			"args": ["${__dirname}/bin/onlyoffice-docspace-mcp.js"],
 			"env": {
 				"DOCSPACE_DYNAMIC": "${user_config.dynamic}",
 				"DOCSPACE_TOOLSETS": "${user_config.toolsets}",

@@ -37,7 +37,7 @@ async function main(): Promise<void> {
 	await fs.mkdir("tmp/docs", {recursive: true})
 	await fs.copyFile("docs/icon.png", "tmp/docs/icon.png")
 
-	let i = await fs.readFile("dxt-manifest.json", "utf8")
+	let i = await fs.readFile("manifest.json", "utf8")
 	let m = JSON.parse(i)
 
 	m.tools = []
@@ -60,7 +60,7 @@ async function main(): Promise<void> {
 	await fs.copyFile("LICENSE", "tmp/LICENSE")
 	await fs.copyFile("README.md", "tmp/README.md")
 
-	await exec(`pnpm exec dxt pack tmp onlyoffice-docspace-mcp-${meta.version}.dxt`, {env: process.env})
+	await exec(`pnpm exec mcpb pack tmp onlyoffice-docspace-mcp-${meta.version}.mcpb`, {env: process.env})
 
 	await fs.rm("tmp", {recursive: true, force: true})
 }
