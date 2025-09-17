@@ -7,9 +7,10 @@ permissions:
 on:
   workflow_dispatch:
   push:
-    branches: [develop]
+    branches: 
+    - develop
     paths-ignore:
-      - '.github/**'
+    - .github/**
 
 jobs:
   build:
