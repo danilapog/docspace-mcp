@@ -111,6 +111,10 @@ jobs:
         labels: ${{steps.metadata.outputs.labels}}
         tags: ${{steps.metadata.outputs.tags}}
 
+    - name: check error
+      continue-on-error: true
+      run: exit 1
+
     - name: Update Docker Hub Description
       uses: peter-evans/dockerhub-description@v4
       continue-on-error: true
