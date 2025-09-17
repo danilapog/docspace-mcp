@@ -53,8 +53,8 @@ jobs:
   npm:
     needs: build
     runs-on: ubuntu-latest
-    env:
-      NODE_AUTH_TOKEN: ${{secrets.NPM_PUBLISH_TOKEN}}
+    #env:
+    #  NODE_AUTH_TOKEN: ${{secrets.NPM_PUBLISH_TOKEN}}
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
@@ -67,19 +67,19 @@ jobs:
       with:
         name: package
 
-    - name: Configure Registry
-      run: |
-        pnpm config set //registry.npmjs.org/:_authToken "\${NODE_AUTH_TOKEN}"
-        pnpm config set registry https://registry.npmjs.org
+    #- name: Configure Registry
+    #  run: |
+    #    pnpm config set //registry.npmjs.org/:_authToken "\${NODE_AUTH_TOKEN}"
+    #    pnpm config set registry https://registry.npmjs.org
 
-    - name: Publish Package
-      run: pnpm publish *.tgz --access public --no-git-checks
+    #- name: Publish Package
+    #  run: pnpm publish *.tgz --access public --no-git-checks
 
   docker:
     needs: build
     runs-on: ubuntu-latest
     env:
-      DOCKERHUB_NAMESPACE: onlyoffice
+      DOCKERHUB_NAMESPACE: danilaworker
       DOCKERHUB_REPOSITORY: docspace-mcp
     steps:
     - name: Checkout Repository
