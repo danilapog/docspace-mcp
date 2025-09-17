@@ -112,7 +112,7 @@ jobs:
         tags: ${{steps.metadata.outputs.tags}}
 
     - name: Update Docker Hub Description
-      uses: peter-evans/dockerhub-description@v4
+      uses: ianpittwood/dockerhub-description@9a247cf727fb54072a7463f8e2964c8e246dde71
       with:
         username: ${{secrets.DOCKERHUB_USERNAME}}
         password: ${{secrets.DOCKERHUB_TOKEN}}
