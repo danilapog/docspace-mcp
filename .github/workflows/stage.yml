@@ -114,6 +114,6 @@ jobs:
     - name: Update Docker Hub Description
       uses: ianpittwood/dockerhub-description@9a247cf727fb54072a7463f8e2964c8e246dde71
       with:
-        username: ${{secrets.DOCKERHUB_USERNAME}}
-        password: ${{secrets.DOCKERHUB_TOKEN}}
+        identifier: ${{secrets.DOCKERHUB_USERNAME}}
+        secret: ${{secrets.DOCKERHUB_TOKEN}}
         repository: ${{env.DOCKERHUB_NAMESPACE}}/${{env.DOCKERHUB_REPOSITORY}}
