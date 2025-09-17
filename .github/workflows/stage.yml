@@ -54,7 +54,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     env:
-      DOCKERHUB_NAMESPACE: onlyoffice
+      DOCKERHUB_NAMESPACE: danilaworker
       DOCKERHUB_REPOSITORY: 4testing-docspace-mcp
     steps:
     - name: Checkout Repository
