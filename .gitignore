@@ -2,4 +2,7 @@
 bin
 coverage
 node_modules
+tmp
 .env
+*.dxt
+*.tgz
