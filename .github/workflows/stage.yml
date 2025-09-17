@@ -116,7 +116,7 @@ jobs:
       run: exit 1
 
     - name: Update Docker Hub Description
-      uses: peter-evans/dockerhub-description@v4
+      uses: ianpittwood/dockerhub-description@9a247cf727fb54072a7463f8e2964c8e246dde71
       continue-on-error: true
       with:
         username: ${{secrets.DOCKERHUB_USERNAME}}
