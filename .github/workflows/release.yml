@@ -79,8 +79,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     env:
-      DOCKER_NAMESPACE: onlyoffice
-      DOCKER_REPOSITORY: docspace-mcp
+      DOCKERHUB_NAMESPACE: onlyoffice
+      DOCKERHUB_REPOSITORY: docspace-mcp
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
@@ -120,7 +120,7 @@ jobs:
       id: metadata
       uses: docker/metadata-action@v5
       with:
-        images: index.docker.io/${{env.DOCKER_NAMESPACE}}/${{env.DOCKER_REPOSITORY}}
+        images: index.docker.io/${{env.DOCKERHUB_NAMESPACE}}/${{env.DOCKERHUB_REPOSITORY}}
         labels: ${{steps.labels.outputs.labels}}
         tags: |
           type=semver,pattern={{major}}
@@ -144,7 +144,7 @@ jobs:
       with:
         username: ${{secrets.DOCKERHUB_USERNAME}}
         password: ${{secrets.DOCKERHUB_TOKEN}}
-        repository: ${{env.DOCKER_NAMESPACE}}/${{env.DOCKER_REPOSITORY}}
+        repository: ${{env.DOCKERHUB_NAMESPACE}}/${{env.DOCKERHUB_REPOSITORY}}
 
   gh:
     needs: [build, npm, docker]

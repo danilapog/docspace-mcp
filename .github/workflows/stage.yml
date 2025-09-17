@@ -5,12 +5,14 @@ permissions:
   contents: read
 
 on:
-  workflow_dispatch:
   push:
-    branches: 
+    branches:
     - develop
-    paths-ignore:
-    - .github/**
+    paths:
+    - app/**
+    - lib/**
+    - package.json
+  workflow_dispatch:
 
 jobs:
   build:
@@ -48,12 +50,12 @@ jobs:
         path: "*.dxt"
         if-no-files-found: error
 
-  docker-develop:
+  docker:
     needs: build
     runs-on: ubuntu-latest
     env:
-      DOCKER_NAMESPACE: onlyoffice
-      DOCKER_REPOSITORY: docspace-mcp
+      DOCKERHUB_NAMESPACE: onlyoffice
+      DOCKERHUB_REPOSITORY: 4testing-docspace-mcp
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
@@ -70,11 +72,48 @@ jobs:
         username: ${{secrets.DOCKERHUB_USERNAME}}
         password: ${{secrets.DOCKERHUB_TOKEN}}
 
+    - name: Extract Labels
+      id: labels
+      run: |
+        labels=""
+        while IFS= read -r c; do
+          case "$c" in
+          LABEL*)
+            c=$(echo "$c" | sed "s/^LABEL[[:space:]]*//")
+            n=$(echo "$c" | cut --delimiter="=" --fields=1)
+            v=$(echo "$c" | cut --delimiter="=" --fields=2- | sed "s/\"//g")
+            labels="$labels$n=$v\n"
+            ;;
+          esac
+        done < Dockerfile
+        if [ -n "$labels" ]; then
+          labels=$(printf "%s" "$labels" | sed "s/\\\\n$//")
+        fi
+        printf "labels<<EOF\n%b\nEOF\n" "$labels" >> "$GITHUB_OUTPUT"
+
+    - name: Extract Metadata
+      id: metadata
+      uses: docker/metadata-action@v5
+      with:
+        images: index.docker.io/${{env.DOCKERHUB_NAMESPACE}}/${{env.DOCKERHUB_REPOSITORY}}
+        labels: ${{steps.labels.outputs.labels}}
+        tags: |
+          type=sha,format=short
+          type=sha,format=long
+
     - name: Publish Image
       uses: docker/build-push-action@v6
+      env:
+        DOCKER_BUILD_RECORD_UPLOAD: false
       with:
         push: true
         platforms: linux/amd64,linux/arm64
-        labels: develop
-        tags: docker.io/${{env.DOCKER_NAMESPACE}}/4testing-${{env.DOCKER_REPOSITORY}}:${{ github.sha }}
+        labels: ${{steps.metadata.outputs.labels}}
+        tags: ${{steps.metadata.outputs.tags}}
 
+    - name: Update Docker Hub Description
+      uses: peter-evans/dockerhub-description@v4
+      with:
+        username: ${{secrets.DOCKERHUB_USERNAME}}
+        password: ${{secrets.DOCKERHUB_TOKEN}}
+        repository: ${{env.DOCKERHUB_NAMESPACE}}/${{env.DOCKERHUB_REPOSITORY}}
